@@ -3,7 +3,6 @@ package net.protoqueue.sample;
 import android.util.Log;
 
 import net.protoqueue.ProtoReceiver;
-import net.protoqueue.ProtoSender;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

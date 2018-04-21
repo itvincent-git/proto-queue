@@ -1,0 +1,26 @@
+apply plugin: 'java-library'
+apply plugin: 'maven'
+group = 'com.github.itvincent-git'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':protoqueue-common')
+    implementation "com.squareup:javapoet:$javapoet_version"
+    implementation "com.google.auto:auto-common:$auto_common_version"
+    compileOnly "com.google.auto.service:auto-service:$auto_service_version"
+}
+
+apply plugin: 'com.novoda.bintray-release'//添加
+
+publish {
+    userOrg = "$user_org"//bintray.com用户名
+    groupId = "$group_id"//jcenter上的路径
+    artifactId = 'protoqueue-compiler'//项目名称
+    publishVersion = "$release_version"//版本号
+    desc = 'annotationProcessor dependency'//描述，不重要
+    website = "$url"//网站
+}
