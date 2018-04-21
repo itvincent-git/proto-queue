@@ -1,23 +1,35 @@
 package net.protoqueue.sample;
 
+import java.util.Arrays;
+
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
 public class SampleProto {
-    private int size;
-    private byte[] data;
-    private int uri;
+    public byte[] data;
+    public int uri;
+    public int seqId;
 
     public SampleProto(byte[] data) {
         this.data = data;
-        this.uri = data.length;
+        this.uri = data[0];
+        this.seqId = data[1];
     }
 
-    public SampleProto parseFrom(byte[] data) {
+    public static SampleProto parseFrom(byte[] data) {
         return new SampleProto(data);
     }
 
     public byte[] toByteArray() {
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "SampleProto{" +
+                "data=" + Arrays.toString(data) +
+                ", uri=" + uri +
+                ", seqId=" + seqId +
+                '}';
     }
 }

@@ -6,15 +6,25 @@ import net.protoqueue.ProtoReceiver;
  * Created by zhongyongsheng on 2018/4/20.
  */
 public class SampleProtoQueue_Impl extends SampleProtoQueue{
+
     @Override
-    void bindSampleProtoReceiver(ProtoReceiver<SampleProto> receiver) {
+    protected SampleProto buildProto(byte[] data) {
+        return SampleProto.parseFrom(data);
+    }
 
+    @Override
+    protected byte[] toByteArray(SampleProto proto) {
+        return proto.toByteArray();
+    }
 
-        return null;
+    @Override
+    protected int getProtoContext(SampleProto proto) {
+        return proto.seqId;
     }
 
     @Override
     protected int getOwnAppId() {
-        return 10000;
+        return 10086;
     }
+
 }
