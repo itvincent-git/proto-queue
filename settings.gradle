@@ -1,0 +1,4 @@
+include ':sample',
+        ':protoqueue-runtime',
+        ':protoqueue-common',
+        ':protoqueue-compiler'
