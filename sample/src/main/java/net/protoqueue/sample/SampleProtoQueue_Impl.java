@@ -1,7 +1,5 @@
 package net.protoqueue.sample;
 
-import net.protoqueue.ProtoReceiver;
-
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
