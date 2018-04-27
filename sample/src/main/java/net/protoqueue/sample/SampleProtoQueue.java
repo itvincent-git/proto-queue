@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by zhongyongsheng on 2018/4/20.
  */
 @ProtoQueueClass(appId = 10086)
-public abstract class SampleProtoQueue extends ProtoQueue<SampleProto> {
+public abstract class SampleProtoQueue extends ProtoQueue<SampleProto, Integer> {
     private static final String TAG = "SampleProtoQueue";
     private static volatile SampleProtoQueue sInstance;
     private static AtomicInteger seq = new AtomicInteger();
@@ -54,7 +54,7 @@ public abstract class SampleProtoQueue extends ProtoQueue<SampleProto> {
     }
 
     @Override
-    protected int getSendContext(SampleProto proto) {
+    protected Integer getSendContext(SampleProto proto) {
         return proto.seqId;
     }
 
@@ -64,5 +64,10 @@ public abstract class SampleProtoQueue extends ProtoQueue<SampleProto> {
 
     public int getSeqContext() {
         return seq.get();
+    }
+
+    @Override
+    protected void onProtoException(Throwable throwable) {
+
     }
 }

@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
-public abstract class ProtoQueue<P> {
+public abstract class ProtoQueue<P,C> {
     protected ProtoSender mProtoSender;
-    protected Map<Integer, ProtoContext> mContextMap = new ConcurrentHashMap<>();
+    protected Map<C, ProtoContext> mContextMap = new ConcurrentHashMap<>();
 
     public void init(ProtoSender protoSender) {
         mProtoSender = protoSender;
@@ -25,7 +25,7 @@ public abstract class ProtoQueue<P> {
 
     protected ProtoSenderDisposable enqueue(byte[] data,
                                          ProtoReceiver<P> receiver,
-                                         int context,
+                                         C context,
                                          int receiveUri,
                                          long topSid,
                                          long subSid) {
@@ -33,7 +33,7 @@ public abstract class ProtoQueue<P> {
         Checker.checkReceiverNotNull(receiver);
 
         mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
-        ProtoContext<P> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context, receiveUri, topSid, subSid);
+        ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context, receiveUri, topSid, subSid);
         mContextMap.put(context, protoContext);
         return null;
     }
@@ -42,13 +42,13 @@ public abstract class ProtoQueue<P> {
         try {
             if (getOwnAppId() != appId) return;
             P proto = buildProto(data);
-            int protoContext = getProtoContext(proto);
+            C protoContext = getProtoContext(proto);
 
             ProtoContext context = mContextMap.remove(protoContext);
             if (context == null) return;
             context.mReceiver.onProto(proto);
-        } catch (Exception e) {
-            //todo exception issue
+        } catch (Throwable t) {
+            onProtoException(t);
         }
 
     }
@@ -57,7 +57,7 @@ public abstract class ProtoQueue<P> {
 
     protected abstract byte[] toByteArray(P proto);
 
-    protected abstract int getProtoContext(P proto);
+    protected abstract C getProtoContext(P proto);
 
     protected abstract int getOwnAppId();
 
@@ -65,7 +65,9 @@ public abstract class ProtoQueue<P> {
 
     protected abstract long getSubSid();
 
-    protected abstract int getSendContext(P proto);
+    protected abstract C getSendContext(P proto);
+
+    protected abstract void onProtoException(Throwable throwable);
 
     protected Handler mTimeoutHandler = new Handler() {
         @Override

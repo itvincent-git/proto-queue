@@ -16,7 +16,7 @@ public class SampleProtoQueue_Impl extends SampleProtoQueue{
     }
 
     @Override
-    protected int getProtoContext(SampleProto proto) {
+    protected Integer getProtoContext(SampleProto proto) {
         return proto.seqId;
     }
 

@@ -3,17 +3,17 @@ package net.protoqueue;
 /**
  * Created by zhongyongsheng on 2018/4/21.
  */
-public class ProtoContext<P> {
+public class ProtoContext<P, C> {
     byte[] mData;
     ProtoReceiver mReceiver;
     int appId;
-    int context;
+    C context;
     int receiveUri;
     long topSid;
     long subSid;
     P proto;
 
-    public ProtoContext(byte[] data, ProtoReceiver receiver, int appId, int context, int receiveUri, long topSid, long subSid) {
+    public ProtoContext(byte[] data, ProtoReceiver receiver, int appId, C context, int receiveUri, long topSid, long subSid) {
         this.mData = data;
         this.mReceiver = receiver;
         this.appId = appId;
