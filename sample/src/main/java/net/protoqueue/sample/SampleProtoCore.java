@@ -17,7 +17,7 @@ public class SampleProtoCore {
 
     public void sendGameListReq() {
         SampleProto sampleProto = new SampleProto(new byte[]
-                {10, (byte) sampleProtoQueue.incrementAndGetSeqContext(), 100});
+                {10, sampleProtoQueue.incrementAndGetSeqContext().byteValue(), 100});
         int receiveUri = 11;
 
         sampleProtoQueue.enqueue(sampleProto, new ProtoReceiver<SampleProto>() {
@@ -30,7 +30,7 @@ public class SampleProtoCore {
 
     public void mockOnReceive() {
         SampleProto sampleProto = new SampleProto(new byte[]
-                {11, (byte) sampleProtoQueue.getSeqContext(), 100});
+                {11, sampleProtoQueue.getSeqContext().byteValue(), 100});
         sampleProtoQueue.onReceiveData(appId, sampleProto.toByteArray());
     }
 }

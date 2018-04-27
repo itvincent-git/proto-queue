@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
-public abstract class ProtoQueue<P,C> {
+public abstract class ProtoQueue<P, C> {
     protected ProtoSender mProtoSender;
     protected Map<C, ProtoContext> mContextMap = new ConcurrentHashMap<>();
 
@@ -20,7 +20,7 @@ public abstract class ProtoQueue<P,C> {
     public ProtoSenderDisposable enqueue(P proto,
                                          ProtoReceiver<P> receiver,
                                          int receiveUri) {
-        return enqueue(toByteArray(proto), receiver, getSendContext(proto), receiveUri, getTopSid(), getSubSid());
+        return enqueue(toByteArray(proto), receiver, getProtoContext(proto), receiveUri, getTopSid(), getSubSid());
     }
 
     protected ProtoSenderDisposable enqueue(byte[] data,
@@ -53,6 +53,10 @@ public abstract class ProtoQueue<P,C> {
 
     }
 
+    public abstract C incrementAndGetSeqContext();
+
+    public abstract C getSeqContext();
+
     protected abstract P buildProto(byte[] data);
 
     protected abstract byte[] toByteArray(P proto);
@@ -64,8 +68,6 @@ public abstract class ProtoQueue<P,C> {
     protected abstract long getTopSid();
 
     protected abstract long getSubSid();
-
-    protected abstract C getSendContext(P proto);
 
     protected abstract void onProtoException(Throwable throwable);
 
