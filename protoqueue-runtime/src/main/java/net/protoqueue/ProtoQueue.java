@@ -32,9 +32,9 @@ public abstract class ProtoQueue<P, C> {
         Checker.checkDataNotNull(data);
         Checker.checkReceiverNotNull(receiver);
 
-        mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
         ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context, receiveUri, topSid, subSid);
         mContextMap.put(context, protoContext);
+        mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
         return null;
     }
 
@@ -52,6 +52,15 @@ public abstract class ProtoQueue<P, C> {
         }
 
     }
+
+    protected Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+            }
+        }
+    };
 
     public abstract C incrementAndGetSeqContext();
 
@@ -71,10 +80,4 @@ public abstract class ProtoQueue<P, C> {
 
     protected abstract void onProtoException(Throwable throwable);
 
-    protected Handler mTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-        }
-    };
 }
