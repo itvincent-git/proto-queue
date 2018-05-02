@@ -16,14 +16,6 @@ public abstract class SampleProtoQueue extends BaseProtoQueue<SampleProto, Integ
     private static final String TAG = "SampleProtoQueue";
     private static volatile SampleProtoQueue sInstance;
 
-
-    private static ProtoSender mSender = new ProtoSender() {
-        @Override
-        public void onSend(int appId, byte[] data, long topSid, long subSid) {
-            Log.i(TAG, String.format("onSend: %d, %s, %d, %d", appId, Arrays.toString(data), topSid, subSid));
-        }
-    };
-
     public static SampleProtoQueue getInstance() {
         if (sInstance != null) {
             return sInstance;
