@@ -20,7 +20,7 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor6
 object Util {
 
     private val TO_TYPE = object : SimpleAnnotationValueVisitor6<TypeMirror, Void>() {
-        override fun visitType(typeMirror: TypeMirror, aVoid: Void): TypeMirror {
+        override fun visitType(typeMirror: TypeMirror, aVoid: Void?): TypeMirror {
             return typeMirror
         }
 

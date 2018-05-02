@@ -17,4 +17,12 @@ public abstract class BaseProtoQueue<P, C> extends ProtoQueue<P, C>{
         return 0;
     }
 
+    public void onReceiveData(int appId, byte[] data) {
+        super.onNotifyData(appId, data);
+    }
+
+    @Override
+    protected void onProtoException(Throwable throwable) {
+
+    }
 }

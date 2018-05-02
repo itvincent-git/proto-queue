@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 public @interface ProtoQueueClass {
     int appId();
     String protoContextLiteral();
-    Class protoContextType();
+    Class<?> protoContextType();
 }

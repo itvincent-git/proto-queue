@@ -36,13 +36,5 @@ public abstract class SampleProtoQueue extends BaseProtoQueue<SampleProto, Integ
         }
     }
 
-    public void onReceiveData(int appId, byte[] data) {
-        super.onNotifyData(appId, data);
-    }
 
-
-    @Override
-    protected void onProtoException(Throwable throwable) {
-
-    }
 }

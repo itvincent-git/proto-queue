@@ -14,28 +14,13 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
 
     internal fun process(): ProtoQueueClassData {
         val annotationMirror = Util.getAnnotationMirror(classElement, ProtoQueueClass::class.java)
-        compileContext.log.warn("process @ProtoQueueClass:", annotationMirror)
-        //        List<? extends Element> allMembers = Util.getAllMembers(compileContext.processingEnvironment, transformerElement);
-        //        List<PortInterfaceMethod> portInterfaceMethodList = allMembers.stream()
-        //                .filter(
-        //                        (Predicate<Element>) element ->
-        //                                element.getModifiers().contains(Modifier.ABSTRACT) && element.getKind().equals(ElementKind.METHOD))
-        //                .map((Function<Element, PortInterfaceMethod>) element -> {
-        //                    ExecutableElement methodElement = Util.asExecutable(element);
-        //                    TypeElement interfaceType = Util.toTypeElement(methodElement.getReturnType());
-        //                    PortInterfaceData data = new PortInterfaceProcessor(compileContext, interfaceType).process();
-        //                    PortInterfaceMethod method = new PortInterfaceMethod(methodElement, methodElement.getSimpleName().toString(), data);
-        //                    return method;
-        //                }).collect(Collectors.toList());
-        //
-        //        portInterfaceMethodList.forEach(portInterfaceMethod -> {
-        //            try {
-        //                new PortInterfaceWriter(portInterfaceMethod.portInterfaceData).write(compileContext.processingEnvironment);
-        //            } catch (IOException e) {
-        //                compileContext.log.error("PortInterfaceWriter error", e.getMessage());
-        //            }
-        //
-        //        });
-        return ProtoQueueClassData(classElement/*, portInterfaceMethodList*/)
+        //compileContext.log.debug("process @ProtoQueueClass:%s", annotationMirror)
+
+        val appId = Util.getAnnotationValue(annotationMirror, "appId").value as Int
+        val protoContextLiteral = Util.getAnnotationValue(annotationMirror, "protoContextLiteral").toString()
+        val protoContextTypeValue = Util.getAnnotationValue(annotationMirror, "protoContextType")
+        val protoContextTypeMirror = Util.annotationValueToType(protoContextTypeValue)
+
+        return ProtoQueueClassData(classElement, appId, protoContextLiteral, protoContextTypeMirror)
     }
 }

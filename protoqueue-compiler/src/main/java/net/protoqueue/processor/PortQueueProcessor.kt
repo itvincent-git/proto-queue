@@ -43,7 +43,7 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
             classSet.map { element ->
                 //compilerContext!!.log.debug("ProtoQueueProcessingStep2 process %s", element)
                 ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process();
-            }
+            }.forEach({compilerContext!!.log.debug("ProtoQueueProcessingStep process %s", it)})
             //compilerContext!!.log.debug("ProtoQueueProcessingStep process end")
 
             //            portTransformerDataStream.forEach(portTransformerData -> {
