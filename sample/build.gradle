@@ -28,5 +28,5 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$support_version"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation project(':protoqueue-runtime')
-//    kapt project(':protoqueue-compiler')
+    kapt project(':protoqueue-compiler')
 }
