@@ -1,8 +1,9 @@
-package net.port.transformer.processor
+package net.protoqueue.processor
 
 import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.SetMultimap
-import net.port.transformer.compiler.common.CompilerContext
+import net.protoqueue.compiler.common.CompilerContext
+import net.protoqueue.util.Util
 import net.protoqueue.annotation.ProtoQueueClass
 import java.util.*
 import javax.lang.model.SourceVersion
@@ -38,14 +39,12 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
 
         override fun process(elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>): Set<Element> {
             val classSet = elementsByAnnotation.get(ProtoQueueClass::class.java)
-            compilerContext!!.log.debug("ProtoQueueProcessingStep process %s", classSet)
-            classSet.forEach { element -> compilerContext!!.log.debug("ProtoQueueProcessingStep1 process %s", element) }
+            //compilerContext!!.log.debug("ProtoQueueProcessingStep process %s", classSet)
             classSet.map { element ->
-                compilerContext!!.log.debug("ProtoQueueProcessingStep2 process %s", element)
-                element
-                //                return new ProtoQueueClassProcessor(compilerContext, Util.toTypeElement(element)).process();
+                //compilerContext!!.log.debug("ProtoQueueProcessingStep2 process %s", element)
+                ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process();
             }
-            compilerContext!!.log.debug("ProtoQueueProcessingStep process end")
+            //compilerContext!!.log.debug("ProtoQueueProcessingStep process end")
 
             //            portTransformerDataStream.forEach(portTransformerData -> {
             //                try {

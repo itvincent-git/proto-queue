@@ -1,9 +1,9 @@
-package net.port.transformer.processor
+package net.protoqueue.processor
 
 
-import net.port.transformer.compiler.common.CompilerContext
-import net.port.transformer.compiler.data.ProtoQueueClassData
-import net.port.transformer.util.Util
+import net.protoqueue.compiler.common.CompilerContext
+import net.protoqueue.compiler.data.ProtoQueueClassData
+import net.protoqueue.util.Util
 import net.protoqueue.annotation.ProtoQueueClass
 import javax.lang.model.element.TypeElement
 

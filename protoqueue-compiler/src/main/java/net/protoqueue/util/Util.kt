@@ -1,4 +1,4 @@
-package net.port.transformer.util
+package net.protoqueue.util
 
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.common.MoreElements

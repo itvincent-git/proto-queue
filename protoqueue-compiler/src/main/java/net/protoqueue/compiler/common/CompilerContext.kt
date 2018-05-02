@@ -1,4 +1,4 @@
-package net.port.transformer.compiler.common
+package net.protoqueue.compiler.common
 
 import javax.annotation.processing.ProcessingEnvironment
 

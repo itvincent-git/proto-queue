@@ -1,7 +1,6 @@
-package net.port.transformer.compiler.data
+package net.protoqueue.compiler.data
 
 import com.squareup.javapoet.ClassName
-import java.util.stream.Collectors
 
 import javax.lang.model.element.TypeElement
 
