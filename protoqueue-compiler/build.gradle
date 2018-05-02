@@ -1,4 +1,5 @@
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
 apply plugin: 'maven'
 group = 'com.github.itvincent-git'
 
@@ -11,7 +12,7 @@ dependencies {
     implementation project(':protoqueue-common')
     implementation "com.squareup:javapoet:$javapoet_version"
     implementation "com.google.auto:auto-common:$auto_common_version"
-    compileOnly "com.google.auto.service:auto-service:$auto_service_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply plugin: 'com.novoda.bintray-release'//添加
