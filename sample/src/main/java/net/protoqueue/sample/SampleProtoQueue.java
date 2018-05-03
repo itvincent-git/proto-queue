@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
-@ProtoQueueClass(appId = 10086, protoContextLiteral = "seqId", protoContextType = Integer.class)
+@ProtoQueueClass(appId = 10086, protoContextLiteral = "seqId")
 public abstract class SampleProtoQueue extends BaseProtoQueue<SampleProto, Integer> {
     private static final String TAG = "SampleProtoQueue";
     private static volatile SampleProtoQueue sInstance;

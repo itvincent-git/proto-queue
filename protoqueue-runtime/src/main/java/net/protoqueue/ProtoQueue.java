@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * P代表ProtoBuffer类，C代表上下文的类型（例如seqId是Integer类型）
  * Created by zhongyongsheng on 2018/4/20.
  */
 public abstract class ProtoQueue<P, C> {

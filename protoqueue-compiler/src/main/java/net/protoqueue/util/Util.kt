@@ -66,6 +66,13 @@ object Util {
     }
 
     /**
+     * TypeMirror转化为DeclaredType，包含类型参数
+     */
+    fun asDeclared(typeMirror: TypeMirror): DeclaredType {
+        return MoreTypes.asDeclared(typeMirror)
+    }
+
+    /**
      * AnnotationMirror 包含注解的类型，注解元素的值
      * @param element
      * @param annotationClass
