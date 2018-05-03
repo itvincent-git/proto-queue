@@ -15,6 +15,7 @@ import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.SimpleAnnotationValueVisitor6
 
 /**
+ * javax类型的转换工具
  * Created by zhongyongsheng on 2018/4/14.
  */
 object Util {
@@ -102,6 +103,9 @@ object Util {
         return processingEnvironment.elementUtils.getAllMembers(element)
     }
 
+    /**
+     * 将AnnotationValue转成TypeMirror，TypeMirror带有类型信息
+     */
     fun annotationValueToType(annotationValue: AnnotationValue): TypeMirror {
         return TO_TYPE.visit(annotationValue)
     }

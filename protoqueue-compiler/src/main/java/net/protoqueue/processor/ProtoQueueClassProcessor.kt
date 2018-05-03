@@ -16,16 +16,9 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
 
     internal fun process(): ProtoQueueClassData {
         val annotationMirror = Util.getAnnotationMirror(classElement, ProtoQueueClass::class.java)
-        //compileContext.log.debug("process @ProtoQueueClass:%s", annotationMirror)
 
         val appId = Util.getAnnotationValue(annotationMirror, "appId").value as Int
         val protoContextLiteral = Util.getAnnotationValue(annotationMirror, "protoContextLiteral").toString()
-        //val protoContextTypeValue = Util.getAnnotationValue(annotationMirror, "protoContextType")
-        //val protoContextTypeMirror = Util.annotationValueToType(protoContextTypeValue)
-
-//        compileContext.log.debug("ProtoQueueClassProcessor process %s",
-//                classElement.superclass)
-//        val superClass = Util.toTypeElement(classElement.superclass)
         val superClass = classElement.superclass
         val declaredType = Util.asDeclared(superClass)
         val typeArguments = declaredType.typeArguments
@@ -34,10 +27,10 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
             compileContext.log.error(classElement, "must defined the type arguments <P,C>")
         }
 
-        compileContext.log.debug("ProtoQueueClassProcessor declaredType %s", typeArguments)
+//        compileContext.log.debug("ProtoQueueClassProcessor declaredType %s", typeArguments)
 //        declaredType.typeParameters/*.map ({it.genericElement})*/.forEach {
 //            compileContext.log.debug("ProtoQueueClassProcessor foreach %s", it.genericElement) }
 
-        return ProtoQueueClassData(classElement, appId, protoContextLiteral, typeArguments[1])
+        return ProtoQueueClassData(classElement, appId, protoContextLiteral, typeArguments[0], typeArguments[1])
     }
 }
