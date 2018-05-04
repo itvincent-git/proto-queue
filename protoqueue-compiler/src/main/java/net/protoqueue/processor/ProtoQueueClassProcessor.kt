@@ -48,7 +48,7 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
                 overrideMethods["getOwnAppId()"],
                 overrideMethods["incrementAndGetSeqContext()"],
                 overrideMethods["getSeqContext()"])
-        compileContext.log.debug("ProtoQueueClassProcessor data %s", data)
+        compileContext.log.debug("ProtoQueue process %s:%s", classElement.toString(), data)
         return data
     }
 }

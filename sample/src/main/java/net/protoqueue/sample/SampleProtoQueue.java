@@ -1,17 +1,12 @@
 package net.protoqueue.sample;
 
-import android.util.Log;
-
 import net.protoqueue.ProtoQueueBuilder;
-import net.protoqueue.ProtoSender;
 import net.protoqueue.annotation.ProtoQueueClass;
-
-import java.util.Arrays;
 
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
-@ProtoQueueClass(appId = 10086, protoContextLiteral = "seqId")
+@ProtoQueueClass(protoContextLiteral = "seqId")
 public abstract class SampleProtoQueue extends BaseProtoQueue<SampleProto, Integer> {
     private static final String TAG = "SampleProtoQueue";
     private static volatile SampleProtoQueue sInstance;
@@ -28,5 +23,8 @@ public abstract class SampleProtoQueue extends BaseProtoQueue<SampleProto, Integ
         }
     }
 
-
+    @Override
+    protected int getOwnAppId() {
+        return 10086;
+    }
 }

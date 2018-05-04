@@ -56,9 +56,11 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
     }
 
     private fun addGetOwnAppIdMethod(builder: TypeSpec.Builder) {
-        builder.addMethod(MethodSpec.overriding(protoQueueClassData.getOwnAppIdMethod)
-                .addStatement("return \$L", protoQueueClassData.appId)
-                .build())
+        if (protoQueueClassData.appId != 0) {
+            builder.addMethod(MethodSpec.overriding(protoQueueClassData.getOwnAppIdMethod)
+                    .addStatement("return \$L", protoQueueClassData.appId)
+                    .build())
+        }
     }
 
     private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {
