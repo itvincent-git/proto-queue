@@ -1,11 +1,10 @@
 package net.protoqueue.compiler.writer
 
-import com.google.auto.common.MoreTypes
 import com.squareup.javapoet.*
-
 import net.protoqueue.compiler.data.ProtoQueueClassData
-import net.protoqueue.util.Util
-
+import net.protoqueue.util.TmpVar
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import javax.lang.model.element.Modifier
 
 /**
@@ -21,6 +20,7 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
         addToByteArrayMethod(builder)
         addGetProtoContextMethod(builder)
         addGetOwnAppIdMethod(builder)
+        addSeqFieldAndMethod(builder)
         return builder
     }
 
@@ -59,5 +59,46 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
         builder.addMethod(MethodSpec.overriding(protoQueueClassData.getOwnAppIdMethod)
                 .addStatement("return \$L", protoQueueClassData.appId)
                 .build())
+    }
+
+    private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {
+        val tmpVar = TmpVar()
+        var seqClass: ClassName?
+
+        when (protoQueueClassData.protoContextType.toString()) {
+            "java.lang.Integer" -> seqClass = ClassName.get(AtomicInteger::class.java)
+            "java.lang.Long" -> seqClass = ClassName.get(AtomicLong::class.java)
+            else -> seqClass = ClassName.get(AtomicInteger::class.java)
+        }
+
+        val name = seqClass!!.simpleName().decapitalize()
+        val fieldName = tmpVar.getTmpVar("_$name")
+        val field = FieldSpec.builder(seqClass,
+                fieldName,
+                Modifier.PRIVATE)
+                .initializer("new \$T()", seqClass)
+                .build()
+        builder.addField(field)
+        addSeqMethod(field, builder)
+    }
+
+    private fun addSeqMethod(field: FieldSpec, builder: TypeSpec.Builder) {
+        builder.addMethod(
+                MethodSpec.methodBuilder(protoQueueClassData.incrementAndGetSeqContextMethod!!.simpleName.toString())
+                        .returns(TypeName.get(protoQueueClassData.protoContextType))
+                        .addStatement("return \$N.incrementAndGet()", field)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override::class.java)
+                        .build()
+        )
+
+        builder.addMethod(
+                MethodSpec.methodBuilder(protoQueueClassData.getSeqContextMethod!!.simpleName.toString())
+                        .returns(TypeName.get(protoQueueClassData.protoContextType))
+                        .addStatement("return \$N.get()", field)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override::class.java)
+                        .build()
+        )
     }
 }
