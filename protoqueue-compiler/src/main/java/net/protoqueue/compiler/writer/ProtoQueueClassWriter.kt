@@ -20,6 +20,7 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
         addBuildProtoMethod(builder)
         addToByteArrayMethod(builder)
         addGetProtoContextMethod(builder)
+        addGetOwnAppIdMethod(builder)
         return builder
     }
 
@@ -52,5 +53,11 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
                         .addAnnotation(Override::class.java)
                         .build()
         )
+    }
+
+    private fun addGetOwnAppIdMethod(builder: TypeSpec.Builder) {
+        builder.addMethod(MethodSpec.overriding(protoQueueClassData.getOwnAppIdMethod)
+                .addStatement("return \$L", protoQueueClassData.appId)
+                .build())
     }
 }
