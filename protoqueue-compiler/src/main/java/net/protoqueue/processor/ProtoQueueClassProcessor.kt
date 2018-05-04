@@ -1,18 +1,19 @@
 package net.protoqueue.processor
 
 
-import com.google.auto.common.MoreElements
-import com.google.auto.common.MoreTypes
+import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
 import net.protoqueue.util.Util
-import net.protoqueue.annotation.ProtoQueueClass
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
 /**
  * Created by zhongyongsheng on 2018/4/14.
  */
 class ProtoQueueClassProcessor internal constructor(internal var compileContext: CompilerContext, internal var classElement: TypeElement) {
+
 
     internal fun process(): ProtoQueueClassData {
         val annotationMirror = Util.getAnnotationMirror(classElement, ProtoQueueClass::class.java)
@@ -27,10 +28,27 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
             compileContext.log.error(classElement, "must defined the type arguments <P,C>")
         }
 
+        val allMembers = Util.getAllMembers(compileContext.processingEnvironment, classElement)
+        val overrideMethods = allMembers
+                .filter({ element -> element.modifiers.contains(Modifier.ABSTRACT) && element.kind == ElementKind.METHOD })
+                .map {
+                    Util.asExecutable(it)
+                }
+                .map { it.toString() to it }.toMap()
 //        compileContext.log.debug("ProtoQueueClassProcessor declaredType %s", typeArguments)
-//        declaredType.typeParameters/*.map ({it.genericElement})*/.forEach {
-//            compileContext.log.debug("ProtoQueueClassProcessor foreach %s", it.genericElement) }
 
-        return ProtoQueueClassData(classElement, appId, protoContextLiteral, typeArguments[0], typeArguments[1])
+        var data = ProtoQueueClassData(classElement,
+                appId,
+                protoContextLiteral.filter { it != '\"' },
+                typeArguments[0],
+                typeArguments[1],
+                overrideMethods["buildProto(byte[])"],
+                overrideMethods["toByteArray(P)"],
+                overrideMethods["getProtoContext(P)"],
+                overrideMethods["getOwnAppId()"],
+                overrideMethods["incrementAndGetSeqContext()"],
+                overrideMethods["getSeqContext()"])
+        compileContext.log.debug("ProtoQueueClassProcessor data %s", data)
+        return data
     }
 }

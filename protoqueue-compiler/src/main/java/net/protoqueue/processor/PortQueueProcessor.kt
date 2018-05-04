@@ -5,6 +5,8 @@ import com.google.common.collect.SetMultimap
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.util.Util
 import net.protoqueue.annotation.ProtoQueueClass
+import net.protoqueue.compiler.writer.ProtoQueueBaseWriter
+import net.protoqueue.compiler.writer.ProtoQueueClassWriter
 import java.util.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
@@ -42,17 +44,17 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
             //compilerContext!!.log.debug("ProtoQueueProcessingStep process %s", classSet)
             classSet.map { element ->
                 //compilerContext!!.log.debug("ProtoQueueProcessingStep2 process %s", element)
-                ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process();
-            }.forEach({compilerContext!!.log.debug("ProtoQueueProcessingStep process %s", it)})
-            //compilerContext!!.log.debug("ProtoQueueProcessingStep process end")
+                ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process()
+            }
+            .forEach {
+                try {
+                    ProtoQueueClassWriter(it).write(processingEnv)
+                } catch (e: Throwable) {
+                    portContext!!.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
+                }
+            }
 
-            //            portTransformerDataStream.forEach(portTransformerData -> {
-            //                try {
-            //                    new PortTransformerWriter(portTransformerData).write(processingEnv);
-            //                } catch (IOException e) {
-            //                    portContext.log.error("PortTransformerWriter error", e.getMessage());
-            //                }
-            //            });
+            //compilerContext!!.log.debug("ProtoQueueProcessingStep process end")
 
             return HashSet()
         }
