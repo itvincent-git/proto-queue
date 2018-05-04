@@ -20,12 +20,12 @@ public class SampleProtoCore {
                 {10, sampleProtoQueue.incrementAndGetSeqContext().byteValue(), 100});
         int receiveUri = 11;
 
-        sampleProtoQueue.enqueue(sampleProto, new ProtoReceiver<SampleProto>() {
+        sampleProtoQueue.enqueue(sampleProto, receiveUri, new ProtoReceiver<SampleProto>() {
             @Override
             public void onProto(SampleProto proto) {
                 Log.i(TAG, "onProto: " + proto);
             }
-        }, receiveUri);
+        });
     }
 
     public void mockOnReceive() {

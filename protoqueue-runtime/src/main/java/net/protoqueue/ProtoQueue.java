@@ -19,17 +19,17 @@ public abstract class ProtoQueue<P, C> {
     }
 
     public ProtoSenderDisposable enqueue(P proto,
-                                         ProtoReceiver<P> receiver,
-                                         int receiveUri) {
-        return enqueue(toByteArray(proto), receiver, getProtoContext(proto), receiveUri, getTopSid(), getSubSid());
+                                         int receiveUri,
+                                         ProtoReceiver<P> receiver) {
+        return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver);
     }
 
     protected ProtoSenderDisposable enqueue(byte[] data,
-                                         ProtoReceiver<P> receiver,
                                          C context,
                                          int receiveUri,
                                          long topSid,
-                                         long subSid) {
+                                         long subSid,
+                                         ProtoReceiver<P> receiver) {
         Checker.checkDataNotNull(data);
         Checker.checkReceiverNotNull(receiver);
 
@@ -67,7 +67,7 @@ public abstract class ProtoQueue<P, C> {
 
     public abstract C getSeqContext();
 
-    protected abstract P buildProto(byte[] data);
+    protected abstract P buildProto(byte[] data) throws Exception;
 
     protected abstract byte[] toByteArray(P proto);
 
