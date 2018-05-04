@@ -19,7 +19,8 @@ class ProtoQueueClassData(element: TypeElement,
                           val getProtoContextMethod: ExecutableElement?,
                           val getOwnAppIdMethod: ExecutableElement?,
                           val incrementAndGetSeqContextMethod: ExecutableElement?,
-                          val getSeqContextMethod: ExecutableElement?) {
+                          val getSeqContextMethod: ExecutableElement?,
+                          val getReceiveUriMethod: ExecutableElement?) {
     var implTypeName: ClassName
     var typeName: ClassName
 
@@ -30,7 +31,7 @@ class ProtoQueueClassData(element: TypeElement,
     }
 
     override fun toString(): String {
-        return "ProtoQueueClassData(appId=$appId, protoContextLiteral='$protoContextLiteral', protoClass=$protoClass, protoContextType=$protoContextType, buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod, getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod, incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, getSeqContextMethod=$getSeqContextMethod, implTypeName=$implTypeName, typeName=$typeName)"
+        return "ProtoQueueClassData(appId=$appId, protoContextLiteral='$protoContextLiteral', protoClass=$protoClass, protoContextType=$protoContextType, buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod, getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod, incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, getSeqContextMethod=$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, implTypeName=$implTypeName, typeName=$typeName)"
     }
 
 

@@ -1,9 +1,5 @@
 package net.protoqueue.sample;
 
-import android.util.Log;
-
-import net.protoqueue.ProtoReceiver;
-
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
@@ -16,16 +12,7 @@ public class SampleProtoCore {
     private SampleProtoQueue sampleProtoQueue = SampleProtoQueue.getInstance();
 
     public void sendGameListReq() {
-        SampleProto sampleProto = new SampleProto(new byte[]
-                {10, sampleProtoQueue.incrementAndGetSeqContext().byteValue(), 100});
-        int receiveUri = 11;
-
-        sampleProtoQueue.enqueue(sampleProto, receiveUri, new ProtoReceiver<SampleProto>() {
-            @Override
-            public void onProto(SampleProto proto) {
-                Log.i(TAG, "onProto: " + proto);
-            }
-        });
+        sampleProtoQueue.sendSampleProto();
     }
 
     public void mockOnReceive() {

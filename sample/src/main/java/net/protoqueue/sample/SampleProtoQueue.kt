@@ -1,6 +1,8 @@
 package net.protoqueue.sample
 
+import android.util.Log
 import net.protoqueue.ProtoQueueBuilder
+import net.protoqueue.ProtoReceiver
 import net.protoqueue.annotation.ProtoQueueClass
 
 /**
@@ -8,9 +10,14 @@ import net.protoqueue.annotation.ProtoQueueClass
  */
 @ProtoQueueClass(protoContextLiteral = "seqId")
 abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
+    val TAG = "SampleProtoQueue"
 
     override fun getOwnAppId(): Int {
         return 10086
+    }
+
+    override fun onNotificationData(proto: SampleProto) {
+        Log.i(TAG, "onNotificationData: $proto")
     }
 
     companion object {
@@ -18,5 +25,11 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
         val instance: SampleProtoQueue by lazy {
             ProtoQueueBuilder.newBuilder(SampleProtoQueue::class.java, BaseProtoQueue.mSender).build()
         }
+    }
+
+    fun sendSampleProto() {
+        val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
+
+        instance.enqueue(sampleProto, 11, { proto -> Log.i(TAG, "onProto: $proto") })
     }
 }

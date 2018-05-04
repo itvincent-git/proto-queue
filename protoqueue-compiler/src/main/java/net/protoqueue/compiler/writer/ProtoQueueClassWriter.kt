@@ -21,6 +21,7 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
         addGetProtoContextMethod(builder)
         addGetOwnAppIdMethod(builder)
         addSeqFieldAndMethod(builder)
+        addGetReceiveUriMethod(builder)
         return builder
     }
 
@@ -99,6 +100,18 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
                         .returns(TypeName.get(protoQueueClassData.protoContextType))
                         .addStatement("return \$N.get()", field)
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override::class.java)
+                        .build()
+        )
+    }
+
+    private fun addGetReceiveUriMethod(builder: TypeSpec.Builder) {
+        builder.addMethod(
+                MethodSpec.methodBuilder(protoQueueClassData.getReceiveUriMethod!!.simpleName.toString())
+                        .returns(TypeName.get(protoQueueClassData.getReceiveUriMethod!!.returnType))
+                        .addParameter(ParameterSpec.builder(TypeName.get(protoQueueClassData.protoClass), "proto").build())
+                        .addStatement("return proto.uri")
+                        .addModifiers(Modifier.PROTECTED)
                         .addAnnotation(Override::class.java)
                         .build()
         )
