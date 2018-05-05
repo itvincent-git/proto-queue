@@ -26,19 +26,19 @@ public abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
-    public ProtoSenderDisposable enqueue(P proto,
-                                         int receiveUri,
-                                         ProtoReceiver<P> receiver) {
+    public ProtoSenderDisposable enqueue(@NonNull P proto,
+                                         @NonNull int receiveUri,
+                                         @NonNull ProtoReceiver<P> receiver) {
         onProtoPreProcess(proto);
         return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver);
     }
 
-    protected ProtoSenderDisposable enqueue(byte[] data,
-                                         C context,
-                                         int receiveUri,
-                                         long topSid,
-                                         long subSid,
-                                         ProtoReceiver<P> receiver) {
+    protected ProtoSenderDisposable enqueue(@NonNull byte[] data,
+                                            @NonNull C context,
+                                            @NonNull int receiveUri,
+                                            long topSid,
+                                            long subSid,
+                                            @NonNull ProtoReceiver<P> receiver) {
         Checker.checkDataNotNull(data);
         Checker.checkReceiverNotNull(receiver);
 
@@ -146,6 +146,10 @@ public abstract class ProtoQueue<P, C> {
      */
     protected abstract void onNotificationData(@NonNull P proto);
 
-    protected abstract void onProtoPreProcess(P proto);
+    /**
+     * 发送协议前的处理，可用于加header等处理
+     * @param proto
+     */
+    protected abstract void onProtoPreProcess(@NonNull P proto);
 
 }
