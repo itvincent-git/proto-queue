@@ -39,4 +39,9 @@ public abstract class BaseProtoQueue<P, C> extends ProtoQueue<P, C>{
     protected void onProtoException(Throwable throwable) {
 
     }
+
+    @Override
+    protected void onProtoPreProcess(P proto) {
+
+    }
 }

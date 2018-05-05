@@ -22,12 +22,14 @@ public abstract class ProtoQueue<P, C> {
     /**
      * 发送协议，回调接收协议
      * @param proto 发送协议
+     * @param receiveUri 接收协议的uri
      * @param receiver 接收协议回调
      * @return
      */
     public ProtoSenderDisposable enqueue(P proto,
                                          int receiveUri,
                                          ProtoReceiver<P> receiver) {
+        onProtoPreProcess(proto);
         return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver);
     }
 
@@ -52,8 +54,9 @@ public abstract class ProtoQueue<P, C> {
             P proto = buildProto(data);
             C protoContext = getProtoContext(proto);
 
-            ProtoContext context = mContextMap.remove(protoContext);
+            ProtoContext context = mContextMap.get(protoContext);
             if (context != null && getReceiveUri(proto) == context.receiveUri) {
+                mContextMap.remove(protoContext);
                 context.mReceiver.onProto(proto);
             } else {
                 onNotificationData(proto);
@@ -142,5 +145,7 @@ public abstract class ProtoQueue<P, C> {
      * 不是发-》收的协议，纯广播的协议
      */
     protected abstract void onNotificationData(@NonNull P proto);
+
+    protected abstract void onProtoPreProcess(P proto);
 
 }
