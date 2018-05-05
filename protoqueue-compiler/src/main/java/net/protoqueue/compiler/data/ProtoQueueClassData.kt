@@ -12,6 +12,7 @@ import javax.lang.model.type.TypeMirror
 class ProtoQueueClassData(element: TypeElement,
                           val appId: Int,
                           val protoContextLiteral: String,
+                          val toByteArrayLiteral: String,
                           val protoClass: TypeMirror,
                           val protoContextType: TypeMirror,
                           val buildProtoMethod: ExecutableElement?,
@@ -31,7 +32,13 @@ class ProtoQueueClassData(element: TypeElement,
     }
 
     override fun toString(): String {
-        return "ProtoQueueClassData(appId=$appId, protoContextLiteral='$protoContextLiteral', protoClass=$protoClass, protoContextType=$protoContextType, buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod, getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod, incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, getSeqContextMethod=$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, implTypeName=$implTypeName, typeName=$typeName)"
+        return "ProtoQueueClassData(appId=$appId, protoContextLiteral='$protoContextLiteral', " +
+                "protoClass=$protoClass, protoContextType=$protoContextType, toByteArrayLiteral=$toByteArrayLiteral," +
+                " buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod," +
+                " getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod," +
+                " incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, " +
+                "getSeqContextMethod=$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, " +
+                "implTypeName=$implTypeName, typeName=$typeName)"
     }
 
 

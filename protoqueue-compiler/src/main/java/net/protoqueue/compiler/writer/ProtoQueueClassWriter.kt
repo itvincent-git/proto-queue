@@ -37,7 +37,7 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
                 MethodSpec.methodBuilder(protoQueueClassData.toByteArrayMethod!!.simpleName.toString())
                 .returns(TypeName.get(protoQueueClassData.toByteArrayMethod!!.returnType))
                 .addParameter(ParameterSpec.builder(TypeName.get(protoQueueClassData.protoClass), "proto").build())
-                .addStatement("return com.google.protobuf.nano.MessageNano.toByteArray(proto)")
+                .addStatement("return \$L", protoQueueClassData.toByteArrayLiteral)
                 .addModifiers(Modifier.PROTECTED)
                 .addAnnotation(Override::class.java)
                 .build()

@@ -41,9 +41,7 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
 
         override fun process(elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>): Set<Element> {
             val classSet = elementsByAnnotation.get(ProtoQueueClass::class.java)
-            //compilerContext!!.log.debug("ProtoQueueProcessingStep process %s", classSet)
             classSet.map { element ->
-                //compilerContext!!.log.debug("ProtoQueueProcessingStep2 process %s", element)
                 ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process()
             }
             .forEach {
@@ -53,8 +51,6 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
                     portContext!!.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
                 }
             }
-
-            //compilerContext!!.log.debug("ProtoQueueProcessingStep process end")
 
             return HashSet()
         }

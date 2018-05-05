@@ -23,4 +23,10 @@ public @interface ProtoQueueClass {
      * @return
      */
     String protoContextLiteral();
+
+    /**
+     * 生成toByteArray的语句
+     * @return
+     */
+    String toByteArrayLiteral() default "com.google.protobuf.nano.MessageNano.toByteArray(proto)";
 }
