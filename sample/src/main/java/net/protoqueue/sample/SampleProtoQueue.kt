@@ -1,6 +1,7 @@
 package net.protoqueue.sample
 
 import android.util.Log
+import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.ProtoReceiver
 import net.protoqueue.annotation.ProtoQueueClass
@@ -27,9 +28,9 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
         }
     }
 
-    fun sendSampleProto() {
+    fun sendSampleProto(): ProtoDisposable? {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
-        instance.enqueue(sampleProto, 11, { proto -> Log.i(TAG, "onProto: $proto") })
+        return instance.enqueue(sampleProto, 11, { proto -> Log.i(TAG, "onProto: $proto") })
     }
 }

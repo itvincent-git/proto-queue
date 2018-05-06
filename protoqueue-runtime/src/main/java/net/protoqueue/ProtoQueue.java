@@ -26,26 +26,26 @@ public abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
-    public ProtoSenderDisposable enqueue(@NonNull P proto,
-                                         @NonNull int receiveUri,
-                                         @NonNull ProtoReceiver<P> receiver) {
+    public ProtoDisposable enqueue(@NonNull P proto,
+                                   @NonNull int receiveUri,
+                                   @NonNull ProtoReceiver<P> receiver) {
         onProtoPreProcess(proto);
         return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver);
     }
 
-    protected ProtoSenderDisposable enqueue(@NonNull byte[] data,
-                                            @NonNull C context,
-                                            @NonNull int receiveUri,
-                                            long topSid,
-                                            long subSid,
-                                            @NonNull ProtoReceiver<P> receiver) {
+    protected ProtoDisposable enqueue(@NonNull byte[] data,
+                                      @NonNull C context,
+                                      @NonNull int receiveUri,
+                                      long topSid,
+                                      long subSid,
+                                      @NonNull ProtoReceiver<P> receiver) {
         Checker.checkDataNotNull(data);
         Checker.checkReceiverNotNull(receiver);
 
         ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context, receiveUri, topSid, subSid);
         mContextMap.put(context, protoContext);
         mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
-        return null;
+        return protoContext.protoDisposable;
     }
 
     protected void onNotifyData(int appId, byte[] data) {
@@ -57,7 +57,8 @@ public abstract class ProtoQueue<P, C> {
             ProtoContext context = mContextMap.get(protoContext);
             if (context != null && getReceiveUri(proto) == context.receiveUri) {
                 mContextMap.remove(protoContext);
-                context.mReceiver.onProto(proto);
+                if (!context.protoDisposable.isDisposed())
+                    context.receiver.onProto(proto);
             } else {
                 onNotificationData(proto);
             }
