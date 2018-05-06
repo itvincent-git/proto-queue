@@ -28,7 +28,7 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
     private fun addBuildProtoMethod(builder: TypeSpec.Builder) {
         builder.addMethod(MethodSpec.overriding(protoQueueClassData.buildProtoMethod)
                 .returns(TypeName.get(protoQueueClassData.protoClass))
-                .addStatement("return \$T.parseFrom(\$L)", ClassName.get(protoQueueClassData.protoClass), protoQueueClassData.buildProtoMethod!!.parameters[0].simpleName)
+                .addStatement("return \$T.${protoQueueClassData.buildProtoLiteral}", ClassName.get(protoQueueClassData.protoClass), protoQueueClassData.buildProtoMethod!!.parameters[0].simpleName)
                 .build())
     }
 

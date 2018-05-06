@@ -12,6 +12,7 @@ import javax.lang.model.type.TypeMirror
 class ProtoQueueClassData(element: TypeElement,
                           val appId: Int,
                           val protoContextLiteral: String,
+                          val buildProtoLiteral: String,
                           val toByteArrayLiteral: String,
                           val protoClass: TypeMirror,
                           val protoContextType: TypeMirror,
@@ -33,7 +34,8 @@ class ProtoQueueClassData(element: TypeElement,
 
     override fun toString(): String {
         return "ProtoQueueClassData(appId=$appId, protoContextLiteral='$protoContextLiteral', " +
-                "protoClass=$protoClass, protoContextType=$protoContextType, toByteArrayLiteral=$toByteArrayLiteral," +
+                "protoClass=$protoClass, protoContextType=$protoContextType, buildProtoLiteral=$buildProtoLiteral, " +
+                "toByteArrayLiteral=$toByteArrayLiteral," +
                 " buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod," +
                 " getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod," +
                 " incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, " +

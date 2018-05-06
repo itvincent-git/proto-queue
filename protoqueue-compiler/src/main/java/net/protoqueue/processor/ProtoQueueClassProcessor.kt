@@ -21,6 +21,7 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
         val appId = Util.getAnnotationValue(annotationMirror, "appId").value as Int
         val protoContextLiteral = Util.getAnnotationValue(annotationMirror, "protoContextLiteral").toString()
         val toByteArrayLiteral = Util.getAnnotationValue(annotationMirror, "toByteArrayLiteral").toString()
+        val buildProtoLiteral = Util.getAnnotationValue(annotationMirror, "buildProtoLiteral").toString()
         val superClass = classElement.superclass
         val declaredType = Util.asDeclared(superClass)
         val typeArguments = declaredType.typeArguments
@@ -40,6 +41,7 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
         var data = ProtoQueueClassData(classElement,
                 appId,
                 protoContextLiteral.filter { it != '\"' },
+                buildProtoLiteral.filter { it != '\"' },
                 toByteArrayLiteral.filter { it != '\"' },
                 typeArguments[0],
                 typeArguments[1],

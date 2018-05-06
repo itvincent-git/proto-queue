@@ -25,6 +25,12 @@ public @interface ProtoQueueClass {
     String protoContextLiteral();
 
     /**
+     * 生成buildProto的语句
+     * @return
+     */
+    String buildProtoLiteral() default "parseFrom($L)";
+
+    /**
      * 生成toByteArray的语句
      * @return
      */
