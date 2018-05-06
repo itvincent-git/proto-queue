@@ -14,9 +14,11 @@ public class ProtoContext<P, C> {
     long topSid;
     long subSid;
     ProtoDisposable protoDisposable = new ProtoDisposableImpl();
+    ProtoErrorCallback error;
 
 
-    public ProtoContext(byte[] data, ProtoReceiver receiver, int appId, C context, int receiveUri, long topSid, long subSid) {
+    public ProtoContext(byte[] data, ProtoReceiver receiver, int appId, C context, int receiveUri,
+                        long topSid, long subSid, ProtoErrorCallback error) {
         this.data = data;
         this.receiver = receiver;
         this.appId = appId;
@@ -24,6 +26,7 @@ public class ProtoContext<P, C> {
         this.receiveUri = receiveUri;
         this.topSid = topSid;
         this.subSid = subSid;
+        this.error = error;
     }
 
     class ProtoDisposableImpl implements ProtoDisposable {

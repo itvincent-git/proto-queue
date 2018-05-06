@@ -29,8 +29,7 @@ public abstract class ProtoQueue<P, C> {
     protected ProtoDisposable enqueue(@NonNull P proto,
                                    @NonNull int receiveUri,
                                    @NonNull ProtoReceiver<P> receiver) {
-        onProtoPreProcess(proto);
-        return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, null);
+        return enqueue(proto, getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, null);
     }
 
     /**
@@ -43,25 +42,35 @@ public abstract class ProtoQueue<P, C> {
     protected ProtoDisposable enqueue(@NonNull P proto,
                                    @NonNull int receiveUri,
                                    @NonNull ProtoReceiver<P> receiver,
-                                   @NonNull ProtoError error) {
-        onProtoPreProcess(proto);
-        return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, error);
+                                   @NonNull ProtoErrorCallback error) {
+        return enqueue(proto, getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, error);
     }
 
-    protected ProtoDisposable enqueue(@NonNull byte[] data,
+    protected ProtoDisposable enqueue(@NonNull P proto,
                                       @NonNull C context,
                                       @NonNull int receiveUri,
-                                      long topSid,
-                                      long subSid,
+                                      @NonNull long topSid,
+                                      @NonNull long subSid,
                                       @NonNull ProtoReceiver<P> receiver,
-                                      @NonNull ProtoError error) {
-        Checker.checkDataNotNull(data);
+                                      @NonNull ProtoErrorCallback error) {
+        Checker.checkProtoNotNull(proto);
         Checker.checkReceiverNotNull(receiver);
 
-        ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context, receiveUri, topSid, subSid);
+        onProtoPreProcess(proto);
+        byte[] data = toByteArray(proto);
+        Checker.checkDataNotNull(data);
+
+        ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context,
+                receiveUri, topSid, subSid, error);
         mContextMap.put(context, protoContext);
         if (mProtoSender != null)
             mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
+
+        Message message = mHandler.obtainMessage();
+        message.what = 1;
+        message.obj = protoContext;
+        mHandler.sendMessageDelayed(message, 10000);
+
         return protoContext.protoDisposable;
     }
 
@@ -88,7 +97,13 @@ public abstract class ProtoQueue<P, C> {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-
+                case 1:
+                    ProtoContext protoContext = (ProtoContext) msg.obj;
+                    if (protoContext.error != null) {
+                        ProtoError error = new ProtoTimeoutError("Wait for response timeout");
+                        protoContext.error.onError(error);
+                    }
+                    break;
             }
         }
     };

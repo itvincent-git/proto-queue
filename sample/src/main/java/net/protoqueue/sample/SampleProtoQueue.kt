@@ -31,6 +31,8 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
     fun sendSampleProto(): ProtoDisposable? {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
-        return instance.enqueue(sampleProto, 11, { proto -> Log.i(TAG, "onProto: $proto") })
+        return instance.enqueue(sampleProto, 11,
+                { proto -> Log.i(TAG, "onProto: $proto") },
+                { error -> Log.i(TAG, "onError: $error")})
     }
 }

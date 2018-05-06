@@ -1,8 +1,18 @@
 package net.protoqueue;
 
 /**
- * 错误回调
  * Created by zhongyongsheng on 2018/5/6.
  */
-public interface ProtoError {
+public class ProtoError extends Exception{
+
+    public ProtoError() {
+    }
+
+    public ProtoError(String message) {
+        super(message);
+    }
+
+    public ProtoError(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
