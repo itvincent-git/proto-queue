@@ -26,11 +26,26 @@ public abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
-    public ProtoDisposable enqueue(@NonNull P proto,
+    protected ProtoDisposable enqueue(@NonNull P proto,
                                    @NonNull int receiveUri,
                                    @NonNull ProtoReceiver<P> receiver) {
         onProtoPreProcess(proto);
-        return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver);
+        return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, null);
+    }
+
+    /**
+     * 发送协议，回调接收协议
+     * @param proto 发送协议
+     * @param receiveUri 接收协议的uri
+     * @param receiver 接收协议回调
+     * @return
+     */
+    protected ProtoDisposable enqueue(@NonNull P proto,
+                                   @NonNull int receiveUri,
+                                   @NonNull ProtoReceiver<P> receiver,
+                                   @NonNull ProtoError error) {
+        onProtoPreProcess(proto);
+        return enqueue(toByteArray(proto), getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, error);
     }
 
     protected ProtoDisposable enqueue(@NonNull byte[] data,
@@ -38,13 +53,15 @@ public abstract class ProtoQueue<P, C> {
                                       @NonNull int receiveUri,
                                       long topSid,
                                       long subSid,
-                                      @NonNull ProtoReceiver<P> receiver) {
+                                      @NonNull ProtoReceiver<P> receiver,
+                                      @NonNull ProtoError error) {
         Checker.checkDataNotNull(data);
         Checker.checkReceiverNotNull(receiver);
 
         ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context, receiveUri, topSid, subSid);
         mContextMap.put(context, protoContext);
-        mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
+        if (mProtoSender != null)
+            mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
         return protoContext.protoDisposable;
     }
 
