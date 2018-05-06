@@ -10,7 +10,6 @@ import javax.lang.model.type.TypeMirror
  * Created by zhongyongsheng on 2018/4/14.
  */
 class ProtoQueueClassData(element: TypeElement,
-                          val appId: Int,
                           val protoContextLiteral: String,
                           val buildProtoLiteral: String,
                           val toByteArrayLiteral: String,
@@ -33,7 +32,7 @@ class ProtoQueueClassData(element: TypeElement,
     }
 
     override fun toString(): String {
-        return "ProtoQueueClassData(appId=$appId, protoContextLiteral='$protoContextLiteral', " +
+        return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', " +
                 "protoClass=$protoClass, protoContextType=$protoContextType, buildProtoLiteral=$buildProtoLiteral, " +
                 "toByteArrayLiteral=$toByteArrayLiteral," +
                 " buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod," +

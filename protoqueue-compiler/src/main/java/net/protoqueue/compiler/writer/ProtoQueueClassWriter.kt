@@ -19,7 +19,6 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
         addBuildProtoMethod(builder)
         addToByteArrayMethod(builder)
         addGetProtoContextMethod(builder)
-        addGetOwnAppIdMethod(builder)
         addSeqFieldAndMethod(builder)
         addGetReceiveUriMethod(builder)
         return builder
@@ -54,14 +53,6 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
                         .addAnnotation(Override::class.java)
                         .build()
         )
-    }
-
-    private fun addGetOwnAppIdMethod(builder: TypeSpec.Builder) {
-        if (protoQueueClassData.appId != 0) {
-            builder.addMethod(MethodSpec.overriding(protoQueueClassData.getOwnAppIdMethod)
-                    .addStatement("return \$L", protoQueueClassData.appId)
-                    .build())
-        }
     }
 
     private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {

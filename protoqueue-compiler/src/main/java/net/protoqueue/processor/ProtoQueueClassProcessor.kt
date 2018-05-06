@@ -18,7 +18,6 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
     internal fun process(): ProtoQueueClassData {
         val annotationMirror = Util.getAnnotationMirror(classElement, ProtoQueueClass::class.java)
 
-        val appId = Util.getAnnotationValue(annotationMirror, "appId").value as Int
         val protoContextLiteral = Util.getAnnotationValue(annotationMirror, "protoContextLiteral").toString()
         val toByteArrayLiteral = Util.getAnnotationValue(annotationMirror, "toByteArrayLiteral").toString()
         val buildProtoLiteral = Util.getAnnotationValue(annotationMirror, "buildProtoLiteral").toString()
@@ -39,7 +38,6 @@ class ProtoQueueClassProcessor internal constructor(internal var compileContext:
                 .map { it.toString() to it }.toMap()
 
         var data = ProtoQueueClassData(classElement,
-                appId,
                 protoContextLiteral.filter { it != '\"' },
                 buildProtoLiteral.filter { it != '\"' },
                 toByteArrayLiteral.filter { it != '\"' },

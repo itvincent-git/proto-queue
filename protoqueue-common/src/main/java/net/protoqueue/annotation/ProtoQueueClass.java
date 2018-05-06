@@ -12,11 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 public @interface ProtoQueueClass {
-    /**
-     * 如果0，则不会生成实现方法
-     * @return
-     */
-    int appId() default 0;
 
     /**
      * seq上下文在proto里定义的名称
