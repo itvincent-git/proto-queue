@@ -18,6 +18,10 @@ public class SampleProtoCore {
         mDisposable = sampleProtoQueue.sendSampleProto();
     }
 
+    public void sendGameListReqByQueueParameter() {
+        mDisposable = sampleProtoQueue.sendSampleProtoByQueueParameter();
+    }
+
     public void mockOnReceive() {
         SampleProto sampleProto = new SampleProto(new byte[]
                 {11, sampleProtoQueue.getSeqContext().byteValue(), 100});

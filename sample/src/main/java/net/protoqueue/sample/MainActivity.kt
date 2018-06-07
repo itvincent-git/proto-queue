@@ -14,6 +14,8 @@ class MainActivity : AppCompatActivity() {
 
         send_report.setOnClickListener { core.sendGameListReq() }
 
+        send_report_with_parameter.setOnClickListener { core.sendGameListReqByQueueParameter() }
+
         mock_receive.setOnClickListener { core.mockOnReceive() }
 
         dispose_receive.setOnClickListener { core.dispose() }

@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class ProtoQueue<P, C> {
     protected ProtoSender mProtoSender;
     protected Map<C, ProtoContext> mContextMap = new ConcurrentHashMap<>();
+    protected Handler mHandler = new ProtoHandler();
 
     public void init(ProtoSender protoSender) {
         mProtoSender = protoSender;
@@ -33,17 +34,20 @@ public abstract class ProtoQueue<P, C> {
     }
 
     /**
-     * 发送协议，回调接收协议
+     * 发送协议，回调接收协议，自定义topSid, subSid
      * @param proto 发送协议
      * @param receiveUri 接收协议的uri
+     * @param topSid 顶级频道号
+     * @param subSid 子频道号
      * @param receiver 接收协议回调
      * @return
      */
     protected ProtoDisposable enqueue(@NonNull P proto,
                                    @NonNull int receiveUri,
-                                   @NonNull ProtoReceiver<P> receiver,
-                                   @NonNull ProtoErrorCallback error) {
-        return enqueue(proto, getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, error);
+                                   @NonNull long topSid,
+                                   @NonNull long subSid,
+                                   @NonNull ProtoReceiver<P> receiver) {
+        return enqueue(proto, getProtoContext(proto), receiveUri, topSid, subSid, receiver, null);
     }
 
     protected ProtoDisposable enqueue(@NonNull P proto,
@@ -52,26 +56,53 @@ public abstract class ProtoQueue<P, C> {
                                       @NonNull long topSid,
                                       @NonNull long subSid,
                                       @NonNull ProtoReceiver<P> receiver,
-                                      @NonNull ProtoErrorCallback error) {
+                                      @NonNull QueueParameter parameter) {
         Checker.checkProtoNotNull(proto);
         Checker.checkReceiverNotNull(receiver);
 
-        onProtoPreProcess(proto);
-        byte[] data = toByteArray(proto);
-        Checker.checkDataNotNull(data);
+        byte[] data = null;
+        try {
+            onProtoPreProcess(proto);
+            data = toByteArray(proto);
+        } catch (Throwable t) {
+            onProtoException(t);
+        }
 
         ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context,
-                receiveUri, topSid, subSid, error);
-        mContextMap.put(context, protoContext);
-        if (mProtoSender != null)
-            mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
+                    receiveUri, topSid, subSid, parameter);
 
-        Message message = mHandler.obtainMessage();
-        message.what = 1;
-        message.obj = protoContext;
-        mHandler.sendMessageDelayed(message, 10000);
+        if (data != null) {
+            mContextMap.put(context, protoContext);
+            if (mProtoSender != null)
+                mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);
+
+            if (parameter != null && parameter.timeout > 0) {
+                Message message = mHandler.obtainMessage();
+                message.what = 1;
+                message.obj = protoContext;
+                mHandler.sendMessageDelayed(message, parameter.timeout);
+            }
+        }
 
         return protoContext.protoDisposable;
+    }
+
+    /**
+     * 返回带自定义参数的QueueParameter，调用
+     * @param proto
+     * @param receiveUri
+     * @param receiver
+     * @return
+     */
+    protected QueueParameter newQueueParameter(@NonNull P proto,
+                                               @NonNull int receiveUri,
+                                               @NonNull ProtoReceiver<P> receiver) {
+        QueueParameter queueParameter = new QueueParameter();
+        queueParameter.protoQueue = this;
+        queueParameter.proto = proto;
+        queueParameter.receiveUri = receiveUri;
+        queueParameter.receiver = receiver;
+        return queueParameter;
     }
 
     protected void onNotifyData(int appId, byte[] data) {
@@ -93,20 +124,25 @@ public abstract class ProtoQueue<P, C> {
         }
     }
 
-    protected Handler mHandler = new Handler() {
+    class ProtoHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 1:
-                    ProtoContext protoContext = (ProtoContext) msg.obj;
-                    if (protoContext.error != null) {
-                        ProtoError error = new ProtoTimeoutError("Wait for response timeout");
-                        protoContext.error.onError(error);
-                    }
-                    break;
+            try {
+                switch (msg.what) {
+                    case 1:
+                        ProtoContext protoContext = (ProtoContext) msg.obj;
+                        if (protoContext.parameter != null && protoContext.parameter.error != null) {
+                            ProtoError error = new ProtoTimeoutError("Wait for response timeout");
+                            protoContext.parameter.error.onError(error);
+                        }
+                        mContextMap.remove(protoContext);
+                        break;
+                }
+            } catch (Throwable t) {
+                onProtoException(t);
             }
         }
-    };
+    }
 
     /**
      * 自动生成不需要实现

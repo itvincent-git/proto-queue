@@ -3,6 +3,7 @@ package net.protoqueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * proto上下文
  * Created by zhongyongsheng on 2018/4/21.
  */
 public class ProtoContext<P, C> {
@@ -14,11 +15,11 @@ public class ProtoContext<P, C> {
     long topSid;
     long subSid;
     ProtoDisposable protoDisposable = new ProtoDisposableImpl();
-    ProtoErrorCallback error;
+    QueueParameter parameter;
 
 
     public ProtoContext(byte[] data, ProtoReceiver receiver, int appId, C context, int receiveUri,
-                        long topSid, long subSid, ProtoErrorCallback error) {
+                        long topSid, long subSid, QueueParameter parameter) {
         this.data = data;
         this.receiver = receiver;
         this.appId = appId;
@@ -26,7 +27,7 @@ public class ProtoContext<P, C> {
         this.receiveUri = receiveUri;
         this.topSid = topSid;
         this.subSid = subSid;
-        this.error = error;
+        this.parameter = parameter;
     }
 
     class ProtoDisposableImpl implements ProtoDisposable {
