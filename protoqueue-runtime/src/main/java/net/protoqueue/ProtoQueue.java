@@ -30,7 +30,7 @@ public abstract class ProtoQueue<P, C> {
     protected ProtoDisposable enqueue(@NonNull P proto,
                                    @NonNull int receiveUri,
                                    @NonNull ProtoReceiver<P> receiver) {
-        return enqueue(proto, getProtoContext(proto), receiveUri, getTopSid(), getSubSid(), receiver, null);
+        return enqueue(proto, receiveUri, getTopSid(), getSubSid(), receiver, null);
     }
 
     /**
@@ -47,11 +47,10 @@ public abstract class ProtoQueue<P, C> {
                                    @NonNull long topSid,
                                    @NonNull long subSid,
                                    @NonNull ProtoReceiver<P> receiver) {
-        return enqueue(proto, getProtoContext(proto), receiveUri, topSid, subSid, receiver, null);
+        return enqueue(proto, receiveUri, topSid, subSid, receiver, null);
     }
 
     protected ProtoDisposable enqueue(@NonNull P proto,
-                                      @NonNull C context,
                                       @NonNull int receiveUri,
                                       @NonNull long topSid,
                                       @NonNull long subSid,
@@ -61,9 +60,21 @@ public abstract class ProtoQueue<P, C> {
         Checker.checkReceiverNotNull(receiver);
 
         byte[] data = null;
+        C context = null;
         try {
             onProtoPreProcess(proto);
+        } catch (Throwable t) {
+            onProtoException(t);
+        }
+
+        try {
             data = toByteArray(proto);
+        } catch (Throwable t) {
+            onProtoException(t);
+        }
+
+        try {
+            context = getProtoContext(proto);
         } catch (Throwable t) {
             onProtoException(t);
         }
@@ -71,7 +82,7 @@ public abstract class ProtoQueue<P, C> {
         ProtoContext<P, C> protoContext = new ProtoContext<>(data, receiver, getOwnAppId(), context,
                     receiveUri, topSid, subSid, parameter);
 
-        if (data != null) {
+        if (data != null && context != null) {
             mContextMap.put(context, protoContext);
             if (mProtoSender != null)
                 mProtoSender.onSend(getOwnAppId(), data, topSid, subSid);

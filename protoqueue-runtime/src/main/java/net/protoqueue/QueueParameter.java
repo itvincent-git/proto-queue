@@ -50,7 +50,6 @@ public class QueueParameter<P, C> {
      */
     public ProtoDisposable enqueue() {
         return this.protoQueue.enqueue(proto,
-                protoQueue.getProtoContext(proto),
                 receiveUri,
                 protoQueue.getTopSid(),
                 protoQueue.getSubSid(),
