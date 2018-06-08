@@ -97,12 +97,7 @@ public abstract class ProtoQueue<P, C> {
     protected QueueParameter newQueueParameter(@NonNull P proto,
                                                @NonNull int receiveUri,
                                                @NonNull ProtoReceiver<P> receiver) {
-        QueueParameter queueParameter = new QueueParameter();
-        queueParameter.protoQueue = this;
-        queueParameter.proto = proto;
-        queueParameter.receiveUri = receiveUri;
-        queueParameter.receiver = receiver;
-        return queueParameter;
+        return new QueueParameter(this, proto, receiveUri, receiver);
     }
 
     protected void onNotifyData(int appId, byte[] data) {

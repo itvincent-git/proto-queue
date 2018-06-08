@@ -1,6 +1,7 @@
 package net.protoqueue;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * 创建enqueue的参数
@@ -9,16 +10,19 @@ import android.support.annotation.NonNull;
 public class QueueParameter<P, C> {
 
     @NonNull ProtoQueue<P, C> protoQueue;
-
     @NonNull P proto;
-
     @NonNull int receiveUri;
-
     @NonNull ProtoReceiver<P> receiver;
-
-    @NonNull ProtoErrorCallback error;
-
+    @Nullable ProtoErrorCallback error;
     int timeout = 10000;//默认10s
+
+    QueueParameter(@NonNull ProtoQueue<P, C> protoQueue, @NonNull P proto, @NonNull int receiveUri,
+                   @NonNull ProtoReceiver<P> receiver) {
+        this.protoQueue = protoQueue;
+        this.proto = proto;
+        this.receiveUri = receiveUri;
+        this.receiver = receiver;
+    }
 
     /**
      * 错误回调
