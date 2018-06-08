@@ -23,7 +23,7 @@ public class QueueParameter<P, C> {
     /**
      * 错误回调
      * @param error
-     * @return
+     * @return QueueParameter
      */
     public QueueParameter error(@NonNull ProtoErrorCallback error) {
         this.error = error;
@@ -33,13 +33,17 @@ public class QueueParameter<P, C> {
     /**
      * 超时时长ms
      * @param timeout
-     * @return
+     * @return QueueParameter
      */
     public QueueParameter timeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
 
+    /**
+     * 进请求队列
+     * @return ProtoDisposable
+     */
     public ProtoDisposable enqueue() {
         return this.protoQueue.enqueue(proto,
                 protoQueue.getProtoContext(proto),
