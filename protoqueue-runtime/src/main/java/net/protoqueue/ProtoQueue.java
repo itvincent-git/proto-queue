@@ -79,7 +79,7 @@ public abstract class ProtoQueue<P, C> {
             if (parameter != null && parameter.timeout > 0) {
                 Message message = mHandler.obtainMessage();
                 message.what = 1;
-                message.obj = protoContext;
+                message.obj = context;
                 mHandler.sendMessageDelayed(message, parameter.timeout);
             }
         }
@@ -124,18 +124,25 @@ public abstract class ProtoQueue<P, C> {
         }
     }
 
+    private void handleTimeout(Message msg) {
+        C context = (C) msg.obj;
+        ProtoContext protoContext = mContextMap.get(context);
+        if (protoContext == null) return;
+        if (protoContext.protoDisposable.isDisposed()) return;
+        if (protoContext.parameter != null && protoContext.parameter.error != null) {
+            ProtoError error = new ProtoTimeoutError("Wait for response timeout");
+            protoContext.parameter.error.onError(error);
+        }
+        mContextMap.remove(context);
+    }
+
     class ProtoHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             try {
                 switch (msg.what) {
                     case 1:
-                        ProtoContext protoContext = (ProtoContext) msg.obj;
-                        if (protoContext.parameter != null && protoContext.parameter.error != null) {
-                            ProtoError error = new ProtoTimeoutError("Wait for response timeout");
-                            protoContext.parameter.error.onError(error);
-                        }
-                        mContextMap.remove(protoContext);
+                        handleTimeout(msg);
                         break;
                 }
             } catch (Throwable t) {

@@ -16,8 +16,7 @@ public class QueueParameter<P, C> {
 
     @NonNull ProtoReceiver<P> receiver;
 
-    @NonNull
-    ProtoErrorCallback error;
+    @NonNull ProtoErrorCallback error;
 
     int timeout = 10000;//默认10s
 

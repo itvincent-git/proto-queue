@@ -39,6 +39,7 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         return instance.newQueueParameter(sampleProto, 11, { proto -> Log.i(TAG, "onProto: $proto") })
+                .timeout(3000)
                 .error({ error -> Log.i(TAG, "onError: $error")})
                 .enqueue()
     }
