@@ -101,7 +101,7 @@ class ProtoQueueClassWriter(internal var protoQueueClassData: ProtoQueueClassDat
                 MethodSpec.methodBuilder(protoQueueClassData.getReceiveUriMethod!!.simpleName.toString())
                         .returns(TypeName.get(protoQueueClassData.getReceiveUriMethod!!.returnType))
                         .addParameter(ParameterSpec.builder(TypeName.get(protoQueueClassData.protoClass), "proto").build())
-                        .addStatement("return proto.uri")
+                        .addStatement("return proto.\$L", protoQueueClassData.uriLiteral)
                         .addModifiers(Modifier.PROTECTED)
                         .addAnnotation(Override::class.java)
                         .build()

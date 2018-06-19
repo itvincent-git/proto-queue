@@ -7,12 +7,14 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 
 /**
+ * 注解处理完后记录的数据
  * Created by zhongyongsheng on 2018/4/14.
  */
 class ProtoQueueClassData(element: TypeElement,
                           val protoContextLiteral: String,
                           val buildProtoLiteral: String,
                           val toByteArrayLiteral: String,
+                          val uriLiteral: String,
                           val protoClass: TypeMirror,
                           val protoContextType: TypeMirror,
                           val buildProtoMethod: ExecutableElement?,
@@ -32,12 +34,11 @@ class ProtoQueueClassData(element: TypeElement,
     }
 
     override fun toString(): String {
-        return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', " +
-                "protoClass=$protoClass, protoContextType=$protoContextType, buildProtoLiteral=$buildProtoLiteral, " +
-                "toByteArrayLiteral=$toByteArrayLiteral," +
-                " buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod," +
-                " getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod," +
-                " incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, " +
+        return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', buildProtoLiteral='" +
+                "$buildProtoLiteral', toByteArrayLiteral='$toByteArrayLiteral', uriLiteral='$uriLiteral'" +
+                ", protoClass=$protoClass, protoContextType=$protoContextType, buildProtoMethod=$buildProtoMethod," +
+                " toByteArrayMethod=$toByteArrayMethod, getProtoContextMethod=$getProtoContextMethod, " +
+                "getOwnAppIdMethod=$getOwnAppIdMethod, incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, " +
                 "getSeqContextMethod=$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, " +
                 "implTypeName=$implTypeName, typeName=$typeName)"
     }

@@ -30,4 +30,10 @@ public @interface ProtoQueueClass {
      * @return
      */
     String toByteArrayLiteral() default "com.google.protobuf.nano.MessageNano.toByteArray(proto)";
+
+    /**
+     * uri在proto里定义的名称
+     * @return
+     */
+    String uriLiteral() default "uri";
 }
