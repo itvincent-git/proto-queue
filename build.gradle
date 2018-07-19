@@ -19,6 +19,9 @@ buildscript {
         url = 'https://github.com/itvincent-git/proto-queue'
     }
     repositories {
+        maven {
+            url "http://repo.yypm.com:8181/nexus/content/groups/public"
+        }
         google()
         jcenter()
     }
@@ -35,6 +38,9 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            url "http://repo.yypm.com:8181/nexus/content/groups/public"
+        }
         google()
         jcenter()
     }
@@ -42,4 +48,12 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+apply plugin: 'net.researchgate.release'
+
+release {
+    failOnUnversionedFiles = false
+    failOnUpdateNeeded = false
+    buildTasks = [] ////定义发布时该执行哪个task
 }

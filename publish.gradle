@@ -1,36 +1,3 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.github.dcendents.android-maven'
-//group = 'com.github.itvincent-git'
-
-android {
-    compileSdkVersion _compileSdkVersion
-    defaultConfig {
-        minSdkVersion _minSdkVersion
-        targetSdkVersion _targetSdkVersion
-    }
-
-}
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api project(':protoqueue-common')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    compileOnly "com.android.support:support-annotations:${support_version}"
-}
-
-//apply plugin: 'com.novoda.bintray-release'//添加
-//
-//publish {
-//    userOrg = "$user_org"//bintray.com用户名
-//    groupId = "$group_id"//jcenter上的路径
-//    artifactId = 'protoqueue-runtime'//项目名称
-//    publishVersion = "$release_version"//版本号
-//    desc = 'runtime dependency'//描述，不重要
-//    website = "$url"//网站
-//}
-
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
@@ -56,7 +23,7 @@ def getRepositoryPassword() {
     return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
 }
 
-group = 'net.protoqueue'
+group = GROUP
 
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -92,7 +59,7 @@ android.libraryVariants
 publishing {
     publications {
         maven(MavenPublication) {
-            artifact androidSourcesJar
+            artifact bundleRelease
             //artifact androidJavadocsJar
         }
     }
