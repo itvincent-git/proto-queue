@@ -13,15 +13,12 @@ buildscript {
         support_version = '27.1.1'
 
         // === release ==
-        release_version = '1.1.2'
+        release_version = '1.2.0'
         user_org = 'itvincent126'
         group_id = 'net.protoqueue'
         url = 'https://github.com/itvincent-git/proto-queue'
     }
     repositories {
-        maven {
-            url "http://repo.yypm.com:8181/nexus/content/groups/public"
-        }
         google()
         jcenter()
     }
@@ -30,7 +27,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.novoda:bintray-release:0.8.1'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
-        classpath 'net.researchgate:gradle-release:2.4.1' ////release插件for private
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -38,9 +34,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url "http://repo.yypm.com:8181/nexus/content/groups/public"
-        }
         google()
         jcenter()
     }
@@ -48,20 +41,4 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-apply plugin: 'net.researchgate.release'
-
-release {
-    failOnUnversionedFiles = false
-    failOnUpdateNeeded = false
-    buildTasks = [] ////定义发布时该执行哪个task
-    scmAdapters = [
-            net.researchgate.release.GitAdapter
-    ]
-
-    git {
-        requireBranch = 'trunk'
-    }
-
 }

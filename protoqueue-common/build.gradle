@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 apply plugin: 'maven'
 apply plugin: 'kotlin'
-//group = 'com.github.itvincent-git'
+group = 'com.github.itvincent-git'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -12,100 +12,13 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-//apply plugin: 'com.novoda.bintray-release'//添加
-//
-//publish {
-//    userOrg = "$user_org"//bintray.com用户名
-//    groupId = "$group_id"//jcenter上的路径
-//    artifactId = 'protoqueue-common'//项目名称
-//    publishVersion = "$release_version"//版本号
-//    desc = 'common dependency'//描述，不重要
-//    website = "$url"//网站
-//}
+apply plugin: 'com.novoda.bintray-release'//添加
 
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
-def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
-}
-
-def getReleaseRepositoryUrl() {
-    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
-            : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-}
-
-def getSnapshotRepositoryUrl() {
-    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
-            : "https://oss.sonatype.org/content/repositories/snapshots/"
-}
-
-def getRepositoryUsername() {
-    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
-}
-
-def getRepositoryPassword() {
-    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
-}
-
-group = 'net.protoqueue'
-
-//task androidJavadocs(type: Javadoc) {
-//    source = android.sourceSets.main.java.srcDirs
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//    exclude '**/*.so'
-//}
-
-//task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-//    classifier = 'javadoc'
-//    from androidJavadocs.destinationDir
-//}
-//
-//task androidSourcesJar(type: Jar) {
-//    classifier = 'sources'
-//    from android.sourceSets.main.java.sourceFiles
-//}
-//
-//task androidNativeJar(type: Jar) {
-//    classifier = 'so'
-//    from(new File(buildDir, 'libs'))
-//    include("**/*.so")
-//}
-//
-//task androidNativeZip(type: Zip) {
-//    classifier = 'so'
-//    from(new File(buildDir, 'libs'))
-//    include("**/*.so")
-//}
-
-
-//android.libraryVariants
-
-//task sourceJar(type: Jar) {
-//    from sourceSets.main.allJava ///若包含图片等资源改为allSource
-//}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            credentials {
-                username = getRepositoryUsername()
-                password = getRepositoryPassword()
-            }
-
-            if(isReleaseBuild()) {
-                url getReleaseRepositoryUrl()
-            } else {
-                url getSnapshotRepositoryUrl()
-            }
-        }
-    }
+publish {
+    userOrg = "$user_org"//bintray.com用户名
+    groupId = "$group_id"//jcenter上的路径
+    artifactId = 'protoqueue-common'//项目名称
+    publishVersion = "$release_version"//版本号
+    desc = 'common dependency'//描述，不重要
+    website = "$url"//网站
 }
