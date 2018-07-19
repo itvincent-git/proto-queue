@@ -56,4 +56,12 @@ release {
     failOnUnversionedFiles = false
     failOnUpdateNeeded = false
     buildTasks = [] ////定义发布时该执行哪个task
+    scmAdapters = [
+            net.researchgate.release.GitAdapter
+    ]
+
+    git {
+        requireBranch = 'trunk'
+    }
+
 }
