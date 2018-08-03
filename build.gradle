@@ -21,6 +21,9 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
+            url "http://repo.yypm.com:8181/nexus/content/groups/public"
+        }////公司内部maven地址
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
@@ -38,6 +41,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "http://repo.yypm.com:8181/nexus/content/groups/public"
+        }////公司内部maven地址
     }
     configurations.all {
         // check for updates every build
