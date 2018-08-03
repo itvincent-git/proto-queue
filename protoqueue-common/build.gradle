@@ -19,6 +19,7 @@ release {
     failOnUnversionedFiles = false
     failOnUpdateNeeded = false
     buildTasks = ['publish'] ////定义发布时该执行哪个task
+    versionPropertyFile = '../gradle.properties'
 }
 
 version="$release_version"
