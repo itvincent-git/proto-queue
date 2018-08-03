@@ -42,7 +42,9 @@ release {
 }
 
 group = "$group_id"
-version="${version}"
+
+version="$release_version"
+
 println "version=====$version"
 
 def isReleaseBuild() {

@@ -20,6 +20,9 @@ release {
     failOnUpdateNeeded = false
     buildTasks = ['publish'] ////定义发布时该执行哪个task
 }
+
+version="$release_version"
+
 //publish {
 //    userOrg = "$user_org"//bintray.com用户名
 //    groupId = "$group_id"//jcenter上的路径
