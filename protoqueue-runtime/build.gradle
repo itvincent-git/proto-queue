@@ -41,14 +41,8 @@ release {
     buildTasks = ['publish'] ////定义发布时该执行哪个task
 }
 
-group = "$group_id"
-
-version="$release_version"
-
-println "version=====$version"
-
 def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
+    return true
 }
 
 def getReleaseRepositoryUrl() {

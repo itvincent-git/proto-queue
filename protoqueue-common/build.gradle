@@ -21,8 +21,6 @@ release {
     buildTasks = ['publish'] ////定义发布时该执行哪个task
 }
 
-version="$release_version"
-
 //publish {
 //    userOrg = "$user_org"//bintray.com用户名
 //    groupId = "$group_id"//jcenter上的路径
@@ -33,7 +31,7 @@ version="$release_version"
 //}
 
 def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
+    return true
 }
 
 def getReleaseRepositoryUrl() {
