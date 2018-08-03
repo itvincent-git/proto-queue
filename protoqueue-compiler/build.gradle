@@ -24,6 +24,8 @@ release {
     buildTasks = ['publish'] ////定义发布时该执行哪个task
 }
 
+version="$release_version"
+
 def isReleaseBuild() {
     return true
 }
