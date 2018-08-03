@@ -6,7 +6,6 @@ group = 'com.github.itvincent-git'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':protoqueue-common')
@@ -16,7 +15,14 @@ dependencies {
 }
 
 apply plugin: 'com.novoda.bintray-release'//添加
-
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'net.researchgate.release'
+release {
+    failOnUnversionedFiles = false
+    failOnUpdateNeeded = false
+    buildTasks = ['publish'] ////定义发布时该执行哪个task
+}
 publish {
     userOrg = "$user_org"//bintray.com用户名
     groupId = "$group_id"//jcenter上的路径
