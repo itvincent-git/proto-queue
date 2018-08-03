@@ -30,7 +30,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.novoda:bintray-release:0.8.1'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
-        classpath 'net.researchgate:gradle-release:2.4.1' ////release插件for private
+        classpath 'net.researchgate:gradle-release:2.6.0' ////release插件for private
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
