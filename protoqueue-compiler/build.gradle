@@ -27,7 +27,7 @@ release {
 version="$release_version"
 
 def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
+    return false
 }
 
 def getReleaseRepositoryUrl() {

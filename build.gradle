@@ -13,7 +13,7 @@ buildscript {
         support_version = '27.1.1'
 
         // === release ==
-        release_version = '1.2.0-SNAPSHOT'
+        release_version = '1.2.0'
         user_org = 'itvincent126'
         group_id = 'net.protoqueue'
         url = 'https://github.com/itvincent-git/proto-queue'
@@ -38,6 +38,11 @@ allprojects {
     repositories {
         google()
         jcenter()
+    }
+    configurations.all {
+        // check for updates every build
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
 }
 
