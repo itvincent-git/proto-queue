@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+
     ext {
         _compileSdkVersion = 27
         _targetSdkVersion = 27
@@ -36,7 +37,7 @@ buildscript {
     }
 
 }
-
+version="$release_version"
 allprojects {
     repositories {
         google()
