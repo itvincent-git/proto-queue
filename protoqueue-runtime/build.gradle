@@ -49,7 +49,7 @@ release {
 
 
 def isReleaseBuild() {
-    return false
+    return true
 }
 
 def getReleaseRepositoryUrl() {

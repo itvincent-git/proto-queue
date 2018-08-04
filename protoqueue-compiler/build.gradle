@@ -29,7 +29,7 @@ release {
 //println "version=====$version"
 //println "deafault version=====$project.version"
 def isReleaseBuild() {
-    return false
+    return true
 }
 
 def getReleaseRepositoryUrl() {
