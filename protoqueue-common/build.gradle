@@ -22,9 +22,9 @@ release {
     versionPropertyFile = '../gradle.properties'
 }
 
-version="$release_version"
-println "version=====$version"
-println "deafault version=====$project.version"
+//version="$release_version"
+//println "version=====$version"
+//println "deafault version=====$project.version"
 //publish {
 //    userOrg = "$user_org"//bintray.com用户名
 //    groupId = "$group_id"//jcenter上的路径
