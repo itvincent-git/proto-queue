@@ -37,7 +37,6 @@ buildscript {
     }
 
 }
-version="$release_version"
 allprojects {
     repositories {
         google()
