@@ -71,7 +71,8 @@ def getRepositoryPassword() {
 }
 
 task sourceJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs ///若包含图片等资源改为allSource
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
 }
 
 publishing {
@@ -81,9 +82,8 @@ publishing {
             artifactId 'protoqueue-runtime'
             version "$release_version"
 //            from components.java
-            artifact sourceJar {
-                classifier "sources"
-            }
+            artifact bundleRelease
+            artifact(sourceJar)
         }
     }
 }
