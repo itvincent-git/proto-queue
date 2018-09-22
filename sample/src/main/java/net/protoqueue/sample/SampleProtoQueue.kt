@@ -5,7 +5,6 @@ import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
-import net.protoqueue.ProtoReceiver
 import net.protoqueue.annotation.ProtoQueueClass
 
 /**
@@ -51,7 +50,7 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
 
         val disposable = enqueueInCoroutine(sampleProto, 11)
         GlobalScope.async {
-            val ret = disposable.deferred.await()
+            val ret = disposable.responseDeferred.await()
             Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
         }
         return disposable
