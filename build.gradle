@@ -16,7 +16,7 @@ buildscript {
         coroutines_android_version = '0.26.1'
 
         // === release ==
-        release_version = '1.2.3'
+        release_version = "$version"
         user_org = 'itvincent126'
         group_id = 'net.protoqueue'
         url = 'https://github.com/itvincent-git/proto-queue'
