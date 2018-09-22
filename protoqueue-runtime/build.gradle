@@ -33,12 +33,15 @@ dependencies {
 //}
 
 //private below
-apply plugin: 'maven-publish'
+apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'signing'
 apply plugin: 'net.researchgate.release'
 release {
     failOnUnversionedFiles = false
+    failOnCommitNeeded = false
     failOnUpdateNeeded = false
+    failOnPublishNeeded = false
+    failOnSnapshotDependencies = false
     buildTasks = ['publish'] ////定义发布时该执行哪个task
     versionPropertyFile = '../gradle.properties'
 }
@@ -78,13 +81,11 @@ task sourceJar(type: Jar) {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenAar(MavenPublication) {
             groupId "$group_id"
             artifactId 'protoqueue-runtime'
             version "$release_version"
-//            from components.java
-            artifact bundleRelease
-            artifact(sourceJar)
+            from components.android
         }
     }
 }
