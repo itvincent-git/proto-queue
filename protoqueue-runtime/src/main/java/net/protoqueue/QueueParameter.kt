@@ -4,10 +4,10 @@ package net.protoqueue
  * 创建enqueue的参数
  * Created by zhongyongsheng on 2018/6/7.
  */
-class QueueParameter<P, C> internal constructor(internal var protoQueue: ProtoQueue<P, C>,
-                                                internal var proto: P,
-                                                internal var receiveUri: Int,
-                                                internal var receiver: (P) -> Unit) {
+class QueueParameter<P, C> internal constructor(private var protoQueue: ProtoQueue<P, C>,
+                                                private var proto: P,
+                                                private var receiveUri: Int,
+                                                private var receiver: (P) -> Unit) {
     internal var error: ((ProtoError) -> Unit?)? = null
     internal var timeout = 10000//默认10s
 

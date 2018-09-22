@@ -85,8 +85,7 @@ abstract class ProtoQueue<P, C> {
 
         if (data != null && context != null) {
             mContextMap[context] = protoContext
-            if (mProtoSender != null)
-                mProtoSender!!.onSend(getOwnAppId(), data, topSid, subSid)
+            mProtoSender?.onSend(getOwnAppId(), data, topSid, subSid)
 
             if (parameter != null && parameter.timeout > 0) {
                 val message = mHandler.obtainMessage()
@@ -108,7 +107,7 @@ abstract class ProtoQueue<P, C> {
      */
     protected fun newQueueParameter(proto: P,
                                     receiveUri: Int,
-                                    receiver: ProtoReceiver<P>): QueueParameter<*, *> {
+                                    receiver: ProtoReceiver<P>): QueueParameter<P, C> {
         return QueueParameter(this, proto, receiveUri) { receiver.onProto(it) }
     }
 
@@ -121,7 +120,7 @@ abstract class ProtoQueue<P, C> {
      */
     protected fun newQueueParameter(proto: P,
                                     receiveUri: Int,
-                                    receiver: (P) -> Unit): QueueParameter<*, *> {
+                                    receiver: (P) -> Unit): QueueParameter<P, C> {
         return QueueParameter(this, proto, receiveUri, receiver)
     }
 
