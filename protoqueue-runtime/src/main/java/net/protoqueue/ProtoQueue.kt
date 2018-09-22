@@ -35,7 +35,7 @@ abstract class ProtoQueue<P, C> {
      * 发送协议，回调接收协议
      * @param proto 发送协议
      * @param receiveUri 接收协议的uri
-     * @param receiver 接收协议回调(高阶函数）
+     * @param receiver 接收协议回调(高阶函数）推荐
      * @return
      */
     protected fun enqueue(proto: P,
@@ -53,7 +53,7 @@ abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
-    protected fun enqueue(proto: P,
+    internal fun enqueue(proto: P,
                 receiveUri: Int,
                 topSid: Long,
                 subSid: Long,
@@ -109,14 +109,14 @@ abstract class ProtoQueue<P, C> {
     protected fun newQueueParameter(proto: P,
                                     receiveUri: Int,
                                     receiver: ProtoReceiver<P>): QueueParameter<*, *> {
-        return QueueParameter(this, proto, receiveUri, receiver)
+        return QueueParameter(this, proto, receiveUri) { receiver.onProto(it) }
     }
 
     /**
      * 返回带自定义参数的QueueParameter，调用
      * @param proto
      * @param receiveUri
-     * @param receiver
+     * @param receiver 高阶函数版，推荐
      * @return
      */
     protected fun newQueueParameter(proto: P,
@@ -150,8 +150,7 @@ abstract class ProtoQueue<P, C> {
         val protoContext = mContextMap[context] ?: return
         if (protoContext.protoDisposable.isDisposed) return
         if (protoContext.parameter != null && protoContext.parameter?.error != null) {
-            val error = ProtoTimeoutError("Wait for response timeout")
-            protoContext.parameter?.error?.onError(error)
+            protoContext.parameter?.error?.invoke(ProtoTimeoutError("Wait for response timeout"))
         }
         mContextMap.remove(context)
     }
@@ -167,6 +166,14 @@ abstract class ProtoQueue<P, C> {
             }
 
         }
+    }
+
+    internal fun iGetTopSid(): Long {
+        return getTopSid()
+    }
+
+    internal fun iGetSubSid(): Long {
+        return getSubSid()
     }
 
     /**
