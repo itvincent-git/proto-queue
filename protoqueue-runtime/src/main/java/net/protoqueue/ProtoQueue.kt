@@ -2,6 +2,10 @@ package net.protoqueue
 
 import android.os.Handler
 import android.os.Message
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.Channel
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -43,6 +47,25 @@ abstract class ProtoQueue<P, C> {
                           receiver: (P) -> Unit): ProtoDisposable {
         return enqueue(proto, receiveUri, getTopSid(), getSubSid(), receiver, null)
     }
+
+    /**
+     * 发送协议，通过DeferredProtoDisposable.deferred返回数据，通过await()协程拿到数据结果
+     */
+    protected fun enqueueInCoroutine(proto: P,
+                                     receiveUri: Int): DeferredProtoDisposable<P> {
+        return DeferredProtoDisposable(GlobalScope.async {
+            val channel = Channel<P>()
+            enqueue(proto, receiveUri) {
+                GlobalScope.async {
+                    channel.send(it)
+                    channel.close()
+                }
+            }
+
+            channel.receive()
+        })
+    }
+
 
     /**
      * 发送协议，回调接收协议，自定义topSid, subSid

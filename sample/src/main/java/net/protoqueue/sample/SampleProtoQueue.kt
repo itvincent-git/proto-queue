@@ -1,6 +1,8 @@
 package net.protoqueue.sample
 
 import android.util.Log
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.ProtoReceiver
@@ -42,5 +44,16 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
                 .timeout(3000)
                 .error { error -> Log.i(TAG, "onError: $error")}
                 .enqueue()
+    }
+
+    fun sendSampleProtoInCoroutine(): ProtoDisposable? {
+        val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
+
+        val disposable = enqueueInCoroutine(sampleProto, 11)
+        GlobalScope.async {
+            val ret = disposable.deferred.await()
+            Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
+        }
+        return disposable
     }
 }

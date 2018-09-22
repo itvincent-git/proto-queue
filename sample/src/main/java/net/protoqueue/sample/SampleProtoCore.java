@@ -32,4 +32,9 @@ public class SampleProtoCore {
         if (mDisposable != null)
             mDisposable.dispose();
     }
+
+    public void sendGameListReqInCoroutine() {
+        mDisposable = sampleProtoQueue.sendSampleProtoInCoroutine();
+    }
+
 }

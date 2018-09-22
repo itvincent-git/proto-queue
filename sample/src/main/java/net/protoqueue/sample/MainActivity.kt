@@ -19,5 +19,7 @@ class MainActivity : AppCompatActivity() {
         mock_receive.setOnClickListener { core.mockOnReceive() }
 
         dispose_receive.setOnClickListener { core.dispose() }
+
+        send_report_in_coroutine.setOnClickListener { core.sendGameListReqInCoroutine() }
     }
 }
