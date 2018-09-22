@@ -3,6 +3,9 @@ package net.protoqueue;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 /**
  * 创建enqueue的参数
  * Created by zhongyongsheng on 2018/6/7.
@@ -53,7 +56,13 @@ public class QueueParameter<P, C> {
                 receiveUri,
                 protoQueue.getTopSid(),
                 protoQueue.getSubSid(),
-                receiver,
+                new Function1<P, Unit>() {
+                    @Override
+                    public Unit invoke(P p) {
+                        receiver.onProto(p);
+                        return Unit.INSTANCE;
+                    }
+                },
                 this);
     }
 }
