@@ -46,6 +46,8 @@ release {
     versionPropertyFile = '../gradle.properties'
 }
 
+kotlin { experimental { coroutines 'enable' } }
+
 //version="$release_version"
 //
 //println "version=====$version"

@@ -1,30 +1,19 @@
 package net.protoqueue
 
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.experimental.CompletableDeferred
 
 /**
  * proto上下文
  * Created by zhongyongsheng on 2018/4/21.
  */
-class ProtoContext<P, C>(internal var data: ByteArray?,
-                         internal var receiver: (P) -> Unit,
-                         internal var appId: Int,
-                         internal var context: C?,
-                         internal var receiveUri: Int,
-                         internal var topSid: Long,
-                         internal var subSid: Long,
-                         internal var parameter: QueueParameter<P, C>?) {
-    internal var protoDisposable: ProtoDisposable = ProtoDisposableImpl()
-
-    internal inner class ProtoDisposableImpl : ProtoDisposable {
-        var isDisposed = AtomicBoolean(false)
-
-        override fun dispose() {
-            isDisposed.set(true)
-        }
-
-        override fun isDisposed(): Boolean {
-            return isDisposed.get()
-        }
-    }
+class ProtoContext<P, C>(internal val data: ByteArray?,
+                         internal val receiver: (P) -> Unit,
+                         internal val appId: Int,
+                         internal val context: C?,
+                         internal val receiveUri: Int,
+                         internal val topSid: Long,
+                         internal val subSid: Long,
+                         internal val parameter: QueueParameter<P, C>?,
+                         internal val deferred: CompletableDeferred<P>?) {
+    internal val protoDisposable: ProtoDisposable = ProtoDisposableImpl()
 }

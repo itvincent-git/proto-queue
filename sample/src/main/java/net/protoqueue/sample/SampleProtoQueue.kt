@@ -1,10 +1,11 @@
 package net.protoqueue.sample
 
 import android.util.Log
+import kotlinx.coroutines.experimental.Deferred
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
-import net.protoqueue.protoQueueAsync
+import net.protoqueue.protoQueueLaunch
 
 /**
  * Created by zhongyongsheng on 2018/4/20.
@@ -12,6 +13,7 @@ import net.protoqueue.protoQueueAsync
 @ProtoQueueClass(protoContextLiteral = "seqId")
 abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
     val TAG = "SampleProtoQueue"
+    internal var mDeferred: Deferred<SampleProto>? = null
 
     override fun getOwnAppId(): Int {
         return 10086
@@ -44,14 +46,27 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
                 .enqueue()
     }
 
-    fun sendSampleProtoInCoroutine(): ProtoDisposable? {
+    fun sendSampleProtoInCoroutine() {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
-        val disposable = enqueueInCoroutine(sampleProto, 11)
-        protoQueueAsync {
-            val ret = disposable.responseDeferred.await()
-            Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
+        //val disposable = enqueueInCoroutine(sampleProto, 11)
+        protoQueueLaunch {
+            try {
+                mDeferred = newQueryParameterInCoroutine(sampleProto, 11)
+                    .timeout(3000)
+                    .enqueueInCoroutine()
+                val ret = mDeferred?.await()
+                Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
+                ret
+            } catch (e: Exception) {
+                Log.e(TAG, "sendSampleProtoInCoroutine error: $e")
+                SampleProto(byteArrayOf(0, 0, 0))
+            }
+
         }
-        return disposable
+    }
+
+    fun cancel() {
+        mDeferred?.cancel()
     }
 }

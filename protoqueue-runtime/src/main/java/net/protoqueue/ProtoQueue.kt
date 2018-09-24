@@ -2,10 +2,11 @@ package net.protoqueue
 
 import android.os.Handler
 import android.os.Message
+import android.util.Log
+import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.channels.Channel
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -32,7 +33,7 @@ abstract class ProtoQueue<P, C> {
     protected fun enqueue(proto: P,
                           receiveUri: Int,
                           receiver: ProtoReceiver<P>): ProtoDisposable {
-        return enqueue(proto, receiveUri, getTopSid(), getSubSid(), { receiver.onProto(it) }, null)
+        return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), { receiver.onProto(it) }, null, null)
     }
 
     /**
@@ -45,25 +46,38 @@ abstract class ProtoQueue<P, C> {
     protected fun enqueue(proto: P,
                           receiveUri: Int,
                           receiver: (P) -> Unit): ProtoDisposable {
-        return enqueue(proto, receiveUri, getTopSid(), getSubSid(), receiver, null)
+        return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), receiver, null, null)
     }
 
     /**
-     * 发送协议，通过DeferredProtoDisposable.deferred返回数据，通过await()协程拿到数据结果
+     * 发送协议，通过Deferred返回数据，调用Deferred.await()协程拿到数据结果<br/>
+     *
+     * 调用await()时会抛异常：<br/>
+     *      <li>如调用deferred.cancel()会抛 JobCancellationException</li>
+     *      <li>超时会抛 ProtoTimeoutError</li>
      */
     protected fun enqueueInCoroutine(proto: P,
-                                     receiveUri: Int): DeferredProtoDisposable<P> {
-        return DeferredProtoDisposable(GlobalScope.async {
-            val channel = Channel<P>()
-            enqueue(proto, receiveUri) {
-                GlobalScope.async {
-                    channel.send(it)
-                    channel.close()
-                }
-            }
+                           receiveUri: Int) : Deferred<P> {
+        return enqueueInCoroutine(proto, receiveUri, null)
+    }
 
-            channel.receive()
-        })
+    internal fun enqueueInCoroutine(proto: P,
+                           receiveUri: Int,
+                           parameter: QueueParameter<P, C>?): Deferred<P> {
+        val deferred = CompletableDeferred<P>()
+
+        val disposable = enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), {
+                    GlobalScope.async {
+                        Log.i("ProtoQueue", "callback $it")
+                        deferred.complete(it)
+                    }
+                }, parameter, deferred)
+        deferred.invokeOnCompletion() {
+            Log.i("ProtoQueue", "invokeOnCompletion $it ${deferred.isCancelled}")
+            if (deferred.isCancelled)
+                disposable.dispose()
+        }
+        return deferred
     }
 
 
@@ -76,15 +90,16 @@ abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
-    internal fun enqueue(proto: P,
-                receiveUri: Int,
-                topSid: Long,
-                subSid: Long,
-                receiver: (P) -> Unit,
-                parameter: QueueParameter<P, C>?): ProtoDisposable {
+    internal fun enqueueInternal(proto: P,
+                                 receiveUri: Int,
+                                 topSid: Long,
+                                 subSid: Long,
+                                 receiver: (P) -> Unit,
+                                 parameter: QueueParameter<P, C>?,
+                                 deferred: CompletableDeferred<P>?): ProtoDisposable {
 
         var data: ByteArray? = null
-        var context: C? = null
+        var protoContext: C? = null
         try {
             onProtoPreProcess(proto)
         } catch (t: Throwable) {
@@ -98,27 +113,27 @@ abstract class ProtoQueue<P, C> {
         }
 
         try {
-            context = getProtoContext(proto)
+            protoContext = getProtoContext(proto)
         } catch (t: Throwable) {
             onProtoException(t)
         }
 
-        val protoContext = ProtoContext(data, receiver, getOwnAppId(), context,
-                receiveUri, topSid, subSid, parameter)
+        val contextPayload = ProtoContext(data, receiver, getOwnAppId(), protoContext,
+                receiveUri, topSid, subSid, parameter, deferred)
 
-        if (data != null && context != null) {
-            mContextMap[context] = protoContext
+        if (data != null && protoContext != null) {
+            mContextMap[protoContext] = contextPayload
             mProtoSender?.onSend(getOwnAppId(), data, topSid, subSid)
 
             if (parameter != null && parameter.timeout > 0) {
                 val message = mHandler.obtainMessage()
                 message.what = 1
-                message.obj = context
+                message.obj = protoContext
                 mHandler.sendMessageDelayed(message, parameter.timeout.toLong())
             }
         }
 
-        return protoContext.protoDisposable
+        return contextPayload.protoDisposable
     }
 
     /**
@@ -147,6 +162,11 @@ abstract class ProtoQueue<P, C> {
         return QueueParameter(this, proto, receiveUri, receiver)
     }
 
+    protected fun newQueryParameterInCoroutine(proto: P,
+                                               receiveUri: Int): QueueParameter<P, C> {
+        return QueueParameter(this, proto, receiveUri, {}/*协程里这里已经无用了*/)
+    }
+
     protected fun onNotifyData(appId: Int, data: ByteArray) {
         try {
             if (getOwnAppId() != appId) return
@@ -171,8 +191,16 @@ abstract class ProtoQueue<P, C> {
         val context = msg.obj as C
         val protoContext = mContextMap[context] ?: return
         if (protoContext.protoDisposable.isDisposed) return
+
+        val error = ProtoTimeoutError("Wait for response timeout")
         if (protoContext.parameter?.error != null) {
-            protoContext.parameter?.error?.invoke(ProtoTimeoutError("Wait for response timeout"))
+            protoContext.parameter?.error?.invoke(error)
+        }
+
+        //如果用协程的方式返回
+        protoContext.deferred?.let {
+            if (!it.isCancelled)
+                it.completeExceptionally(error)
         }
         mContextMap.remove(context)
     }
