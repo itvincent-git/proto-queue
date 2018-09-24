@@ -171,7 +171,7 @@ abstract class ProtoQueue<P, C> {
         val context = msg.obj as C
         val protoContext = mContextMap[context] ?: return
         if (protoContext.protoDisposable.isDisposed) return
-        if (protoContext.parameter != null && protoContext.parameter?.error != null) {
+        if (protoContext.parameter?.error != null) {
             protoContext.parameter?.error?.invoke(ProtoTimeoutError("Wait for response timeout"))
         }
         mContextMap.remove(context)
