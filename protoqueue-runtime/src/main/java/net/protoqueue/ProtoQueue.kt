@@ -1,6 +1,7 @@
 package net.protoqueue
 
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
 import android.util.Log
 import kotlinx.coroutines.experimental.CompletableDeferred
@@ -205,7 +206,7 @@ abstract class ProtoQueue<P, C> {
         mContextMap.remove(context)
     }
 
-    internal inner class ProtoHandler : Handler() {
+    internal inner class ProtoHandler : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             try {
                 when (msg.what) {
