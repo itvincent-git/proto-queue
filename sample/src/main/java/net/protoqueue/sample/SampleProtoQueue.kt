@@ -5,6 +5,7 @@ import kotlinx.coroutines.experimental.Deferred
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
+import net.protoqueue.protoQueueAsync
 import net.protoqueue.protoQueueLaunch
 
 /**
@@ -50,7 +51,8 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         //val disposable = enqueueInCoroutine(sampleProto, 11)
-        protoQueueLaunch {
+        //protoQueueLaunch {
+        protoQueueAsync {
             try {
                 mDeferred = newQueryParameterInCoroutine(sampleProto, 11)
                     .timeout(3000)
@@ -62,7 +64,6 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
                 Log.e(TAG, "sendSampleProtoInCoroutine error: $e")
                 SampleProto(byteArrayOf(0, 0, 0))
             }
-
         }
     }
 

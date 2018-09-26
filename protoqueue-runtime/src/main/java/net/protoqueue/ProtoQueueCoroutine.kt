@@ -10,3 +10,8 @@ fun protoQueueLaunch(start: CoroutineStart = CoroutineStart.DEFAULT,
                     onCompletion: CompletionHandler? = null,
                     block: suspend CoroutineScope.() -> Unit
 ) = GlobalScope.launch (Dispatchers.Default, start, onCompletion, block)
+
+fun <T> protoQueueAsync(start: CoroutineStart = CoroutineStart.DEFAULT,
+                    onCompletion: CompletionHandler? = null,
+                    block: suspend CoroutineScope.() -> T
+) = GlobalScope.async (Dispatchers.Default, start, onCompletion, block)
