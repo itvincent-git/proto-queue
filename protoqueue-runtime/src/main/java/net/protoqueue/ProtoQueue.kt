@@ -3,7 +3,6 @@ package net.protoqueue
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope
@@ -69,12 +68,10 @@ abstract class ProtoQueue<P, C> {
 
         val disposable = enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), {
                     GlobalScope.async {
-                        Log.i("ProtoQueue", "callback $it")
                         deferred.complete(it)
                     }
                 }, parameter, deferred)
         deferred.invokeOnCompletion() {
-            Log.i("ProtoQueue", "invokeOnCompletion $it ${deferred.isCancelled}")
             if (deferred.isCancelled)
                 disposable.dispose()
         }

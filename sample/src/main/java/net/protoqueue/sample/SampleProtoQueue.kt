@@ -50,9 +50,22 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
     fun sendSampleProtoInCoroutine() {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
-        //val disposable = enqueueInCoroutine(sampleProto, 11)
-        //protoQueueLaunch {
-        protoQueueAsync {
+        //没有设置超时
+        /*protoQueueLaunch {
+            try {
+                mDeferred = enqueueInCoroutine(sampleProto, 11)
+                val ret = mDeferred?.await()
+                Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
+                ret
+            } catch (e: Exception) {
+                Log.e(TAG, "sendSampleProtoInCoroutine error: $e")
+                SampleProto(byteArrayOf(0, 0, 0))
+            }
+        }*/
+
+
+        //设置了超时
+        protoQueueLaunch {
             try {
                 mDeferred = newQueryParameterInCoroutine(sampleProto, 11)
                     .timeout(3000)
