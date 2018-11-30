@@ -1,6 +1,7 @@
 package net.protoqueue
 
-import kotlinx.coroutines.experimental.CompletableDeferred
+import kotlinx.coroutines.CompletableDeferred
+
 
 /**
  * proto上下文

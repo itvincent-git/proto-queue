@@ -3,10 +3,10 @@ package net.protoqueue
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.util.concurrent.ConcurrentHashMap
 
 /**

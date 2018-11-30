@@ -1,11 +1,10 @@
 package net.protoqueue.sample
 
 import android.util.Log
-import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.Deferred
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
-import net.protoqueue.protoQueueAsync
 import net.protoqueue.protoQueueLaunch
 
 /**

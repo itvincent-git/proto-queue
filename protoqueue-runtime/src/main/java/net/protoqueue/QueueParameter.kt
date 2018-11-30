@@ -1,6 +1,7 @@
 package net.protoqueue
 
-import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.Deferred
+
 
 /**
  * 创建enqueue的参数
