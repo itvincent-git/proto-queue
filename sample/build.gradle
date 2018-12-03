@@ -14,7 +14,7 @@ android {
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
-    /* release sign from properties */
+    /* release sign from properties, just use for test in local */
     Properties props = new Properties()
     props.load(new FileInputStream(file("../../../keystore.properties")))
     signingConfigs {
