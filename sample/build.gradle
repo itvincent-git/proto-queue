@@ -14,15 +14,26 @@ android {
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    /* release sign from properties */
+    Properties props = new Properties()
+    props.load(new FileInputStream(file("../../../keystore.properties")))
+    signingConfigs {
+        release {
+            storeFile file(props["keystore"])
+            storePassword props["keystore.password"]
+            keyAlias props["keyalias"]
+            keyPassword props["keypassword"]
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
-
-kotlin { experimental { coroutines 'enable' } }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
