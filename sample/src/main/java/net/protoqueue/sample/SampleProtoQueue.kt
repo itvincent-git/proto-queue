@@ -2,6 +2,8 @@ package net.protoqueue.sample
 
 import android.util.Log
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
@@ -70,8 +72,11 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
                     .timeout(3000)
                     .enqueueInCoroutine()
                 val ret = mDeferred?.await()
-                Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
-                ret
+
+                //test something do in the ui thread
+                withContext(Dispatchers.Main) {
+                    Log.i(TAG, "[${Thread.currentThread().name}]sendSampleProtoInCoroutine onProto: $ret")
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "sendSampleProtoInCoroutine error: $e")
                 SampleProto(byteArrayOf(0, 0, 0))
