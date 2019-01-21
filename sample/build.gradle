@@ -15,7 +15,7 @@ android {
     }
 
     /* release sign from properties, just use for test in local */
-    Properties props = new Properties()
+    /*Properties props = new Properties()
     props.load(new FileInputStream(file("../../../keystore.properties")))
     signingConfigs {
         release {
@@ -24,13 +24,13 @@ android {
             keyAlias props["keyalias"]
             keyPassword props["keypassword"]
         }
-    }
+    }*/
 
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            //signingConfig signingConfigs.release
         }
     }
 }
