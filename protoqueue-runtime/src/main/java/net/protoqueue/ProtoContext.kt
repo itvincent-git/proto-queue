@@ -1,7 +1,5 @@
 package net.protoqueue
 
-import kotlinx.coroutines.CompletableDeferred
-
 
 /**
  * proto上下文
@@ -14,7 +12,6 @@ class ProtoContext<P, C>(internal val data: ByteArray?,
                          internal val receiveUri: Int,
                          internal val topSid: Long,
                          internal val subSid: Long,
-                         internal val parameter: QueueParameter<P, C>?,
-                         internal val deferred: CompletableDeferred<P>?) {
+                         internal val parameter: QueueParameter<P, C>?) {
     internal val protoDisposable: ProtoDisposable = ProtoDisposableImpl()
 }

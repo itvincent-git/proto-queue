@@ -30,10 +30,11 @@ abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
+    @Deprecated(message = "use enqueue lambda below", replaceWith = ReplaceWith("enqueue receiver: (P) -> Unit"))
     protected fun enqueue(proto: P,
                           receiveUri: Int,
                           receiver: ProtoReceiver<P>): ProtoDisposable {
-        return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), { receiver.onProto(it) }, null, null)
+        return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), { receiver.onProto(it) }, null)
     }
 
     /**
@@ -46,7 +47,7 @@ abstract class ProtoQueue<P, C> {
     protected fun enqueue(proto: P,
                           receiveUri: Int,
                           receiver: (P) -> Unit): ProtoDisposable {
-        return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), receiver, null, null)
+        return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), receiver, null)
     }
 
     /**
@@ -70,14 +71,13 @@ abstract class ProtoQueue<P, C> {
                     GlobalScope.async {
                         deferred.complete(it)
                     }
-                }, parameter, deferred)
+                }, parameter)
         deferred.invokeOnCompletion() {
             if (deferred.isCancelled)
                 disposable.dispose()
         }
         return deferred
     }
-
 
     /**
      * 发送协议，回调接收协议，自定义topSid, subSid
@@ -93,8 +93,7 @@ abstract class ProtoQueue<P, C> {
                                  topSid: Long,
                                  subSid: Long,
                                  receiver: (P) -> Unit,
-                                 parameter: QueueParameter<P, C>?,
-                                 deferred: CompletableDeferred<P>?): ProtoDisposable {
+                                 parameter: QueueParameter<P, C>?): ProtoDisposable {
 
         var data: ByteArray? = null
         var protoContext: C? = null
@@ -117,7 +116,7 @@ abstract class ProtoQueue<P, C> {
         }
 
         val contextPayload = ProtoContext(data, receiver, getOwnAppId(), protoContext,
-                receiveUri, topSid, subSid, parameter, deferred)
+                receiveUri, topSid, subSid, parameter)
 
         if (data != null && protoContext != null) {
             mContextMap[protoContext] = contextPayload
@@ -160,11 +159,6 @@ abstract class ProtoQueue<P, C> {
         return QueueParameter(this, proto, receiveUri, receiver)
     }
 
-    protected fun newQueryParameterInCoroutine(proto: P,
-                                               receiveUri: Int): QueueParameter<P, C> {
-        return QueueParameter(this, proto, receiveUri, {}/*协程里这里已经无用了*/)
-    }
-
     protected fun onNotifyData(appId: Int, data: ByteArray) {
         try {
             if (getOwnAppId() != appId) return
@@ -193,12 +187,6 @@ abstract class ProtoQueue<P, C> {
         val error = ProtoTimeoutError("Wait for response timeout")
         if (protoContext.parameter?.error != null) {
             protoContext.parameter?.error?.invoke(error)
-        }
-
-        //如果用协程的方式返回
-        protoContext.deferred?.let {
-            if (!it.isCancelled)
-                it.completeExceptionally(error)
         }
         mContextMap.remove(context)
     }

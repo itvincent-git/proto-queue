@@ -1,12 +1,13 @@
 package net.protoqueue.sample
 
 import android.util.Log
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import net.protoqueue.ProtoDisposable
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
+import net.protoqueue.enqueueAwait
 import net.protoqueue.protoQueueLaunch
 
 /**
@@ -15,7 +16,7 @@ import net.protoqueue.protoQueueLaunch
 @ProtoQueueClass(protoContextLiteral = "seqId")
 abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
     val TAG = "SampleProtoQueue"
-    internal var mDeferred: Deferred<SampleProto>? = null
+    private var job: Job? = null
 
     override fun getOwnAppId(): Int {
         return 10086
@@ -66,12 +67,9 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
 
 
         //设置了超时
-        protoQueueLaunch {
+        job = protoQueueLaunch {
             try {
-                mDeferred = newQueryParameterInCoroutine(sampleProto, 11)
-                    .timeout(3000)
-                    .enqueueInCoroutine()
-                val ret = mDeferred?.await()
+                val ret = enqueueAwait(sampleProto, 11, 3000)
 
                 //test something do in the ui thread
                 withContext(Dispatchers.Main) {
@@ -85,6 +83,6 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
     }
 
     fun cancel() {
-        mDeferred?.cancel()
+        job?.cancel()
     }
 }

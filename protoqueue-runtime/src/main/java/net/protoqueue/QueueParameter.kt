@@ -1,7 +1,5 @@
 package net.protoqueue
 
-import kotlinx.coroutines.Deferred
-
 
 /**
  * 创建enqueue的参数
@@ -12,7 +10,7 @@ class QueueParameter<P, C> internal constructor(private var protoQueue: ProtoQue
                                                 private var receiveUri: Int,
                                                 private var receiver: (P) -> Unit) {
     internal var error: ((ProtoError) -> Unit?)? = null
-    internal var timeout = 10000//默认10s
+    internal var timeout = DEFAULT_TIMEOUT
 
     /**
      * 错误回调，在用enqueueInCoroutine时，这个error是不会返回的，应该用try { result.await()} catch(e: Exception){} 处理
@@ -44,14 +42,10 @@ class QueueParameter<P, C> internal constructor(private var protoQueue: ProtoQue
                 protoQueue.iGetTopSid(),
                 protoQueue.iGetSubSid(),
                 receiver,
-                this,
-                null)
+                this)
     }
 
-    /**
-     * @see ProtoQueue.enqueueInCoroutine
-     */
-    suspend fun enqueueInCoroutine(): Deferred<P> {
-        return this.protoQueue.enqueueInCoroutine(proto, receiveUri, this)
+    companion object {
+        val DEFAULT_TIMEOUT = 10000//默认10s
     }
 }
