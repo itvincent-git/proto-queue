@@ -3,10 +3,6 @@ package net.protoqueue
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -48,35 +44,6 @@ abstract class ProtoQueue<P, C> {
                           receiveUri: Int,
                           receiver: (P) -> Unit): ProtoDisposable {
         return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), receiver, null)
-    }
-
-    /**
-     * 发送协议，通过Deferred返回数据，调用Deferred.await()协程拿到数据结果<br/>
-     *
-     * 调用await()时会抛异常：<br/>
-     *      <li>如调用deferred.cancel()会抛 JobCancellationException</li>
-     *      <li>超时会抛 ProtoTimeoutError</li>
-     */
-    protected fun enqueueInCoroutine(proto: P,
-                           receiveUri: Int) : Deferred<P> {
-        return enqueueInCoroutine(proto, receiveUri, null)
-    }
-
-    internal fun enqueueInCoroutine(proto: P,
-                           receiveUri: Int,
-                           parameter: QueueParameter<P, C>?): Deferred<P> {
-        val deferred = CompletableDeferred<P>()
-
-        val disposable = enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), {
-                    GlobalScope.async {
-                        deferred.complete(it)
-                    }
-                }, parameter)
-        deferred.invokeOnCompletion() {
-            if (deferred.isCancelled)
-                disposable.dispose()
-        }
-        return deferred
     }
 
     /**
