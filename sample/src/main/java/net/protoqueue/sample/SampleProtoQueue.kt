@@ -4,11 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
-import net.protoqueue.ProtoDisposable
-import net.protoqueue.ProtoQueueBuilder
+import net.protoqueue.*
 import net.protoqueue.annotation.ProtoQueueClass
-import net.protoqueue.enqueueAwait
-import net.protoqueue.protoQueueLaunch
 
 /**
  * Created by zhongyongsheng on 2018/4/20.
@@ -52,24 +49,10 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
     fun sendSampleProtoInCoroutine() {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
-        //没有设置超时
-        /*protoQueueLaunch {
+        //enqueueAwait
+        /*job = protoQueueLaunch {
             try {
-                mDeferred = enqueueInCoroutine(sampleProto, 11)
-                val ret = mDeferred?.await()
-                Log.i(TAG, "sendSampleProtoInCoroutine onProto: $ret")
-                ret
-            } catch (e: Exception) {
-                Log.e(TAG, "sendSampleProtoInCoroutine error: $e")
-                SampleProto(byteArrayOf(0, 0, 0))
-            }
-        }*/
-
-
-        //设置了超时
-        job = protoQueueLaunch {
-            try {
-                val ret = enqueueAwait(sampleProto, 11, 3000)
+                val ret = enqueueAwait(sampleProto, 11)
 
                 //test something do in the ui thread
                 withContext(Dispatchers.Main) {
@@ -78,6 +61,16 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
             } catch (e: Exception) {
                 Log.e(TAG, "sendSampleProtoInCoroutine error: $e")
                 SampleProto(byteArrayOf(0, 0, 0))
+            }
+        }*/
+
+        //enqueueAwaitOrNull and timeout
+        job = protoQueueLaunch {
+            val ret = enqueueAwaitOrNull(sampleProto, 11, 3000)
+
+            //test something do in the ui thread
+            withContext(Dispatchers.Main) {
+                Log.i(TAG, "[${Thread.currentThread().name}]sendSampleProtoInCoroutine onProto: $ret")
             }
         }
     }

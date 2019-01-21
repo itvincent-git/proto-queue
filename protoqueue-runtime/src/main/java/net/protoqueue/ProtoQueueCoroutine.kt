@@ -33,9 +33,11 @@ fun <T> protoQueueAsync(start: CoroutineStart = CoroutineStart.DEFAULT,
  * <li>如调用job.cancel()会抛 JobCancellationException</li>
  * <li>超时会抛 ProtoTimeoutError</li>
  */
-suspend fun <P, C, T: ProtoQueue<P, C>> T.enqueueAwait(proto: P, receiveUri: Int, timeout: Int = QueueParameter.DEFAULT_TIMEOUT): P {
+suspend fun <P, C, T: ProtoQueue<P, C>> T.enqueueAwait(proto: P,
+                                                       receiveUri: Int,
+                                                       timeout: Int = QueueParameter.DEFAULT_TIMEOUT): P {
 
-     return suspendCancellableCoroutine<P> { continuation ->
+     return suspendCancellableCoroutine { continuation ->
         val disposable = QueueParameter(this, proto, receiveUri) { continuation.resume(it) }
             .error { continuation.resumeWithException(it) }
             .timeout(timeout)
@@ -43,5 +45,18 @@ suspend fun <P, C, T: ProtoQueue<P, C>> T.enqueueAwait(proto: P, receiveUri: Int
         continuation.invokeOnCancellation {
             if (!disposable.isDisposed) disposable.dispose()
         }
+    }
+}
+
+/**
+ * 使用协程的方式发送协议，如果有异常则返回null
+ */
+suspend fun <P, C, T: ProtoQueue<P, C>> T.enqueueAwaitOrNull(proto: P,
+                                                             receiveUri: Int,
+                                                             timeout: Int = QueueParameter.DEFAULT_TIMEOUT): P? {
+    return try {
+        enqueueAwait(proto, receiveUri, timeout)
+    } catch (t: Throwable) {
+        return null
     }
 }
