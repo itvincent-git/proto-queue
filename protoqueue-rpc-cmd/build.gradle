@@ -51,7 +51,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId "$group_id"
-            artifactId 'protoqueue-rpc-gen'
+            artifactId 'protoqueue-rpc-cmd'
             version "$release_version"
             from components.java
             artifact sourceJar {
