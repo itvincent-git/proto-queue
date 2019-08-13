@@ -1,0 +1,13 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+
+mainClassName = "net.protoqueue.protorpcg.Main"
+
+sourceCompatibility = "7"
+targetCompatibility = "7"
