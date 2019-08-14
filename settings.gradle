@@ -1,4 +1,1 @@
-include ':sample', ':protorpcg',
-        ':protoqueue-runtime',
-        ':protoqueue-common',
-        ':protoqueue-compiler'
+include ':protoqueue-rpc-gen', ':protoqueue-rpc-desc', ':protoqueue-rpc-cmd', ':protoqueue-rpc-as'
