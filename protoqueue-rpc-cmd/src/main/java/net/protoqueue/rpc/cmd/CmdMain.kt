@@ -14,7 +14,9 @@ class CmdMain {
 //        }
         val descPath = File("proto.desc").absolutePath
         val outFilePath = ""
-        DescFileReader(descPath).readFile()
+        DescFileReader(descPath).readFile().getServiceList().forEach {
+            println(it)
+        }
     }
 
     private fun showUsage() {

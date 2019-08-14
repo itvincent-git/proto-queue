@@ -20,7 +20,7 @@ class DescFileReader(private val descFilePath: String) {
     private val serviceList = mutableListOf<ServiceStruct>()
     private var curService: ServiceStruct? = null
 
-    fun readFile() {
+    fun readFile(): DescFileReader {
         val fileDescriptorSet = File(descFilePath).inputStream().use {
             DescriptorProtos.FileDescriptorSet.parseFrom(it)
         }
@@ -28,8 +28,11 @@ class DescFileReader(private val descFilePath: String) {
         fileDescriptorSet.fileList.forEach { fdp ->
             readProto(fdp)
         }
-        println(serviceList)
+//        println(serviceList)
+        return this
     }
+
+    fun getServiceList() = serviceList
 
     /**
      * 获取类型对应
