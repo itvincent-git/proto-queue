@@ -1,8 +1,7 @@
 package net.protoqueue.rpc.gen
 
-import java.lang.RuntimeException
-
 /**
+ * //todo only test, must remove
  * Created by zhongyongsheng on 2019-08-13.
  */
 object RPCApi {
@@ -11,13 +10,14 @@ object RPCApi {
         adapter = _adapter
     }
 
+    @Throws(RPCError::class)
     fun send(
-        service: String, functionName: String, bytes: ByteArray,
+        serviceName: String, functionName: String, bytes: ByteArray,
         successCallback: RPCResponseCallback,
         errorCallback: RPCErrorCallback? = null,
         parameter: RPCParameter? = null
     ) {
-        adapter?.send(service, functionName, bytes, parameter, successCallback, errorCallback)
+        adapter?.send(serviceName, functionName, bytes, parameter, successCallback, errorCallback)
     }
 
     fun subscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver) {
@@ -25,13 +25,17 @@ object RPCApi {
     }
 }
 
-class RPCError(val sdkResCode: Int, val srvResCode: Int) : RuntimeException()
+class RPCError(val sdkResCode: Int, val srvResCode: Int) : Exception() {
+    override fun toString(): String {
+        return "RPCError(sdkResCode=$sdkResCode, srvResCode=$srvResCode)"
+    }
+}
 
 /**
  * 成功回调
  */
 typealias RPCResponseCallback = (
-    serverName: String,
+    serviceName: String,
     funcName: String,
     data: ByteArray
 ) -> Unit
@@ -52,12 +56,12 @@ typealias RPCNotifyReceiver = (
 
 interface RPCAdapter {
     fun send(
-        serverName: String, functionName: String, bytes: ByteArray, parameter: RPCParameter? = null,
+        serviceName: String, functionName: String, bytes: ByteArray, parameter: RPCParameter? = null,
         successCallback: RPCResponseCallback,
         errorCallback: RPCErrorCallback? = null
     )
 
-    fun subscribe(serverName: String, functionName: String, receiver: RPCNotifyReceiver)
+    fun subscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver)
 }
 
 data class RPCParameter(val timeout: Long = 0L)

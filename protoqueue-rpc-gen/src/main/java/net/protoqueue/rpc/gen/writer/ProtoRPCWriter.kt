@@ -1,5 +1,10 @@
 package net.jbridge.compiler.writer
 
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import net.protoqueue.rpc.gen.ServiceStruct
 import java.io.File
@@ -13,53 +18,48 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
     var fieldName: String? = null
 
     override fun createTypeSpecBuilder(): TypeSpec.Builder {
-        val builder = TypeSpec.classBuilder(serviceStruct.serviceClassName)
-//        builder.
-//        fieldName = addModuleField(builder)
-//        addConstructor(builder)
-//        addDispatchMethod(builder)
+        val builder = TypeSpec.objectBuilder(serviceStruct.serviceClassName)
+        addServiceNameField(builder)
+        addRequestFun(builder)
 //        addRouteMethod(builder)
         return builder
     }
-//
-//    // private Module _module;
-//    private fun addModuleField(builder: TypeSpec.Builder): String {
-//        val tmpVar = TmpVar()
-//        val name = data.typeName.simpleName().decapitalize()
-//        val fieldName = tmpVar.getTmpVar("_$name")
-//
-//        val field = FieldSpec.builder(data.typeName, fieldName, Modifier.PRIVATE)
-//                .initializer("new \$T()", data.typeName)
-//                .build()
-//        builder.addField(field)
-//        return fieldName
-//    }
-//
-//    //constructor
-//    private fun addConstructor(builder: TypeSpec.Builder) {
-//        MethodSpec.constructorBuilder()
+
+    //
+    // private const val serviceName = "WhSvcUserService"
+    private fun addServiceNameField(builder: TypeSpec.Builder) {
+        val property = PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE)
+            .initializer("%S", serviceStruct.serviceClassName.simpleName)
+            .build()
+        builder.addProperty(property)
+    }
+
+    //service请求应答的方法
+    private fun addRequestFun(builder: TypeSpec.Builder) {
+        for (func in serviceStruct.funList) {
+            /**
+             * suspend fun batchGetUserBasicInfo(req: WhSvcUser.GetUserBasicInfoReq): WhSvcUser.GetUserBasicInfoRes
+             */
+            FunSpec.builder(func.funName)
+                .addModifiers(KModifier.SUSPEND)
+                .addParameter(
+                    ParameterSpec.builder("req", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build())
+                .returns(ClassName(func.rspTypePackage, func.rspTypeSimpleName))
+                .build().let { builder.addFunction(it) }
 //                .addModifiers(Modifier.PUBLIC)
+//                .addParameter(ParameterSpec.builder(
+//                    createClassName("net.urigo.runtime", "UriGoParameter"), "parameter").build())
+//                .addParameter(ParameterSpec.builder(
+//                    createClassName("android.content", "Context"), "context").build())
 //                .apply {
+//                    for (parameter in data.parameterList) {
+//                        if (!parameter.isContext) createDispatchSetParameterBlock(this, parameter)
+//                    }
+//                    createDispatchInvokeModuleBlock(this)
 //                    builder.addMethod(this.build())
 //                }
-//    }
-//
-//    //fun dispatch()
-//    private fun addDispatchMethod(builder: TypeSpec.Builder) {
-//        MethodSpec.methodBuilder("dispatch")
-//            .addModifiers(Modifier.PUBLIC)
-//            .addParameter(ParameterSpec.builder(
-//                    createClassName("net.urigo.runtime", "UriGoParameter"), "parameter").build())
-//            .addParameter(ParameterSpec.builder(
-//                    createClassName("android.content", "Context"), "context").build())
-//            .apply {
-//                for (parameter in data.parameterList) {
-//                    if (!parameter.isContext) createDispatchSetParameterBlock(this, parameter)
-//                }
-//                createDispatchInvokeModuleBlock(this)
-//                builder.addMethod(this.build())
-//            }
-//    }
+        }
+    }
 //
 //    //fun dispatcher > java.lang.String msg = parameter.getString("msg");
 //    private fun createDispatchSetParameterBlock(builder: MethodSpec.Builder, parameter: UriRouteParameter) {

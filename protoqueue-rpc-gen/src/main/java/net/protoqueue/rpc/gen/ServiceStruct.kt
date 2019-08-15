@@ -14,10 +14,14 @@ data class ServiceStruct(var serviceName: String = "", var servicePackage: Strin
     var notifyList: List<NotifyStruct> = emptyList()
     val serviceClassName: ClassName
         get() {
-            //ClassName(servicePackage, serviceName)
-            return ClassName("test", "TestService")
+            return ClassName(servicePackage, serviceName)
+            //return ClassName("test", "TestService")
         }
 
     init {
+    }
+
+    override fun toString(): String {
+        return "ServiceStruct(serviceName='$serviceName', servicePackage='$servicePackage', funList=$funList, notifyList=$notifyList)"
     }
 }
