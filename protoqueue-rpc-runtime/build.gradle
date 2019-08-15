@@ -7,7 +7,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation project(":protoqueue-rpc-runtime")
 }
 
 //ci build below
@@ -51,7 +50,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId "$group_id"
-            artifactId 'protoqueue-rpc-gen'
+            artifactId 'protoqueue-rpc-runtime'
             version "$release_version"
             from components.java
             artifact sourceJar {
