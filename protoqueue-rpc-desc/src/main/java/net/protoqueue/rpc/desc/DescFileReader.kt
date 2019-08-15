@@ -80,7 +80,7 @@ class DescFileReader(private val descFilePath: String) {
             this.options.javaPackage
         } else {
             this.`package`
-        }
+        } + ".nano"
     }
 
     private fun readService(service: DescriptorProtos.ServiceDescriptorProto) {
