@@ -45,11 +45,7 @@ class DescFileReader(private val descFilePath: String) {
             } else {
                 getClassNameFromFdpName(fdp.name)
             }
-            val packageName = if (fdp.options.hasJavaPackage()) {
-                fdp.options.javaPackage
-            } else {
-                fdp.`package`
-            }
+            val packageName = fdp.readPackageName()
             fdp.messageTypeList.forEach {
                 val protoType = "." + fdp.`package` + "." + it.name
                 val className = packageName + "." + outClassName + "." + it.name
@@ -59,9 +55,11 @@ class DescFileReader(private val descFilePath: String) {
     }
 
     private fun readProto(fdp: DescriptorProtos.FileDescriptorProto) {
+        val packageName = fdp.readPackageName()
         fdp.serviceList?.forEach { service ->
             val name = service.name
             curService = ServiceStruct()
+            curService?.servicePackage = packageName
             if (name.endsWith("Service") && !name.endsWith("NotifyService")) {
                 curService?.serviceName = service.name
                 readService(service)
@@ -69,9 +67,19 @@ class DescFileReader(private val descFilePath: String) {
                 readNotify(service)
             }
             curService?.let {
-                serviceList.add(it)
+                if (it.serviceName.isNotEmpty()) {
+                    serviceList.add(it)
+                }
             }
             curService = null
+        }
+    }
+
+    private fun DescriptorProtos.FileDescriptorProto.readPackageName(): String {
+        return if (this.options.hasJavaPackage()) {
+            this.options.javaPackage
+        } else {
+            this.`package`
         }
     }
 

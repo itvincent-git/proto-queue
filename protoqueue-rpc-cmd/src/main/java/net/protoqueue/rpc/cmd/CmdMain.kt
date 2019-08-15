@@ -12,6 +12,7 @@ class CmdMain {
     fun run(args: Array<String>) {
 //        if (args.isEmpty()) {
 //            showUsage()
+//            return
 //        }
         val descPath = File("proto.desc").absolutePath
         val outFilePath = System.getProperty("user.dir") + File.separator + "build" + File.separator
