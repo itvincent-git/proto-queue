@@ -52,7 +52,7 @@ class DescFileReader(private val descFilePath: String) {
             }
             fdp.messageTypeList.forEach {
                 val protoType = "." + fdp.`package` + "." + it.name
-                val className = packageName + "." + outClassName + "$" + it.name
+                val className = packageName + "." + outClassName + "." + it.name
                 typeMap[protoType] = className
             }
         }
