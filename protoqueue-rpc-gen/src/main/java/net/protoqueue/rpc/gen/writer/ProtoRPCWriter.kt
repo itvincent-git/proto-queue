@@ -6,6 +6,8 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.buildCodeBlock
+import net.protoqueue.rpc.gen.FunctionStruct
 import net.protoqueue.rpc.gen.ServiceStruct
 import java.io.File
 
@@ -45,7 +47,10 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
                 .addParameter(
                     ParameterSpec.builder("req", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build())
                 .returns(ClassName(func.rspTypePackage, func.rspTypeSimpleName))
-                .build().let { builder.addFunction(it) }
+                .let {
+                    addInnerCode(it, func)
+                    builder.addFunction(it.build())
+                }
 //                .addModifiers(Modifier.PUBLIC)
 //                .addParameter(ParameterSpec.builder(
 //                    createClassName("net.urigo.runtime", "UriGoParameter"), "parameter").build())
@@ -59,6 +64,13 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
 //                    builder.addMethod(this.build())
 //                }
         }
+    }
+
+    private fun addInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
+        builder.addCode(buildCodeBlock {
+            //val functionName = "batchGetUserBasicInfo"
+            addStatement("""val functionName = %S""", func.funName)
+        })
     }
 //
 //    //fun dispatcher > java.lang.String msg = parameter.getString("msg");
