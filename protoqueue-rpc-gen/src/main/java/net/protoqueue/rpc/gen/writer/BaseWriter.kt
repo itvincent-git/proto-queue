@@ -1,6 +1,5 @@
 package net.jbridge.compiler.writer
 
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.TypeSpec
 import net.protoqueue.rpc.gen.ServiceStruct
@@ -15,10 +14,9 @@ abstract class BaseWriter(
     serviceStruct: ServiceStruct,
     private val outputDir: File
 ) {
-    private var className: ClassName
+    private val className = serviceStruct.serviceClassName
 
     init {
-        className = serviceStruct.serviceClassName
     }
 
     @Throws(IOException::class)
