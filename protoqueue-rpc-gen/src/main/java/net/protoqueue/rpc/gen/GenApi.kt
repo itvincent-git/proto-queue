@@ -5,5 +5,6 @@ package net.protoqueue.rpc.gen
  */
 object GenApi {
     fun generateProtoFile(serviceStruct: ServiceStruct) {
+        println("generateProtoFile $serviceStruct")
     }
 }
