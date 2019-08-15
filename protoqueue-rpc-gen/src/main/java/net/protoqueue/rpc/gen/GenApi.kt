@@ -4,7 +4,7 @@ package net.protoqueue.rpc.gen
  * Created by zhongyongsheng on 2019-08-13.
  */
 object GenApi {
-    fun generateProtoFile(serviceStruct: ServiceStruct, outputPath: String) {
+    fun generateProtoFile(serviceStruct: ServiceStruct, outputDirPath: String) {
         println("generateProtoFile $serviceStruct")
     }
 }
