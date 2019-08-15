@@ -1,5 +1,7 @@
 package net.protoqueue.rpc.gen
 
+import com.squareup.kotlinpoet.ClassName
+
 /**
  *
  *
@@ -7,14 +9,15 @@ package net.protoqueue.rpc.gen
  * @author linmin1 on 2019-08-14.
  *
  */
-class ServiceStruct {
-    var serviceName: String = ""
+data class ServiceStruct(var serviceName: String = "", var servicePackage: String = "") {
     var funList: List<FunctionStruct> = emptyList()
     var notifyList: List<NotifyStruct> = emptyList()
+    val serviceClassName: ClassName
+        get() {
+            //ClassName(servicePackage, serviceName)
+            return ClassName("test", "TestService")
+        }
 
-    override fun toString(): String {
-        return "< serviceName $serviceName \n" +
-            "funList $funList \n" +
-            "notifyList $notifyList >\n"
+    init {
     }
 }
