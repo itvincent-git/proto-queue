@@ -14,7 +14,7 @@ class CmdMain {
 //            showUsage()
 //        }
         val descPath = File("proto.desc").absolutePath
-        val outFilePath = System.getProperty("user.dir") + File.separator + "build" + File.separator
+        val outFilePath = System.getProperty("user.dir") + File.separator + "output" + File.separator
         DescFileReader(descPath).readFile().getServiceList().forEach {
             GenApi.generateProtoFile(it, outFilePath)
         }
