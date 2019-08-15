@@ -24,6 +24,9 @@ data class FunctionStruct(
     }
 }
 
-data class TypeClass(val packageName: String, val simpleName: String, val properties: List<PropertyClass>)
+data class TypeClass(
+    val packageName: String, val simpleName: String, val nullable: Boolean, val properties:
+    List<PropertyClass>
+)
 
 data class PropertyClass(val propertyName: String, val propertyType: String, val propertyTypeClass: TypeClass)
