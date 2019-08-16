@@ -3,13 +3,13 @@ package net.jbridge.compiler.writer
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.buildCodeBlock
 import net.protoqueue.rpc.gen.FunctionStruct
-import net.protoqueue.rpc.gen.NotifyStruct
 import net.protoqueue.rpc.gen.RPCApi
 import net.protoqueue.rpc.gen.RPCError
 import net.protoqueue.rpc.gen.ServiceStruct
@@ -25,9 +25,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
 
     override fun createTypeSpecBuilder(): TypeSpec.Builder {
         val builder = TypeSpec.classBuilder(serviceStruct.serviceClassName)
-//        addServiceNameField(builder)
         addClientObject(builder)
-
+        addHandlerObject(builder)
         return builder
     }
 
@@ -41,7 +40,6 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     private fun addClientObject(classBuilder: TypeSpec.Builder) {
         val clientBuilder = TypeSpec.objectBuilder("Client")
         addRequestFun(clientBuilder)
-        addNotifyFun(clientBuilder)
         classBuilder.addType(clientBuilder.build())
     }
 
@@ -93,30 +91,36 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
         })
     }
 
+    //object Handler
+    private fun addHandlerObject(classBuilder: TypeSpec.Builder) {
+        val clientBuilder = TypeSpec.objectBuilder("Handler")
+        addHandlerFun(clientBuilder)
+        classBuilder.addType(clientBuilder.build())
+    }
+
     //service注册接收通知的方法
-    private fun addNotifyFun(builder: TypeSpec.Builder) {
-//        for (notify in serviceStruct.notifyList) {
-//            /**
-//             * fun subscribeUserFreezeNotify(notifyCallback: (UserFreezeNotifyInfo) -> Unit) {
-//             */
-//            FunSpec.builder(notify.notifyFunctionGenName)
-//                .addParameter(
-//                    ParameterSpec.builder("notifyCallback", LambdaTypeName.get(null,
-//                        listOf(getNotifyParameter(notify)),
-//                        Unit::class.asTypeName())
-//
-//                    ).build())
-//                .let {
-//                    addNotifyInnerCode(it, notify)
-//                    builder.addFunction(it.build())
-//                }
-//        }
+    private fun addHandlerFun(builder: TypeSpec.Builder) {
+        for (func in serviceStruct.funList) {
+            /**
+             * fun subscribeUserFreezeNotify(handler: (UserFreezeNotifyInfo) -> Unit) {
+             */
+            FunSpec.builder(func.funName)
+                .addParameter(
+                    ParameterSpec.builder("handler", LambdaTypeName.get(null,
+                        listOf(getHandlerParameter(func)),
+                        ClassName(func.rspTypePackage, func.rspTypeSimpleName).copy(nullable = true))
+                    ).build())
+                .let {
+                    addNotifyInnerCode(it, func)
+                    builder.addFunction(it.build())
+                }
+        }
     }
 
-    private fun addNotifyInnerCode(builder: FunSpec.Builder, notify: NotifyStruct) {
+    private fun addNotifyInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
     }
 
-    private fun getNotifyParameter(notify: NotifyStruct): ParameterSpec {
-        return ParameterSpec.builder("", ClassName(notify.notifyPackage, notify.notifySimpleName)).build()
+    private fun getHandlerParameter(func: FunctionStruct): ParameterSpec {
+        return ParameterSpec.builder("", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build()
     }
 }
