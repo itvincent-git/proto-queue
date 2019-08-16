@@ -56,23 +56,23 @@ class DescFileReader(private val descFilePath: String) {
 
     private fun readProto(fdp: DescriptorProtos.FileDescriptorProto) {
         val packageName = fdp.readPackageName()
+        curService = ServiceStruct()
+        curService?.servicePackage = packageName
         fdp.serviceList?.forEach { service ->
             val name = service.name
-            curService = ServiceStruct()
-            curService?.servicePackage = packageName
             if (name.endsWith("Service") && !name.endsWith("NotifyService")) {
                 curService?.serviceName = service.name
                 readService(service)
             } else if (name.endsWith("NotifyService")) {
                 readNotify(service)
             }
-            curService?.let {
-                if (it.serviceName.isNotEmpty()) {
-                    serviceList.add(it)
-                }
-            }
-            curService = null
         }
+        curService?.let {
+            if (it.serviceName.isNotEmpty()) {
+                serviceList.add(it)
+            }
+        }
+        curService = null
     }
 
     private fun DescriptorProtos.FileDescriptorProto.readPackageName(): String {
