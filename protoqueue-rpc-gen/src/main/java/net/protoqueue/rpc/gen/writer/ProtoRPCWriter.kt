@@ -24,24 +24,25 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     ) {
 
     override fun createTypeSpecBuilder(): TypeSpec.Builder {
-        val builder = TypeSpec.objectBuilder(serviceStruct.serviceClassName)
-        addServiceNameField(builder)
-        addRequestFun(builder)
-        addNotifyFun(builder)
+        val builder = TypeSpec.classBuilder(serviceStruct.serviceClassName)
+//        addServiceNameField(builder)
+        addClientObject(builder)
+
         return builder
     }
 
+    //private val serviceName = "SvcUserService"
     override fun createFileProperty(): PropertySpec.Builder {
         return PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE)
             .initializer("%S", serviceStruct.serviceName)
     }
 
-    // private const val serviceName = "WhSvcUserService"
-    private fun addServiceNameField(builder: TypeSpec.Builder) {
-        val property = PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE)
-            .initializer("%S", serviceStruct.serviceClassName.simpleName)
-            .build()
-        builder.addProperty(property)
+    //object Client
+    private fun addClientObject(classBuilder: TypeSpec.Builder) {
+        val clientBuilder = TypeSpec.objectBuilder("Client")
+        addRequestFun(clientBuilder)
+        addNotifyFun(clientBuilder)
+        classBuilder.addType(clientBuilder.build())
     }
 
     //service请求应答的方法
