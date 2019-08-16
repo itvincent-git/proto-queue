@@ -11,7 +11,6 @@ import com.squareup.kotlinpoet.ClassName
  */
 data class ServiceStruct(var serviceName: String = "", var servicePackage: String = "") {
     var funList: List<FunctionStruct> = emptyList()
-    var notifyList: List<NotifyStruct> = emptyList()
     val serviceClassName: ClassName
         get() {
             return ClassName(servicePackage, serviceName)
@@ -22,6 +21,6 @@ data class ServiceStruct(var serviceName: String = "", var servicePackage: Strin
     }
 
     override fun toString(): String {
-        return "ServiceStruct(serviceName='$serviceName', servicePackage='$servicePackage', funList=$funList, notifyList=$notifyList)"
+        return "ServiceStruct(serviceName='$serviceName', servicePackage='$servicePackage', funList=$funList)"
     }
 }

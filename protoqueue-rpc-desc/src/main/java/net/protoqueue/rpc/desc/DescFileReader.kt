@@ -2,7 +2,6 @@ package net.protoqueue.rpc.desc
 
 import com.google.protobuf.DescriptorProtos
 import net.protoqueue.rpc.gen.FunctionStruct
-import net.protoqueue.rpc.gen.NotifyStruct
 import net.protoqueue.rpc.gen.ServiceStruct
 import java.io.File
 import java.lang.StringBuilder
@@ -55,24 +54,20 @@ class DescFileReader(private val descFilePath: String) {
     }
 
     private fun readProto(fdp: DescriptorProtos.FileDescriptorProto) {
-        val packageName = fdp.readPackageName()
-        curService = ServiceStruct()
-        curService?.servicePackage = packageName
         fdp.serviceList?.forEach { service ->
+            val packageName = fdp.readPackageName()
+            curService = ServiceStruct()
+            curService?.servicePackage = packageName
             val name = service.name
-            if (name.endsWith("Service") && !name.endsWith("NotifyService")) {
-                curService?.serviceName = service.name
-                readService(service)
-            } else if (name.endsWith("NotifyService")) {
-                readNotify(service)
+            curService?.serviceName = service.name
+            readService(service)
+            curService?.let {
+                if (it.serviceName.isNotEmpty()) {
+                    serviceList.add(it)
+                }
             }
+            curService = null
         }
-        curService?.let {
-            if (it.serviceName.isNotEmpty()) {
-                serviceList.add(it)
-            }
-        }
-        curService = null
     }
 
     private fun DescriptorProtos.FileDescriptorProto.readPackageName(): String {
@@ -94,15 +89,15 @@ class DescFileReader(private val descFilePath: String) {
 //        }
     }
 
-    private fun readNotify(service: DescriptorProtos.ServiceDescriptorProto) {
-        println("----> ${service.name}")
-//        service.methodList?.forEach {
-//            println("${it.name} ===>>>> ${typeMap[it.inputType]}")
-//        }
-        curService?.notifyList = service.methodList?.map {
-            NotifyStruct(it.name, typeMap[it.inputType] ?: "")
-        } ?: emptyList()
-    }
+//    private fun readNotify(service: DescriptorProtos.ServiceDescriptorProto) {
+//        println("----> ${service.name}")
+////        service.methodList?.forEach {
+////            println("${it.name} ===>>>> ${typeMap[it.inputType]}")
+////        }
+//        curService?.notifyList = service.methodList?.map {
+//            NotifyStruct(it.name, typeMap[it.inputType] ?: "")
+//        } ?: emptyList()
+//    }
 
     /**
      * 获取默认类名
