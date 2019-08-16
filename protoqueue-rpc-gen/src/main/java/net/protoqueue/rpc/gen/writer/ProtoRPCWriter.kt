@@ -3,11 +3,14 @@ package net.jbridge.compiler.writer
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.buildCodeBlock
 import net.protoqueue.rpc.gen.FunctionStruct
+import net.protoqueue.rpc.gen.RPCApi
+import net.protoqueue.rpc.gen.RPCError
 import net.protoqueue.rpc.gen.ServiceStruct
 import java.io.File
 
@@ -48,7 +51,7 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
                     ParameterSpec.builder("req", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build())
                 .returns(ClassName(func.rspTypePackage, func.rspTypeSimpleName))
                 .let {
-                    addInnerCode(it, func)
+                    addRequestInnerCode(it, func)
                     builder.addFunction(it.build())
                 }
 //                .addModifiers(Modifier.PUBLIC)
@@ -66,10 +69,32 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
         }
     }
 
-    private fun addInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
+    private fun addRequestInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
+        val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+        val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
         builder.addCode(buildCodeBlock {
             //val functionName = "batchGetUserBasicInfo"
             addStatement("""val functionName = %S""", func.funName)
+            //return suspendCancellableCoroutine { continuation ->
+            addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
+            //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
+            addStatement(""" %T.send(serviceName, functionName, %T.toByteArray(req), { serverName, funcName, data ->""",
+                RPCApi::class, messageNanoClassName)
+            //val res = GetUserBasicInfoRes.parseFrom(data)
+            addStatement(""" val res = %T.parseFrom(data)""",
+                ClassName(func.rspTypePackage, func.rspTypeSimpleName))
+            //continuation.resume(res)
+            addStatement(""" continuation.resume(res)""")
+            //}, { sdkResCode, srvResCode ->
+            addStatement(""" }, {sdkResCode, srvResCode ->""")
+            //    continuation.resumeWithException(RPCError(sdkResCode, srvResCode))
+            addStatement("""  continuation.resumeWithException(%T(sdkResCode, srvResCode))""", RPCError::class)
+            //           }
+            addStatement(" }")
+            //           )
+            addStatement(" )")
+            //       }
+            addStatement("}")
         })
     }
 //
