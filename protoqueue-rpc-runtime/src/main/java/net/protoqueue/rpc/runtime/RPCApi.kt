@@ -25,7 +25,18 @@ object RPCApi {
     }
 }
 
-class RPCError(val sdkResCode: Int, val srvResCode: Int) : Exception() {
+class RPCError : Exception {
+    var sdkResCode: Int? = null
+    var srvResCode: Int? = null
+
+    constructor(message: String, ex: Throwable?) : super(message, ex) {}
+    constructor(message: String) : super(message) {}
+    constructor(ex: Throwable) : super(ex) {}
+    constructor(_sdkResCode: Int, _srvResCode: Int) : super() {
+        sdkResCode = _sdkResCode
+        srvResCode = _srvResCode
+    }
+
     override fun toString(): String {
         return "RPCError(sdkResCode=$sdkResCode, srvResCode=$srvResCode)"
     }
