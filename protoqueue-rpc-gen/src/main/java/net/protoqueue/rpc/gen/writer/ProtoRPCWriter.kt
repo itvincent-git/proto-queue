@@ -118,6 +118,20 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     }
 
     private fun addNotifyInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
+        builder.addCode(buildCodeBlock {
+            //val subscribeFuncName = "userFreezeNotify"
+            addStatement("""val subscribeFuncName = %S""", func.funName)
+            //RPCApi.subscribe(serviceName, subscribeFuncName) { _, functionName, data ->
+            addStatement("""RPCApi.subscribe(serviceName, subscribeFuncName) { _, functionName, data ->""",
+                RPCApi::class)
+            //               if (functionName == subscribeFuncName) {
+            beginControlFlow("""if (functionName == subscribeFuncName) """)
+            //                   val notify = UserFreezeNotifyInfo.parseFrom(data)
+            addStatement("""val notify = %T.parseFrom(data)""", ClassName(func.reqTypePackage, func.reqTypeSimpleName))
+            //                   handler(notify)
+            addStatement("""handler(notify)""")
+            endControlFlow()
+        })
     }
 
     private fun getHandlerParameter(func: FunctionStruct): ParameterSpec {
