@@ -11,17 +11,10 @@ data class FunctionStruct(
     val funName: String, val reqType: String, val rspType: String, val reqTypeClass: TypeClass? = null,
     val rspTypeClass: TypeClass? = null
 ) {
-    val reqTypePackage: String
-    val reqTypeSimpleName: String
-    val rspTypePackage: String
-    val rspTypeSimpleName: String
-
-    init {
-        reqTypePackage = reqType.substringBeforeLast(".")
-        reqTypeSimpleName = reqType.substringAfterLast(".")
-        rspTypePackage = rspType.substringBeforeLast(".")
-        rspTypeSimpleName = rspType.substringAfterLast(".")
-    }
+    val reqTypePackage: String = reqType.substringBeforeLast(".")
+    val reqTypeSimpleName: String = reqType.substringAfterLast(".")
+    val rspTypePackage: String = rspType.substringBeforeLast(".")
+    val rspTypeSimpleName: String = rspType.substringAfterLast(".")
 }
 
 data class TypeClass(
