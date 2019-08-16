@@ -25,7 +25,7 @@ class DescFileReader(private val descFilePath: String) {
         }
         readMessageTypeMap(fileDescriptorSet)
         fileDescriptorSet.fileList.forEach { fdp ->
-            readProto(fdp)
+            serviceList.addAll(readProto(fdp))
         }
 //        println(serviceList)
         return this
@@ -53,21 +53,28 @@ class DescFileReader(private val descFilePath: String) {
         }
     }
 
-    private fun readProto(fdp: DescriptorProtos.FileDescriptorProto) {
-        fdp.serviceList?.forEach { service ->
-            val packageName = fdp.readPackageName()
-            curService = ServiceStruct()
-            curService?.servicePackage = packageName
-            val name = service.name
-            curService?.serviceName = service.name
-            readService(service)
-            curService?.let {
-                if (it.serviceName.isNotEmpty()) {
-                    serviceList.add(it)
-                }
+    private fun readProto(fdp: DescriptorProtos.FileDescriptorProto): List<ServiceStruct> {
+        val packageName = fdp.readPackageName()
+        return fdp.serviceList?.map { service ->
+            ServiceStruct().apply {
+                this.servicePackage = packageName
+                this.serviceName = service.name
+                this.funList = service.methodList?.map { it.convert() } ?: emptyList()
             }
-            curService = null
-        }
+        } ?: emptyList()
+//        fdp.serviceList?.forEach { service ->
+//            val packageName = fdp.readPackageName()
+//            curService = ServiceStruct()
+//            curService?.servicePackage = packageName
+//            curService?.serviceName = service.name
+//            readService(service)
+//            curService?.let {
+//                if (it.serviceName.isNotEmpty()) {
+//                    serviceList.add(it)
+//                }
+//            }
+//            curService = null
+//        }
     }
 
     private fun DescriptorProtos.FileDescriptorProto.readPackageName(): String {
@@ -76,6 +83,11 @@ class DescFileReader(private val descFilePath: String) {
         } else {
             this.`package`
         } + ".nano"
+    }
+
+    private fun DescriptorProtos.MethodDescriptorProto.convert(): FunctionStruct {
+        return FunctionStruct(this.name, typeMap[this.inputType] ?: "", typeMap[this
+            .outputType] ?: "")
     }
 
     private fun readService(service: DescriptorProtos.ServiceDescriptorProto) {
