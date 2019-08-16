@@ -1,11 +1,8 @@
 package net.protoqueue.rpc.gen
 
 /**
- *
- *
- *
+ * 生成发送接收服务结构
  * @author linmin1 on 2019-08-14.
- *
  */
 data class FunctionStruct(
     val funName: String, val reqType: String, val rspType: String, val reqTypeClass: TypeClass? = null,

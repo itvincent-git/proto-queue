@@ -1,9 +1,7 @@
 package net.protoqueue.rpc.gen
 
 /**
- *
- *
- *
+ * 生成通知的结构
  * @author linmin1 on 2019-08-14.
  *
  */

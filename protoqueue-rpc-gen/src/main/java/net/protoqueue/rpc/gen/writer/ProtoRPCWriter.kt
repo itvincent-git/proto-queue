@@ -3,12 +3,15 @@ package net.jbridge.compiler.writer
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.buildCodeBlock
 import net.protoqueue.rpc.gen.FunctionStruct
+import net.protoqueue.rpc.gen.NotifyStruct
 import net.protoqueue.rpc.gen.RPCApi
 import net.protoqueue.rpc.gen.RPCError
 import net.protoqueue.rpc.gen.ServiceStruct
@@ -18,15 +21,14 @@ import java.io.File
  * 生成RPC协议类
  * Created by zhongyongsheng on 2018/4/14.
  */
-class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWriter(serviceStruct, outputDir
+class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) : BaseWriter(serviceStruct, outputDir
 ) {
-    var fieldName: String? = null
 
     override fun createTypeSpecBuilder(): TypeSpec.Builder {
         val builder = TypeSpec.objectBuilder(serviceStruct.serviceClassName)
         addServiceNameField(builder)
         addRequestFun(builder)
-//        addRouteMethod(builder)
+        addNotifyFun(builder)
         return builder
     }
 
@@ -84,5 +86,32 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
             //       }
             addStatement("}")
         })
+    }
+
+    //service注册接收通知的方法
+    private fun addNotifyFun(builder: TypeSpec.Builder) {
+        for (notify in serviceStruct.notifyList) {
+            /**
+             * fun subscribeUserFreezeNotify(notifyCallback: (UserFreezeNotifyInfo) -> Unit) {
+             */
+            FunSpec.builder(notify.notifyFunctionGenName)
+                .addParameter(
+                    ParameterSpec.builder("notifyCallback", LambdaTypeName.get(null,
+                        listOf(getNotifyParameter(notify)),
+                        Unit::class.asTypeName())
+
+                    ).build())
+                .let {
+                    addNotifyInnerCode(it, notify)
+                    builder.addFunction(it.build())
+                }
+        }
+    }
+
+    private fun addNotifyInnerCode(builder: FunSpec.Builder, notify: NotifyStruct) {
+    }
+
+    private fun getNotifyParameter(notify: NotifyStruct): ParameterSpec {
+        return ParameterSpec.builder("", ClassName(notify.notifyPackage, notify.notifySimpleName)).build()
     }
 }
