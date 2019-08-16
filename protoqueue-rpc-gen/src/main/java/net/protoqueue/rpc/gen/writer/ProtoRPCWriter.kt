@@ -64,6 +64,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     //service请求应答内部实现
     private fun addRequestInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
         val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+        val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
         val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
         builder.addCode(buildCodeBlock {
             //val functionName = "batchGetUserBasicInfo"
@@ -71,7 +72,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //return suspendCancellableCoroutine { continuation ->
             addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
-            addStatement(""" %T.send(serviceName, functionName, %T.toByteArray(req), { serverName, funcName, data ->""",
+            addStatement(""" %T.send(serviceName, functionName, %T.toByteArray(req),
+                | { serviceName, funcName, data ->""".trimMargin(),
                 RPCApi::class, messageNanoClassName)
             //val res = GetUserBasicInfoRes.parseFrom(data)
             addStatement(""" val res = %T.parseFrom(data)""",
@@ -79,9 +81,9 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //continuation.resume(res)
             addStatement(""" continuation.resume(res)""")
             //}, { sdkResCode, srvResCode ->
-            addStatement(""" }, {sdkResCode, srvResCode ->""")
+            addStatement(""" }, { sdkResCode, srvResCode ->""")
             //    continuation.resumeWithException(RPCError(sdkResCode, srvResCode))
-            addStatement("""  continuation.resumeWithException(%T(sdkResCode, srvResCode))""", RPCError::class)
+            addStatement("""  continuation.%M(%T(sdkResCode, srvResCode))""", resumeWithException, RPCError::class)
             //           }
             addStatement(" }")
             //           )
@@ -130,6 +132,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""val notify = %T.parseFrom(data)""", ClassName(func.reqTypePackage, func.reqTypeSimpleName))
             //                   handler(notify)
             addStatement("""handler(notify)""")
+            addStatement("""}""")
             endControlFlow()
         })
     }
