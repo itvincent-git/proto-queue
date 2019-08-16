@@ -8,8 +8,8 @@ package net.protoqueue.rpc.gen
  *
  */
 data class FunctionStruct(
-    val funName: String, val reqType: String, val rspType: String, val reqTypeClass: TypeClass?,
-    val rspTypeClass: TypeClass?
+    val funName: String, val reqType: String, val rspType: String, val reqTypeClass: TypeClass? = null,
+    val rspTypeClass: TypeClass? = null
 ) {
     val reqTypePackage: String
     val reqTypeSimpleName: String
