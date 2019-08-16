@@ -3,12 +3,10 @@ package net.jbridge.compiler.writer
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.buildCodeBlock
 import net.protoqueue.rpc.gen.FunctionStruct
 import net.protoqueue.rpc.gen.NotifyStruct
@@ -21,8 +19,9 @@ import java.io.File
  * 生成RPC协议类
  * Created by zhongyongsheng on 2018/4/14.
  */
-class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) : BaseWriter(serviceStruct, outputDir
-) {
+class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) :
+    BaseWriter(serviceStruct.serviceClassName, outputDir
+    ) {
 
     override fun createTypeSpecBuilder(): TypeSpec.Builder {
         val builder = TypeSpec.objectBuilder(serviceStruct.serviceClassName)
@@ -30,6 +29,11 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
         addRequestFun(builder)
         addNotifyFun(builder)
         return builder
+    }
+
+    override fun createFileProperty(): PropertySpec.Builder {
+        return PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE)
+            .initializer("%S", serviceStruct.serviceName)
     }
 
     // private const val serviceName = "WhSvcUserService"
@@ -90,22 +94,22 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
 
     //service注册接收通知的方法
     private fun addNotifyFun(builder: TypeSpec.Builder) {
-        for (notify in serviceStruct.notifyList) {
-            /**
-             * fun subscribeUserFreezeNotify(notifyCallback: (UserFreezeNotifyInfo) -> Unit) {
-             */
-            FunSpec.builder(notify.notifyFunctionGenName)
-                .addParameter(
-                    ParameterSpec.builder("notifyCallback", LambdaTypeName.get(null,
-                        listOf(getNotifyParameter(notify)),
-                        Unit::class.asTypeName())
-
-                    ).build())
-                .let {
-                    addNotifyInnerCode(it, notify)
-                    builder.addFunction(it.build())
-                }
-        }
+//        for (notify in serviceStruct.notifyList) {
+//            /**
+//             * fun subscribeUserFreezeNotify(notifyCallback: (UserFreezeNotifyInfo) -> Unit) {
+//             */
+//            FunSpec.builder(notify.notifyFunctionGenName)
+//                .addParameter(
+//                    ParameterSpec.builder("notifyCallback", LambdaTypeName.get(null,
+//                        listOf(getNotifyParameter(notify)),
+//                        Unit::class.asTypeName())
+//
+//                    ).build())
+//                .let {
+//                    addNotifyInnerCode(it, notify)
+//                    builder.addFunction(it.build())
+//                }
+//        }
     }
 
     private fun addNotifyInnerCode(builder: FunSpec.Builder, notify: NotifyStruct) {
