@@ -63,10 +63,6 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
 
     //service请求应答内部实现
     private fun addRequestInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
-        val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
-        val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
-        val resume = MemberName("kotlin.coroutines", "resume")
-        val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
         builder.addCode(buildCodeBlock {
             //val functionName = "batchGetUserBasicInfo"
             addStatement("""val functionName = %S""", func.funName)
@@ -140,5 +136,12 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
 
     private fun getHandlerParameter(func: FunctionStruct): ParameterSpec {
         return ParameterSpec.builder("", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build()
+    }
+
+    companion object {
+        val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+        val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
+        val resume = MemberName("kotlin.coroutines", "resume")
+        val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
     }
 }
