@@ -65,6 +65,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     private fun addRequestInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
         val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
         val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
+        val resume = MemberName("kotlin.coroutines", "resume")
         val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
         builder.addCode(buildCodeBlock {
             //val functionName = "batchGetUserBasicInfo"
@@ -79,7 +80,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement(""" val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
             //continuation.resume(res)
-            addStatement(""" continuation.resume(res)""")
+            addStatement(""" continuation.%M(res)""", resume)
             //}, { sdkResCode, srvResCode ->
             addStatement(""" }, { sdkResCode, srvResCode ->""")
             //    continuation.resumeWithException(RPCError(sdkResCode, srvResCode))
@@ -113,13 +114,13 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                         ClassName(func.rspTypePackage, func.rspTypeSimpleName).copy(nullable = true))
                     ).build())
                 .let {
-                    addNotifyInnerCode(it, func)
+                    addHandlerInnerCode(it, func)
                     builder.addFunction(it.build())
                 }
         }
     }
 
-    private fun addNotifyInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
+    private fun addHandlerInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
         builder.addCode(buildCodeBlock {
             //val subscribeFuncName = "userFreezeNotify"
             addStatement("""val subscribeFuncName = %S""", func.funName)
@@ -127,7 +128,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""RPCApi.subscribe(serviceName, subscribeFuncName) { _, functionName, data ->""",
                 RPCApi::class)
             //               if (functionName == subscribeFuncName) {
-            beginControlFlow("""if (functionName == subscribeFuncName) """)
+            beginControlFlow("""if (functionName == subscribeFuncName)""")
             //                   val notify = UserFreezeNotifyInfo.parseFrom(data)
             addStatement("""val notify = %T.parseFrom(data)""", ClassName(func.reqTypePackage, func.reqTypeSimpleName))
             //                   handler(notify)
