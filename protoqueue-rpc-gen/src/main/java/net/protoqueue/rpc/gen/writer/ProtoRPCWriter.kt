@@ -15,7 +15,7 @@ import net.protoqueue.rpc.gen.ServiceStruct
 import java.io.File
 
 /**
- * 生成XXXProtoRPC
+ * 生成RPC协议类
  * Created by zhongyongsheng on 2018/4/14.
  */
 class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWriter(serviceStruct, outputDir
@@ -30,7 +30,6 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
         return builder
     }
 
-    //
     // private const val serviceName = "WhSvcUserService"
     private fun addServiceNameField(builder: TypeSpec.Builder) {
         val property = PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE)
@@ -54,21 +53,10 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
                     addRequestInnerCode(it, func)
                     builder.addFunction(it.build())
                 }
-//                .addModifiers(Modifier.PUBLIC)
-//                .addParameter(ParameterSpec.builder(
-//                    createClassName("net.urigo.runtime", "UriGoParameter"), "parameter").build())
-//                .addParameter(ParameterSpec.builder(
-//                    createClassName("android.content", "Context"), "context").build())
-//                .apply {
-//                    for (parameter in data.parameterList) {
-//                        if (!parameter.isContext) createDispatchSetParameterBlock(this, parameter)
-//                    }
-//                    createDispatchInvokeModuleBlock(this)
-//                    builder.addMethod(this.build())
-//                }
         }
     }
 
+    //service请求应答内部实现
     private fun addRequestInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
         val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
         val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
@@ -97,34 +85,4 @@ class ProtoRPCWriter(val serviceStruct: ServiceStruct, outputDir: File) : BaseWr
             addStatement("}")
         })
     }
-//
-//    //fun dispatcher > java.lang.String msg = parameter.getString("msg");
-//    private fun createDispatchSetParameterBlock(builder: MethodSpec.Builder, parameter: UriRouteParameter) {
-//        builder.addCode(
-//            CodeBlock.builder()
-//                    .add("\$L \$L = parameter.\$L(\$S);\n", parameter.typeName, parameter.name, parameter.getMethod, parameter.name)
-//            .build())
-//    }
-//
-//    //fun dispatcher > _module.showToast(context, msg, duration);
-//    private fun createDispatchInvokeModuleBlock(builder: MethodSpec.Builder) {
-//        builder.addCode(
-//                CodeBlock.builder()
-//                        .add("\$L.\$L(\$L);\n", fieldName, data.methodElement.simpleName,
-//                                data.parameterList.joinToString {
-//                                    if (it.isContext) return@joinToString "context" else it.name
-//                                })
-//                        .build())
-//    }
-//
-//    //fun route()
-//    private fun addRouteMethod(builder: TypeSpec.Builder) {
-//        MethodSpec.methodBuilder("route")
-//                .addModifiers(Modifier.PUBLIC)
-//                .returns(ClassName.get(String::class.java))
-//                .addStatement("return \$S", data.route)
-//                .apply {
-//                    builder.addMethod(this.build())
-//                }
-//    }
 }
