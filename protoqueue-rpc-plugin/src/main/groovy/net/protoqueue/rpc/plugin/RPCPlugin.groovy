@@ -1,4 +1,4 @@
-package net.urigo.plugin
+package net.protoqueue.rpc.plugin
 
 
 import com.android.build.gradle.AppPlugin
@@ -20,11 +20,11 @@ class RPCPlugin implements Plugin<Project> {
         }
     }
 
-    static void init(Project project, RegisterTransform transformImpl) {
+//    static void init(Project project, RegisterTransform transformImpl) {
 //        UriGoConfiguration config = project.extensions.findByName(EXT_NAME) as UriGoConfiguration
 //        config.project = project
 //        config.convertConfig()
 //        transformImpl.config = config
 //        println("UriGoConfiguration init $config")
-    }
+//    }
 }
