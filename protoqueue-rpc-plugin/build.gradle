@@ -1,3 +1,5 @@
+import jdk.internal.dynalink.linker.LinkerServices
+
 apply plugin: 'java-library'
 apply plugin: 'groovy'
 apply plugin: 'maven'
@@ -13,6 +15,7 @@ dependencies {
     api 'com.android.tools.build:gradle:3.1.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.ow2.asm:asm:7.0"
+    implementation project(":protoqueue-rpc-cmd")
 }
 
 compileGroovy {
