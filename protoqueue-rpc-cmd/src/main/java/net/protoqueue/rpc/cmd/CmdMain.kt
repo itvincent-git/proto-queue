@@ -2,7 +2,6 @@ package net.protoqueue.rpc.cmd
 
 import net.protoqueue.rpc.desc.DescFileReader
 import net.protoqueue.rpc.gen.GenApi
-import java.io.File
 
 /**
  * Created by zhongyongsheng on 2019-08-13.
@@ -12,13 +11,12 @@ class CmdMain {
     private data class Args(var descPath: String, var outDir: String, var outPackageName: String)
 
     fun run(param: Array<String>) {
-        /**
-         * 如果开发完成，打开下面注释
+
 
         val args = param.getArgsFromParams()
         if (args == null) {
-        showUsage()
-        return
+            showUsage()
+            return
         }
         //描述文件路径
         val descPath = args.descPath
@@ -26,12 +24,11 @@ class CmdMain {
         val outFilePath = args.outDir
         //输出包名
         val outPackageName = args.outPackageName
-         */
 
         //如果开发完成，注释这些代码
-        val descPath = File("proto.desc").absolutePath
-        val outFilePath = System.getProperty("user.dir") + File.separator + "output" + File.separator
-        val outPackageName = "com.woohoo.app.common.protocol.rpc"
+//        val descPath = File("proto.desc").absolutePath
+//        val outFilePath = System.getProperty("user.dir") + File.separator + "output" + File.separator
+//        val outPackageName = "com.woohoo.app.common.protocol.rpc"
         //
         DescFileReader(descPath).readFile().getServiceList().forEach {
             GenApi.generateProtoFile(it, outFilePath)
