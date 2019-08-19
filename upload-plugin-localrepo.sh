@@ -1,0 +1,1 @@
+./gradlew -p protoqueue-rpc-plugin clean build uploadArchives --stacktrace

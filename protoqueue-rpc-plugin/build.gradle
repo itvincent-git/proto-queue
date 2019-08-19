@@ -34,7 +34,7 @@ uploadArchives {
     repositories.mavenDeployer {
         //add your own local repo in local.properties like : local.repo.url=/Users/vincent/Documents/Develop/gityy/urigo/localrepo
         repository(url: uri(localProp.get('local.repo.url') ?: ""))
-        pom.groupId = 'net.protoqueue.rpc'
+        pom.groupId = 'net.protoqueue'
         pom.artifactId = 'protoqueue-rpc-plugin'
         pom.version = gradleProp.getProperty('version')
     }
@@ -84,7 +84,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId "$group_id"
-            artifactId 'protoqueue-plugin'
+            artifactId 'protoqueue-rpc-plugin'
             version "$release_version"
             from components.java
             sourceSets {
