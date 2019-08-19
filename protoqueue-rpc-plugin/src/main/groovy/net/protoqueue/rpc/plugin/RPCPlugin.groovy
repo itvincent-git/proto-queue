@@ -1,30 +1,30 @@
 package net.protoqueue.rpc.plugin
 
-
-import com.android.build.gradle.AppPlugin
+import net.protoqueue.rpc.cmd.CmdMain
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.JavaExec
 
 /**
  *
  */
 class RPCPlugin implements Plugin<Project> {
-    public static final String EXT_NAME = 'protoquerpc'
+    public static final String EXT_NAME = 'genProtocols'
+
+    class RPCExtension {
+        String inputDesc;
+        String outDir;
+        String outPackage;
+    }
 
     @Override
     void apply(Project project) {
-        println("project(:${project.name}) apply net.protoqueue.rpc.plugin")
-        def isApp = project.plugins.hasPlugin(AppPlugin)
-        //project.extensions.create(EXT_NAME, UriGoConfiguration)
-        if (isApp) {
+        def extension = project.extensions.create('protoqueueRpc', RPCExtension)
+        project.task(EXT_NAME, group: "exshell", description: "生成PB协议相关", type: JavaExec) << {
+            def inputFile = extension.inputDesc
+            def outDir = extension.outDir
+            def outPackage = extension.outPackage
+            new CmdMain().doRun(inputFile, outDir, outPackage)
         }
     }
-
-//    static void init(Project project, RegisterTransform transformImpl) {
-//        UriGoConfiguration config = project.extensions.findByName(EXT_NAME) as UriGoConfiguration
-//        config.project = project
-//        config.convertConfig()
-//        transformImpl.config = config
-//        println("UriGoConfiguration init $config")
-//    }
 }
