@@ -11,7 +11,7 @@ import org.gradle.api.tasks.JavaExec
 class RPCPlugin implements Plugin<Project> {
     public static final String EXT_NAME = 'genProtocols'
 
-    class RPCExtension {
+    static class RPCExtension {
         String inputDesc;
         String outDir;
         String outPackage;
