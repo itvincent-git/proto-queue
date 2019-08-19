@@ -4,6 +4,8 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'org.jetbrains.kotlin.jvm'
 
+//apply plugin: 'net.protoqueue.rpc.plugin'
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
