@@ -20,7 +20,7 @@ class RPCPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         def extension = project.extensions.create('protoqueueRpc', RPCExtension)
-        project.task(EXT_NAME, group: "exshell", description: "生成PB协议相关", type: JavaExec) << {
+        project.task(EXT_NAME, group: "exshell", description: "生成PB协议相关").doLast {
             def inputFile = extension.inputDesc
             def outDir = extension.outDir
             def outPackage = extension.outPackage
