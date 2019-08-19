@@ -45,7 +45,7 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
         classpath 'net.researchgate:gradle-release:2.4.1' ////release插件for private
         classpath 'digital.wup:android-maven-publish:3.2.0'//android aar plugin
-//        classpath 'net.protoqueue:protoqueue-rpc-plugin:0.2.3'
+//        classpath 'net.protoqueue:protoqueue-rpc-plugin:0.2.5'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
