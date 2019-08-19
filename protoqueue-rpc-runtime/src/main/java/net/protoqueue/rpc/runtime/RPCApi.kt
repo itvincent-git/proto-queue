@@ -1,11 +1,12 @@
 package net.protoqueue.rpc.gen
 
 /**
- * //todo only test, must remove
+ * RPCApi
+ * 使用前需要先调用initialize()方法，自定义adapter
  * Created by zhongyongsheng on 2019-08-13.
  */
 object RPCApi {
-    internal var adapter: RPCAdapter? = null
+    private var adapter: RPCAdapter? = null
     fun initialize(_adapter: RPCAdapter) {
         adapter = _adapter
     }
@@ -25,8 +26,17 @@ object RPCApi {
     }
 }
 
+/**
+ * 异常信息
+ */
 class RPCError : Exception {
+    /**
+     * 客户端sdk的错误码
+     */
     var sdkResCode: Int? = null
+    /**
+     * 服务端的错误码
+     */
     var srvResCode: Int? = null
 
     constructor(message: String, ex: Throwable?) : super(message, ex) {}
@@ -65,6 +75,9 @@ typealias RPCNotifyReceiver = (
     data: ByteArray
 ) -> Unit
 
+/**
+ * 实现接口，调用的yyservicesdk的方法
+ */
 interface RPCAdapter {
     fun send(
         serviceName: String, functionName: String, bytes: ByteArray, parameter: RPCParameter? = null,
