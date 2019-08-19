@@ -20,15 +20,18 @@ buildscript {
         group_id = 'net.protoqueue'
     }
     repositories {
-//        try {
-//            Properties localProp = new Properties()
-//            localProp.load(project.rootProject.file('local.properties').newDataInputStream())
-//            maven {
-//                url localProp.getProperty("local.repo.url")
-//            }
-//        } catch (Exception e) {
-//            println("read local.preperties error")
-//        }
+        try {
+            Properties localProp = new Properties()
+            localProp.load(project.rootProject.file('local.properties').newDataInputStream())
+            maven {
+                url localProp.getProperty("local.repo.url")
+            }
+        } catch (Exception e) {
+            println("read local.preperties error")
+        }
+        maven {
+            url "file://$rootDir/localrepo"
+        }
         maven {
             url "http://repo.yypm.com:8181/nexus/content/groups/public"
         }////公司内部maven地址

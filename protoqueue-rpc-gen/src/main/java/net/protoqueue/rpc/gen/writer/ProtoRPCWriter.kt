@@ -83,9 +83,12 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement(""" continuation.%M(%T(res, null))""", resume, RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             addStatement(""" }, { sdkResCode, srvResCode ->""")
-            //    continuation.resume(RPCResponse(null, RPCError(sdkResCode, srvResCode)))
-            addStatement("""  continuation.%M(%T(null, %T(sdkResCode, srvResCode)))""", resume,
-                RPCResponse::class, RPCError::class)
+            //    continuation.resume(RPCResponse(null as GetUserBasicInfoRes, RPCError(sdkResCode, srvResCode)))
+            addStatement("""  continuation.%M(%T(null as %T, %T(sdkResCode, srvResCode)))""",
+                resume,
+                RPCResponse::class.asClassName(),
+                ClassName(func.rspTypePackage, func.rspTypeSimpleName),
+                RPCError::class.asClassName())
             //           }
             addStatement(" }")
             //           )
