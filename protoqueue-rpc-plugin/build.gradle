@@ -23,6 +23,12 @@ compileGroovy {
     dependsOn tasks.getByPath("compileKotlin")
     classpath += files(compileKotlin.destinationDir)
 }
+//
+//protoqueueRpc{
+//    inputDesc "xxx"
+//    outDir "zz"
+//    outPackage "ccc"
+//}
 
 Properties localProp = new Properties()
 try {
