@@ -79,15 +79,14 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //val res = GetUserBasicInfoRes.parseFrom(data)
             addStatement(""" val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
-            //continuation.resume(RPCResponse(res, null))
-            addStatement(""" continuation.%M(%T(res, null))""", resume, RPCResponse::class)
+            //continuation.resume(RPCResponse(res))
+            addStatement(""" continuation.%M(%T(res))""", resume, RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             addStatement(""" }, { sdkResCode, srvResCode ->""")
-            //    continuation.resume(RPCResponse(null as GetUserBasicInfoRes, RPCError(sdkResCode, srvResCode)))
-            addStatement("""  continuation.%M(%T(null as %T, %T(sdkResCode, srvResCode)))""",
+            //    continuation.resume(RPCResponse(error = RPCError(sdkResCode, srvResCode)))
+            addStatement("""  continuation.%M(%T(error = %T(sdkResCode, srvResCode)))""",
                 resume,
                 RPCResponse::class.asClassName(),
-                ClassName(func.rspTypePackage, func.rspTypeSimpleName),
                 RPCError::class.asClassName())
             //           }
             addStatement(" }")
