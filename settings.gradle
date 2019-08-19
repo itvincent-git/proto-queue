@@ -1,1 +1,2 @@
-include ':protoqueue-rpc-gen', ':protoqueue-rpc-desc', ':protoqueue-rpc-cmd', ':protoqueue-rpc-as', ':protoqueue-rpc-runtime'
+include ':protoqueue-rpc-gen', ':protoqueue-rpc-desc', ':protoqueue-rpc-cmd', ':protoqueue-rpc-as',
+        ':protoqueue-rpc-runtime', ':protoqueue-rpc-plugin'

@@ -1,0 +1,117 @@
+apply plugin: 'java-library'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api 'com.android.tools.build:gradle:3.1.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.ow2.asm:asm:7.0"
+}
+
+compileGroovy {
+    dependsOn tasks.getByPath("compileKotlin")
+    classpath += files(compileKotlin.destinationDir)
+}
+
+Properties localProp = new Properties()
+try {
+    localProp.load(project.rootProject.file('local.properties').newDataInputStream())
+} catch (Exception e) {}
+
+Properties gradleProp = new Properties()
+try {
+    gradleProp.load(project.rootProject.file('gradle.properties').newDataInputStream())
+} catch (Exception e) {}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        //add your own local repo in local.properties like : local.repo.url=/Users/vincent/Documents/Develop/gityy/urigo/localrepo
+        repository(url: uri(localProp.get('local.repo.url') ?: ""))
+        pom.groupId = 'net.protoqueue.rpc'
+        pom.artifactId = 'protoqueue-rpc-plugin'
+        pom.version = gradleProp.getProperty('version')
+    }
+}
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'net.researchgate.release'
+release {
+    failOnUnversionedFiles = false
+    failOnCommitNeeded = false
+    failOnUpdateNeeded = false
+    failOnPublishNeeded = false
+    failOnSnapshotDependencies = false
+    buildTasks = ['publish'] ////定义发布时该执行哪个task
+    versionPropertyFile = '../gradle.properties'
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+            : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+def getSnapshotRepositoryUrl() {
+    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+            : "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava ///若包含图片等资源改为allSource
+    classifier = 'sources'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId "$group_id"
+            artifactId 'protoqueue-plugin'
+            version "$release_version"
+            from components.java
+            sourceSets {
+                main {
+                    java {
+                        include '**/*.java'
+                        include '**/*.kt'
+                    }
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username = getRepositoryUsername()
+                password = getRepositoryPassword()
+            }
+
+            if(isReleaseBuild()) {
+                url getReleaseRepositoryUrl()
+            } else {
+                url getSnapshotRepositoryUrl()
+            }
+        }
+    }
+}
