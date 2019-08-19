@@ -1,5 +1,7 @@
 package net.protoqueue.rpc.gen
 
+import net.protoqueue.rpc.runtime.RPCError
+
 /**
  * RPCApi
  * 使用前需要先调用initialize()方法，自定义adapter
@@ -23,32 +25,6 @@ object RPCApi {
 
     fun subscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver) {
         adapter?.subscribe(serviceName, functionName, receiver)
-    }
-}
-
-/**
- * 异常信息
- */
-class RPCError : Exception {
-    /**
-     * 客户端sdk的错误码
-     */
-    var sdkResCode: Int? = null
-    /**
-     * 服务端的错误码
-     */
-    var srvResCode: Int? = null
-
-    constructor(message: String, ex: Throwable?) : super(message, ex) {}
-    constructor(message: String) : super(message) {}
-    constructor(ex: Throwable) : super(ex) {}
-    constructor(_sdkResCode: Int, _srvResCode: Int) : super() {
-        sdkResCode = _sdkResCode
-        srvResCode = _srvResCode
-    }
-
-    override fun toString(): String {
-        return "RPCError(sdkResCode=$sdkResCode, srvResCode=$srvResCode)"
     }
 }
 

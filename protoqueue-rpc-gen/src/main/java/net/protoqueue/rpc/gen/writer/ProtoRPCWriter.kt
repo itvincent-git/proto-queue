@@ -8,11 +8,14 @@ import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.buildCodeBlock
 import net.protoqueue.rpc.gen.FunctionStruct
 import net.protoqueue.rpc.gen.RPCApi
-import net.protoqueue.rpc.gen.RPCError
+import net.protoqueue.rpc.runtime.RPCError
 import net.protoqueue.rpc.gen.ServiceStruct
+import net.protoqueue.rpc.runtime.RPCResponse
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
 
 /**
@@ -47,13 +50,14 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     private fun addRequestFun(builder: TypeSpec.Builder) {
         for (func in serviceStruct.funList) {
             /**
-             * suspend fun batchGetUserBasicInfo(req: WhSvcUser.GetUserBasicInfoReq): WhSvcUser.GetUserBasicInfoRes
+             * suspend fun batchGetUserBasicInfo(req: WhSvcUser.GetUserBasicInfoReq): RPCResponse<GetUserBasicInfoRes>
              */
             FunSpec.builder(func.funName)
                 .addModifiers(KModifier.SUSPEND)
                 .addParameter(
                     ParameterSpec.builder("req", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build())
-                .returns(ClassName(func.rspTypePackage, func.rspTypeSimpleName))
+                .returns(RPCResponse::class.asClassName().parameterizedBy(
+                    ClassName(func.rspTypePackage, func.rspTypeSimpleName)))
                 .let {
                     addRequestInnerCode(it, func)
                     builder.addFunction(it.build())
@@ -75,12 +79,13 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //val res = GetUserBasicInfoRes.parseFrom(data)
             addStatement(""" val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
-            //continuation.resume(res)
-            addStatement(""" continuation.%M(res)""", resume)
+            //continuation.resume(RPCResponse(res, null))
+            addStatement(""" continuation.%M(%T(res, null))""", resume, RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             addStatement(""" }, { sdkResCode, srvResCode ->""")
-            //    continuation.resumeWithException(RPCError(sdkResCode, srvResCode))
-            addStatement("""  continuation.%M(%T(sdkResCode, srvResCode))""", resumeWithException, RPCError::class)
+            //    continuation.resume(RPCResponse(null, RPCError(sdkResCode, srvResCode)))
+            addStatement("""  continuation.%M(%T(null, %T(sdkResCode, srvResCode)))""", resume,
+                RPCResponse::class, RPCError::class)
             //           }
             addStatement(" }")
             //           )
