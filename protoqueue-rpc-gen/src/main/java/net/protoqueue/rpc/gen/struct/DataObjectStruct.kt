@@ -25,10 +25,22 @@ class DataObjectStruct(val messageType: String) {
 
 class DataFieldStruct(val fieldName: String)
 
-open class DataFieldType(val fieldTypeClass: KClass<*>?, val fieldType: String?)
+open class DataFieldType protected constructor(
+    val fieldTypeClass: KClass<*>?, val fieldType: String?, val nullable: Boolean
+) {
+    companion object {
+        fun get(fieldTypeClass: KClass<*>, nullable: Boolean): DataFieldType {
+            return DataFieldType(fieldTypeClass, null, nullable)
+        }
 
-class DataFieldParameterType(fieldTypeClass: KClass<*>?, fieldType: String?) :
-    DataFieldType(fieldTypeClass, fieldType) {
+        fun get(fieldType: String, nullable: Boolean): DataFieldType {
+            return DataFieldType(null, fieldType, nullable)
+        }
+    }
+}
+
+class DataFieldParameterType private constructor(fieldTypeClass: KClass<*>?, fieldType: String?, nullable: Boolean) :
+    DataFieldType(fieldTypeClass, fieldType, nullable) {
     val parameterTypes = mutableListOf<DataFieldType>()
 
     fun addParameterTypes(vararg types: DataFieldType) = apply {
@@ -36,8 +48,14 @@ class DataFieldParameterType(fieldTypeClass: KClass<*>?, fieldType: String?) :
     }
 
     companion object {
-        fun get(fieldTypeClass: KClass<*>?, fieldType: String?, vararg types: DataFieldType): DataFieldParameterType {
-            return DataFieldParameterType(fieldTypeClass, fieldType).addParameterTypes(*types)
+        fun get(fieldTypeClass: KClass<*>, nullable: Boolean, vararg types: DataFieldType):
+            DataFieldParameterType {
+            return DataFieldParameterType(fieldTypeClass, null, nullable).addParameterTypes(*types)
+        }
+
+        fun get(fieldType: String, nullable: Boolean, vararg types: DataFieldType):
+            DataFieldParameterType {
+            return DataFieldParameterType(null, fieldType, nullable).addParameterTypes(*types)
         }
     }
 }
