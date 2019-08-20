@@ -1,10 +1,10 @@
 package net.protoqueue.rpc.desc
 
 import com.google.protobuf.DescriptorProtos
+import net.protoqueue.rpc.desc.DescUtil.getClassNameFromFdpName
 import net.protoqueue.rpc.gen.struct.FunctionStruct
 import net.protoqueue.rpc.gen.struct.ServiceStruct
 import java.io.File
-import java.lang.StringBuilder
 
 /**
  *
@@ -13,13 +13,13 @@ import java.lang.StringBuilder
  * @author linmin1 on 2019-08-14.
  *
  */
-class DescFileReader(private val descFilePath: String) {
+class DescFileServiceReader(private val descFilePath: String) {
     private val typeMap = mutableMapOf<String, String>()
 
     private val serviceList = mutableListOf<ServiceStruct>()
     private var curService: ServiceStruct? = null
 
-    fun readFile(): DescFileReader {
+    fun readFile(): DescFileServiceReader {
         val fileDescriptorSet = File(descFilePath).inputStream().use {
             DescriptorProtos.FileDescriptorSet.parseFrom(it)
         }
@@ -77,14 +77,6 @@ class DescFileReader(private val descFilePath: String) {
 //        }
     }
 
-    private fun DescriptorProtos.FileDescriptorProto.readPackageName(): String {
-        return if (this.options.hasJavaPackage()) {
-            this.options.javaPackage
-        } else {
-            this.`package`
-        } + ".nano"
-    }
-
     private fun DescriptorProtos.MethodDescriptorProto.convert(): FunctionStruct {
         return FunctionStruct(this.name, typeMap[this.inputType] ?: "", typeMap[this
             .outputType] ?: "")
@@ -110,22 +102,4 @@ class DescFileReader(private val descFilePath: String) {
 //            NotifyStruct(it.name, typeMap[it.inputType] ?: "")
 //        } ?: emptyList()
 //    }
-
-    /**
-     * 获取默认类名
-     */
-    private fun getClassNameFromFdpName(fdpName: String): String {
-        val name = fdpName.replace(".proto", "")
-        val result = StringBuilder()
-        val a = name.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        for (s in a) {
-            if (!name.contains("_")) {
-                result.append(s)
-                continue
-            }
-            result.append(s.substring(0, 1).toUpperCase())
-            result.append(s.substring(1).toLowerCase())
-        }
-        return result.toString()
-    }
 }

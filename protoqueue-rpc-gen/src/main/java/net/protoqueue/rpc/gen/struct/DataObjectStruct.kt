@@ -9,11 +9,19 @@ import kotlin.reflect.KClass
 class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: String,
     /*放置转换类的文件名*/val fileName: String
 ) {
+    val enums = mutableListOf<EnumStruct>()
     val objects = mutableListOf<DataObjectStruct>()
 
     override fun toString(): String {
         return "DataObjectFileStruct(filePackage='$filePackage', fileName='$fileName', objects=$objects)"
     }
+}
+
+class EnumStruct(/*数组名*/val enumsName: String) {
+    /**
+     * 数组原生名以及默认值
+     */
+    val enumFields = mutableListOf<Pair<String, Int>>()
 }
 
 class DataObjectStruct(val messageType: String) {
@@ -23,11 +31,15 @@ class DataObjectStruct(val messageType: String) {
     }
 }
 
-class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
+data class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
 
 open class DataFieldType protected constructor(
     val fieldTypeClass: KClass<*>?, val fieldType: String?, val nullable: Boolean
 ) {
+    override fun toString(): String {
+        return "DataFieldType(fieldTypeClass='$fieldTypeClass', fieldType=$fieldType), nullable=$nullable) "
+    }
+
     companion object {
         /*fun get(fieldTypeClass: KClass<*>, nullable: Boolean): DataFieldType {
             return DataFieldType(fieldTypeClass, null, nullable)
