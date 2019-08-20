@@ -1,5 +1,7 @@
 package net.protoqueue.rpc.gen.struct
 
+import kotlin.reflect.KClass
+
 /**
  * PB Message的转换类
  * Created by zhongyongsheng on 2019-08-20.
@@ -14,4 +16,4 @@ data class DataObjectStruct(val messageType: String) {
     val fields = listOf<DataFieldStruct>()
 }
 
-data class DataFieldStruct(val fieldName: String, val fieldTypeClass: Class<*>?, val fieldType: String?)
+data class DataFieldStruct(val fieldName: String, val fieldTypeClass: KClass<*>?, val fieldType: String?)
