@@ -73,26 +73,31 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //return suspendCancellableCoroutine { continuation ->
             addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
-            addStatement("""    %T.send(serviceName, functionName, %T.toByteArray(req),
-                |{ serviceName, funcName, data ->""".trimMargin(),
+            indent()
+            addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req), { _, _, data ->""",
                 RPCApi::class, messageNanoClassName)
             //val res = GetUserBasicInfoRes.parseFrom(data)
-            addStatement("""            val res = %T.parseFrom(data)""",
+            indent()
+            addStatement("""val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
             //continuation.resume(RPCResponse(res))
-            addStatement("""            continuation.%M(%T(res))""", resume, RPCResponse::class)
+            addStatement("""continuation.%M(%T(res))""", resume, RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
-            addStatement("""        }, { sdkResCode, srvResCode ->""")
+            unindent()
+            addStatement("""}, { sdkResCode, srvResCode ->""")
             //    continuation.resume(RPCResponse(error = RPCError(sdkResCode, srvResCode)))
-            addStatement("""            continuation.%M(%T(error = %T(sdkResCode, srvResCode)))""",
+            indent()
+            addStatement("""continuation.%M(%T(error = %T(sdkResCode, srvResCode)))""",
                 resume,
                 RPCResponse::class.asClassName(),
                 RPCError::class.asClassName())
             //           }
-            addStatement("        }")
+            unindent()
+            addStatement("}")
             //           )
-            addStatement("    )")
+            addStatement(")")
             //       }
+            unindent()
             addStatement("}")
         })
     }
