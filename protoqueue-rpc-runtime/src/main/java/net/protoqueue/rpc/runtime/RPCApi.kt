@@ -1,7 +1,5 @@
 package net.protoqueue.rpc.gen
 
-import net.protoqueue.rpc.runtime.RPCError
-
 /**
  * RPCApi
  * 使用前需要先调用initialize()方法，自定义adapter
@@ -9,22 +7,32 @@ import net.protoqueue.rpc.runtime.RPCError
  */
 object RPCApi {
     private var adapter: RPCAdapter? = null
+
+    /**
+     * 必须先初始化，实现RPCAdapter的方法，才能正常收发数据
+     */
+    @JvmStatic
     fun initialize(_adapter: RPCAdapter) {
         adapter = _adapter
     }
 
-    @Throws(RPCError::class)
     fun send(
-        serviceName: String, functionName: String, bytes: ByteArray,
+        serviceName: String,
+        functionName: String,
+        bytes: ByteArray,
         successCallback: RPCResponseCallback,
         errorCallback: RPCErrorCallback? = null,
         parameter: RPCParameter? = null
     ) {
-        adapter?.send(serviceName, functionName, bytes, parameter, successCallback, errorCallback)
+        adapter?.send(serviceName, functionName, bytes, successCallback, errorCallback, parameter)
     }
 
     fun subscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver) {
         adapter?.subscribe(serviceName, functionName, receiver)
+    }
+
+    fun unsubscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver) {
+        adapter?.unsubscribe(serviceName, functionName, receiver)
     }
 }
 
@@ -55,13 +63,28 @@ typealias RPCNotifyReceiver = (
  * 实现接口，调用的yyservicesdk的方法
  */
 interface RPCAdapter {
+
+    /**
+     * 实现发送数据
+     */
     fun send(
-        serviceName: String, functionName: String, bytes: ByteArray, parameter: RPCParameter? = null,
+        serviceName: String,
+        functionName: String,
+        bytes: ByteArray,
         successCallback: RPCResponseCallback,
-        errorCallback: RPCErrorCallback? = null
+        errorCallback: RPCErrorCallback? = null,
+        parameter: RPCParameter? = null
     )
 
+    /**
+     * 实现监听接收数据
+     */
     fun subscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver)
+
+    /**
+     * 实现取消监听接收数据
+     */
+    fun unsubscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver)
 }
 
 data class RPCParameter(val timeout: Long = 0L)

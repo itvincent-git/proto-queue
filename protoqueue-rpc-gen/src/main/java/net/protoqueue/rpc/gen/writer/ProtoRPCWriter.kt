@@ -16,6 +16,7 @@ import net.protoqueue.rpc.runtime.RPCError
 import net.protoqueue.rpc.gen.struct.ServiceStruct
 import net.protoqueue.rpc.runtime.RPCResponse
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import net.protoqueue.rpc.runtime.RPCHandlerObserver
 import java.io.File
 
 /**
@@ -113,7 +114,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     private fun addHandlerFun(builder: TypeSpec.Builder) {
         for (func in serviceStruct.funList) {
             /**
-             * fun subscribeUserFreezeNotify(handler: (UserFreezeNotifyInfo) -> Unit) {
+             * fun userFreezeNotify(handler: (UserFreezeNotifyInfo) -> Unit): RPCHandlerObserver {
              */
             FunSpec.builder(func.funName)
                 .addParameter(
@@ -121,6 +122,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                         listOf(getHandlerParameter(func)),
                         ClassName(func.rspTypePackage, func.rspTypeSimpleName).copy(nullable = true))
                     ).build())
+                .returns(RPCHandlerObserver::class)
                 .let {
                     addHandlerInnerCode(it, func)
                     builder.addFunction(it.build())
@@ -128,6 +130,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
         }
     }
 
+    //service注册接收通知的方法内部
     private fun addHandlerInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
         builder.addCode(buildCodeBlock {
             //val subscribeFuncName = "userFreezeNotify"
@@ -145,6 +148,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             unindent()
             addStatement("""}""")
             endControlFlow()
+            addStatement("""return %T(serviceName, subscribeFuncName, handler)""", RPCHandlerObserver::class)
         })
     }
 
