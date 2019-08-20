@@ -10,10 +10,10 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.buildCodeBlock
-import net.protoqueue.rpc.gen.FunctionStruct
+import net.protoqueue.rpc.gen.struct.FunctionStruct
 import net.protoqueue.rpc.gen.RPCApi
 import net.protoqueue.rpc.runtime.RPCError
-import net.protoqueue.rpc.gen.ServiceStruct
+import net.protoqueue.rpc.gen.struct.ServiceStruct
 import net.protoqueue.rpc.runtime.RPCResponse
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File

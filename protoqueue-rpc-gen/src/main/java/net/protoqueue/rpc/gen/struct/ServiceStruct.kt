@@ -1,4 +1,4 @@
-package net.protoqueue.rpc.gen
+package net.protoqueue.rpc.gen.struct
 
 import com.squareup.kotlinpoet.ClassName
 

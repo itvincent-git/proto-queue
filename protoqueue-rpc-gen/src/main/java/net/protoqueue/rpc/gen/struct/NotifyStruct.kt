@@ -1,4 +1,4 @@
-package net.protoqueue.rpc.gen
+package net.protoqueue.rpc.gen.struct
 
 /**
  * 生成通知的结构

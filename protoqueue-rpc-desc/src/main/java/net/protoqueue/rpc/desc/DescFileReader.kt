@@ -1,8 +1,8 @@
 package net.protoqueue.rpc.desc
 
 import com.google.protobuf.DescriptorProtos
-import net.protoqueue.rpc.gen.FunctionStruct
-import net.protoqueue.rpc.gen.ServiceStruct
+import net.protoqueue.rpc.gen.struct.FunctionStruct
+import net.protoqueue.rpc.gen.struct.ServiceStruct
 import java.io.File
 import java.lang.StringBuilder
 

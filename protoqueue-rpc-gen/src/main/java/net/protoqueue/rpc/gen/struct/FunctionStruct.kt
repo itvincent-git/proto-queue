@@ -1,4 +1,4 @@
-package net.protoqueue.rpc.gen
+package net.protoqueue.rpc.gen.struct
 
 /**
  * 生成发送接收服务结构
