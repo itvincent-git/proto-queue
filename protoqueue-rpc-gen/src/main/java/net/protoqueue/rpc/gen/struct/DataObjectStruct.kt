@@ -23,15 +23,15 @@ class DataObjectStruct(val messageType: String) {
     }
 }
 
-class DataFieldStruct(val fieldName: String)
+class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
 
 open class DataFieldType protected constructor(
     val fieldTypeClass: KClass<*>?, val fieldType: String?, val nullable: Boolean
 ) {
     companion object {
-        fun get(fieldTypeClass: KClass<*>, nullable: Boolean): DataFieldType {
+        /*fun get(fieldTypeClass: KClass<*>, nullable: Boolean): DataFieldType {
             return DataFieldType(fieldTypeClass, null, nullable)
-        }
+        }*/
 
         fun get(fieldType: String, nullable: Boolean): DataFieldType {
             return DataFieldType(null, fieldType, nullable)
@@ -48,10 +48,10 @@ class DataFieldParameterType private constructor(fieldTypeClass: KClass<*>?, fie
     }
 
     companion object {
-        fun get(fieldTypeClass: KClass<*>, nullable: Boolean, vararg types: DataFieldType):
+        /*fun get(fieldTypeClass: KClass<*>, nullable: Boolean, vararg types: DataFieldType):
             DataFieldParameterType {
             return DataFieldParameterType(fieldTypeClass, null, nullable).addParameterTypes(*types)
-        }
+        }*/
 
         fun get(fieldType: String, nullable: Boolean, vararg types: DataFieldType):
             DataFieldParameterType {
