@@ -136,11 +136,13 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""RPCApi.subscribe(serviceName, subscribeFuncName) { _, functionName, data ->""",
                 RPCApi::class)
             //               if (functionName == subscribeFuncName) {
+            indent()
             beginControlFlow("""if (functionName == subscribeFuncName)""")
             //                   val notify = UserFreezeNotifyInfo.parseFrom(data)
             addStatement("""val notify = %T.parseFrom(data)""", ClassName(func.reqTypePackage, func.reqTypeSimpleName))
             //                   handler(notify)
             addStatement("""handler(notify)""")
+            unindent()
             addStatement("""}""")
             endControlFlow()
         })
