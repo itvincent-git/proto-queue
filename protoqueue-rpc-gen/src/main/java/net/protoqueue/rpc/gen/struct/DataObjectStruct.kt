@@ -10,10 +10,17 @@ data class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackag
     /*放置转换类的文件名*/val fileName: String
 ) {
     val objects = listOf<DataObjectStruct>()
+
+    override fun toString(): String {
+        return "DataObjectFileStruct(filePackage='$filePackage', fileName='$fileName', objects=$objects)"
+    }
 }
 
 data class DataObjectStruct(val messageType: String) {
     val fields = listOf<DataFieldStruct>()
+    override fun toString(): String {
+        return "DataObjectStruct(messageType='$messageType', fields=$fields)"
+    }
 }
 
 data class DataFieldStruct(val fieldName: String, val fieldTypeClass: KClass<*>?, val fieldType: String?)
