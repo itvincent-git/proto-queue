@@ -6,17 +6,17 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.buildCodeBlock
-import net.protoqueue.rpc.gen.struct.FunctionStruct
 import net.protoqueue.rpc.gen.RPCApi
-import net.protoqueue.rpc.runtime.RPCError
+import net.protoqueue.rpc.gen.struct.FunctionStruct
 import net.protoqueue.rpc.gen.struct.ServiceStruct
-import net.protoqueue.rpc.runtime.RPCResponse
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import net.protoqueue.rpc.runtime.RPCError
 import net.protoqueue.rpc.runtime.RPCHandlerObserver
+import net.protoqueue.rpc.runtime.RPCResponse
 import java.io.File
 
 /**
@@ -135,9 +135,9 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
         builder.addCode(buildCodeBlock {
             //val subscribeFuncName = "userFreezeNotify"
             addStatement("""val subscribeFuncName = %S""", func.funName)
-            //RPCApi.subscribe(serviceName, subscribeFuncName) { _, functionName, data ->
-            addStatement("""RPCApi.subscribe(serviceName, subscribeFuncName) { _, functionName, data ->""",
-                RPCApi::class)
+            //val receiver: RPCNotifyReceiver = { _, functionName, data ->
+            addStatement("""val receiver: %T = { _, functionName, data ->""",
+                ClassName("net.protoqueue.rpc.gen", "RPCNotifyReceiver"))
             //               if (functionName == subscribeFuncName) {
             indent()
             beginControlFlow("""if (functionName == subscribeFuncName)""")
@@ -148,7 +148,10 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             unindent()
             addStatement("""}""")
             endControlFlow()
-            addStatement("""return %T(serviceName, subscribeFuncName, handler)""", RPCHandlerObserver::class)
+            //RPCApi.subscribe(serviceName, subscribeFuncName, receiver)
+            addStatement("""%T.subscribe(serviceName, subscribeFuncName, receiver)""", RPCApi::class)
+            //return RPCHandlerObserver(serviceName, subscribeFuncName, receiver)
+            addStatement("""return %T(serviceName, subscribeFuncName, receiver)""", RPCHandlerObserver::class)
         })
     }
 
