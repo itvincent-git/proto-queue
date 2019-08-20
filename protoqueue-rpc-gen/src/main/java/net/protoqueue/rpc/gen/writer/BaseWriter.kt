@@ -26,6 +26,7 @@ abstract class BaseWriter(
             .addComment("Generate by protoqueue-rpc, don't edit this file please")
             .addProperty(createFileProperty().build())
             .addType(typeSpecBuilder.build())
+            .indent("    ")
             .build()
             .writeTo(outputDir)
     }
