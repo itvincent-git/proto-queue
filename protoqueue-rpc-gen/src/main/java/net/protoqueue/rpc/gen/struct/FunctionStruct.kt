@@ -1,12 +1,15 @@
 package net.protoqueue.rpc.gen.struct
 
 /**
- * 生成发送接收服务结构
+ * 一个rpc接口结构
  * @author linmin1 on 2019-08-14.
  */
 data class FunctionStruct(
-    val funName: String, val reqType: String, val rspType: String, val reqTypeClass: TypeClass? = null,
-    val rspTypeClass: TypeClass? = null
+    /*rpc方法名*/val funName: String,
+    /*rpc方法发送message类型*/val reqType: String,
+    /*rpc方法返回message类型*/val rspType: String,
+              val reqTypeClass: TypeClass? = null,
+              val rspTypeClass: TypeClass? = null
 ) {
     val reqTypePackage: String = reqType.substringBeforeLast(".")
     val reqTypeSimpleName: String = reqType.substringAfterLast(".")

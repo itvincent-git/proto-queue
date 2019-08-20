@@ -1,6 +1,7 @@
 package net.protoqueue.rpc.gen
 
 import net.jbridge.compiler.writer.ProtoRPCWriter
+import net.protoqueue.rpc.gen.struct.DataObjectFileStruct
 import net.protoqueue.rpc.gen.struct.ServiceStruct
 import java.io.File
 
@@ -21,6 +22,10 @@ object GenApi {
         ProtoRPCWriter(serviceStruct, outputDirFile).write()
     }
 
-    fun generateProtoDataObjectFile() {
+    /**
+     * 生成PB Message的转换类
+     */
+    fun generateProtoDataObjectFile(dataObjectFileStruct: DataObjectFileStruct) {
+        println("generateProtoDataObjectFile $dataObjectFileStruct")
     }
 }
