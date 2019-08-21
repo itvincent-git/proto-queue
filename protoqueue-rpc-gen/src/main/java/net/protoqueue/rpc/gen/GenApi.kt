@@ -1,5 +1,6 @@
 package net.protoqueue.rpc.gen
 
+import net.jbridge.compiler.writer.ProtoDataObjectWriter
 import net.jbridge.compiler.writer.ProtoRPCWriter
 import net.protoqueue.rpc.gen.struct.DataObjectFileStruct
 import net.protoqueue.rpc.gen.struct.ServiceStruct
@@ -27,5 +28,9 @@ object GenApi {
      */
     fun generateProtoDataObjectFile(dataObjectFileStruct: DataObjectFileStruct, outputDirPath: String) {
         println("generateProtoDataObjectFile $dataObjectFileStruct")
+
+        val outputDirFile = File(outputDirPath)
+        println("proto data object file output dir:$outputDirFile")
+        ProtoDataObjectWriter(dataObjectFileStruct, outputDirFile).write()
     }
 }
