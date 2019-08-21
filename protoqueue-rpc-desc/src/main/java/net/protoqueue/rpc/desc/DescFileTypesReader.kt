@@ -98,6 +98,7 @@ class DescFileTypesReader(private val descFilePath: String) {
             "TYPE_ENUM" -> "Int"
             else -> throw RuntimeException("${fdp.type.name} now unSupport")
         }
+        var isOriginalType = firstType.isNotEmpty()
         if (firstType.isEmpty()) {
             //复杂类型
             firstType = typeMap[fdp.typeName] ?: ""
@@ -105,10 +106,10 @@ class DescFileTypesReader(private val descFilePath: String) {
         if (firstType.isNotEmpty()) {
             //数组
             if (fdp.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                return DataFieldParameterType.get("List", nullable,
-                    DataFieldType.get(firstType, false))
+                return DataFieldParameterType.get("List", nullable, true,
+                    DataFieldType.get(firstType, false, isOriginalType))
             }
-            return DataFieldType.get(firstType, nullable)
+            return DataFieldType.get(firstType, nullable, isOriginalType)
         }
         //map
         return nestedMap[fdp.typeName.split(".").last()]
@@ -121,7 +122,7 @@ class DescFileTypesReader(private val descFilePath: String) {
             val keyType = convertType(it.fieldList.find { it.name == "key" }!!, emptyMap())
             val valType = convertType(it.fieldList.find { it.name == "value" }!!, emptyMap())
             map[it.name] = DataFieldParameterType.get("Map",
-                false, keyType, valType)
+                false, true, keyType, valType)
         }
         return map
     }
