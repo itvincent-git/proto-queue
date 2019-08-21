@@ -1,6 +1,8 @@
 package net.protoqueue.rpc.cmd
 
+import net.protoqueue.rpc.desc.DescFileServiceReader
 import net.protoqueue.rpc.desc.DescFileTypesReader
+import net.protoqueue.rpc.gen.GenApi
 import java.io.File
 
 /**
@@ -19,11 +21,11 @@ class CmdMain {
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun doRun(descPath: String, outDir: String, outPackageName: String) {
-//        DescFileServiceReader(descPath).readFile().getServiceList().forEach {
-//            GenApi.generateProtoFile(it, outDir)
-//        }
+        DescFileServiceReader(descPath).readFile().getServiceList().forEach {
+            GenApi.generateProtoFile(it, outDir)
+        }
         DescFileTypesReader(descPath).parseFile().dataObjectFileStructs.forEach {
-            println(it)
+            GenApi.generateProtoDataObjectFile(it, outDir)
         }
     }
 
