@@ -60,9 +60,10 @@ class DescFileTypesReader(private val descFilePath: String) {
 
     private fun readFileDescriptor(fdp: DescriptorProtos.FileDescriptorProto): DataObjectFileStruct {
         val packageName = fdp.readPackageName()
+        val outClassName = fdp.readOutClassName()
         val messageTypes = fdp.messageTypeList.map {
             val nestedMap = it.readNestedType()
-            val struct = DataObjectStruct(packageName + "." + it.name)
+            val struct = DataObjectStruct(packageName + "." + outClassName + "." + it.name)
             struct.fields.addAll(it.fieldList.map {
                 DataFieldStruct(it.name, convertType(it, nestedMap))
             })

@@ -37,3 +37,11 @@ public fun DescriptorProtos.FileDescriptorProto.readPackageName(): String {
         this.`package`
     } + ".nano"
 }
+
+fun DescriptorProtos.FileDescriptorProto.readOutClassName(): String {
+    return if (this.options.hasJavaOuterClassname()) {
+        this.options.javaOuterClassname
+    } else {
+        DescUtil.getClassNameFromFdpName(this.name)
+    }
+}
