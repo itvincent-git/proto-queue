@@ -1,9 +1,14 @@
 package net.jbridge.compiler.writer
 
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
+import net.protoqueue.rpc.gen.struct.DataFieldParameterType
+import net.protoqueue.rpc.gen.struct.DataFieldType
 import net.protoqueue.rpc.gen.struct.DataObjectFileStruct
 import net.protoqueue.rpc.gen.struct.DataObjectStruct
 import java.io.File
@@ -29,9 +34,10 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
 
     private fun createDataObjects(builder: FileSpec.Builder) {
         for (dataObjectStruct in dataObjectFileStruct.objects) {
-            TypeSpec.classBuilder(dataObjectStruct.messageTypeSimpleName)
+            TypeSpec.classBuilder(dataObjectStruct.genMessageTypeSimpleName)
                 .apply {
                     createDataObjectFields(this, dataObjectStruct)
+                    createConvertToMessageFunction(this, dataObjectStruct)
                     builder.addType(build())
                 }
         }
@@ -39,12 +45,33 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
 
     private fun createDataObjectFields(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
         for (fieldStruct in dataObjectStruct.fields) {
-            PropertySpec.builder(fieldStruct.fieldName, fieldStruct.fieldType.fieldTypeClassName)
+            PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
                 .mutable()
                 .apply {
                     builder.addProperty(build())
                 }
         }
+    }
+
+    fun getFieldTypeName(type: DataFieldType): TypeName = when (type) {
+        is DataFieldParameterType -> {
+            val parameterTypes = type.parameterTypes.map {
+                it.genFieldTypeClassName
+            }
+            type.genFieldTypeClassName.parameterizedBy(*parameterTypes.toTypedArray())
+        }
+        else -> {
+            type.genFieldTypeClassName
+        }
+    }
+
+    private fun createConvertToMessageFunction(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
+        FunSpec.builder("convertToMessage")
+            .returns(dataObjectStruct.originMessageTypeClassName)
+            .apply {
+
+                builder.addFunction(build())
+            }
     }
 
     companion object {

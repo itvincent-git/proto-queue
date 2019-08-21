@@ -33,7 +33,11 @@ class EnumStruct(/*数组名*/val enumsName: String) {
 class DataObjectStruct(val messageType: String) {
     val fields = mutableListOf<DataFieldStruct>()
     val messageTypePackage: String = messageType.substringBeforeLast(".")
-    val messageTypeSimpleName: String = messageType.substringAfterLast(".") + DO_SURFIX
+    val messageTypeSimpleName: String = messageType.substringAfterLast(".")
+    val genMessageTypeSimpleName: String = messageType.substringAfterLast(".") + DO_SURFIX
+    val genMessageTypeClassName =
+        ClassName(messageTypePackage.substringBeforeLast("."), messageTypeSimpleName + DO_SURFIX)
+    val originMessageTypeClassName = ClassName(messageTypePackage, messageTypeSimpleName)
 
     override fun toString(): String {
         return "DataObjectStruct(messageType='$messageType', fields=$fields)"
@@ -45,12 +49,16 @@ data class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
 open class DataFieldType protected constructor(
     val fieldType: String, val nullable: Boolean, val isOriginalType: Boolean
 ) {
-    val fieldTypeClassName = ClassName
-        .bestGuess(fieldType + if (!isOriginalType) DO_SURFIX else "")
-        .copy(nullable = nullable)
+    val fieldTypePackage: String = fieldType.substringBeforeLast(".")
+    val fieldTypeSimpleName: String = fieldType.substringAfterLast(".")
+    val genFieldTypeClassName =
+        ClassName(fieldTypePackage.substringBeforeLast("."),
+            fieldTypeSimpleName + if (!isOriginalType) DO_SURFIX else "").copy(
+            nullable = nullable)
+    val originFieldTypeClassName = ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)
 
     override fun toString(): String {
-        return "DataFieldType(fieldType='$fieldType', nullable=$nullable, isOriginalType=$isOriginalType, fieldTypeClassName=$fieldTypeClassName)"
+        return "DataFieldType(fieldType='$fieldType', nullable=$nullable, isOriginalType=$isOriginalType"
     }
 
     companion object {
@@ -72,6 +80,10 @@ class DataFieldParameterType private constructor(
 
     fun addParameterTypes(vararg types: DataFieldType) = apply {
         types.forEach { parameterTypes.add(it) }
+    }
+
+    override fun toString(): String {
+        return "DataFieldParameterType(parameterTypes=$parameterTypes) ${super.toString()}"
     }
 
     companion object {

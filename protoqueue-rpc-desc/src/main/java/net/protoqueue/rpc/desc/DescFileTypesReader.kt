@@ -76,7 +76,7 @@ class DescFileTypesReader(private val descFilePath: String) {
             })
             struct
         }
-        return DataObjectFileStruct(packageName + ".dataobject", outClassName).apply {
+        return DataObjectFileStruct(packageName, outClassName).apply {
             this.objects.addAll(messageTypes)
             this.enums.addAll(enumTypes)
         }
@@ -88,14 +88,14 @@ class DescFileTypesReader(private val descFilePath: String) {
     ): DataFieldType {
         val nullable = fdp.label != DescriptorProtos.FieldDescriptorProto.Label.LABEL_REQUIRED
         var firstType = when (fdp.type.name) {
-            "TYPE_INT32" -> "Int"
-            "TYPE_STRING" -> "String"
-            "TYPE_BOOL" -> "Boolean"
-            "TYPE_DOUBLE" -> "Double"
-            "TYPE_INT64" -> "Long"
-            "TYPE_UINT64" -> "Long"
+            "TYPE_INT32" -> "kotlin.Int"
+            "TYPE_STRING" -> "kotlin.String"
+            "TYPE_BOOL" -> "kotlin.Boolean"
+            "TYPE_DOUBLE" -> "kotlin.Double"
+            "TYPE_INT64" -> "kotlin.Long"
+            "TYPE_UINT64" -> "kotlin.Long"
             "TYPE_MESSAGE" -> ""
-            "TYPE_ENUM" -> "Int"
+            "TYPE_ENUM" -> "kotlin.Int"
             else -> throw RuntimeException("${fdp.type.name} now unSupport")
         }
         var isOriginalType = firstType.isNotEmpty()
