@@ -76,7 +76,7 @@ class DescFileTypesReader(private val descFilePath: String) {
             })
             struct
         }
-        return DataObjectFileStruct(packageName, fdp.name).apply {
+        return DataObjectFileStruct(packageName, outClassName).apply {
             this.objects.addAll(messageTypes)
             this.enums.addAll(enumTypes)
         }
