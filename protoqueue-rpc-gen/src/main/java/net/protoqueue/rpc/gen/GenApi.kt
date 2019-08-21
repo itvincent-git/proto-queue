@@ -25,7 +25,7 @@ object GenApi {
     /**
      * 生成PB Message的转换类
      */
-    fun generateProtoDataObjectFile(dataObjectFileStruct: DataObjectFileStruct) {
+    fun generateProtoDataObjectFile(dataObjectFileStruct: DataObjectFileStruct, outputDirPath: String) {
         println("generateProtoDataObjectFile $dataObjectFileStruct")
     }
 }
