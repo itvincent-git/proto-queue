@@ -52,7 +52,7 @@ open class DataFieldType protected constructor(
     val fieldTypePackage: String = fieldType.substringBeforeLast(".")
     val fieldTypeSimpleName: String = fieldType.substringAfterLast(".")
     val genFieldTypeClassName =
-        ClassName(fieldTypePackage.substringBeforeLast("."),
+        ClassName(if (!isOriginalType) fieldTypePackage.substringBeforeLast(".") else fieldTypePackage,
             fieldTypeSimpleName + if (!isOriginalType) DO_SURFIX else "").copy(
             nullable = nullable)
     val originFieldTypeClassName = ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)

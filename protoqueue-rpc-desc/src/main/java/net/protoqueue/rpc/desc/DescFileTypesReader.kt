@@ -106,7 +106,7 @@ class DescFileTypesReader(private val descFilePath: String) {
         if (firstType.isNotEmpty()) {
             //数组
             if (fdp.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
-                return DataFieldParameterType.get("List", nullable, true,
+                return DataFieldParameterType.get("kotlin.collections.MutableList", nullable, true,
                     DataFieldType.get(firstType, false, isOriginalType))
             }
             return DataFieldType.get(firstType, nullable, isOriginalType)
