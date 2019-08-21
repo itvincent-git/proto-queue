@@ -1,8 +1,6 @@
 package net.jbridge.compiler.writer
 
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -32,7 +30,6 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     private fun createDataObjects(builder: FileSpec.Builder) {
         for (dataObjectStruct in dataObjectFileStruct.objects) {
             TypeSpec.classBuilder(dataObjectStruct.messageTypeSimpleName)
-                .addModifiers(KModifier.DATA)
                 .apply {
                     createDataObjectFields(this, dataObjectStruct)
                     builder.addType(build())

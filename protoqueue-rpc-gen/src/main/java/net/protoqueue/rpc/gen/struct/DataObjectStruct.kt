@@ -45,8 +45,9 @@ data class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
 open class DataFieldType protected constructor(
     val fieldType: String, val nullable: Boolean, val isOriginalType: Boolean
 ) {
-    val fieldTypeClassName = ClassName.bestGuess(fieldType + if (isOriginalType) DO_SURFIX else "").copy(nullable =
-    nullable)
+    val fieldTypeClassName = ClassName
+        .bestGuess(fieldType + if (!isOriginalType) DO_SURFIX else "")
+        .copy(nullable = nullable)
 
     override fun toString(): String {
         return "DataFieldType(fieldType='$fieldType', nullable=$nullable, isOriginalType=$isOriginalType, fieldTypeClassName=$fieldTypeClassName)"
