@@ -121,7 +121,7 @@ class DescFileTypesReader(private val descFilePath: String) {
         this.nestedTypeList.filter { it.options.mapEntry }.forEach {
             val keyType = convertType(it.fieldList.find { it.name == "key" }!!, emptyMap())
             val valType = convertType(it.fieldList.find { it.name == "value" }!!, emptyMap())
-            map[it.name] = DataFieldParameterType.get("Map",
+            map[it.name] = DataFieldParameterType.get("kotlin.collections.MutableMap",
                 false, true, keyType, valType)
         }
         return map

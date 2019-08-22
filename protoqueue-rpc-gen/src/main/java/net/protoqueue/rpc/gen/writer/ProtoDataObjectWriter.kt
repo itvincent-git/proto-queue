@@ -81,9 +81,8 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     //生成字段初始化值
     private fun getFieldInitializer(type: DataFieldType, propertyBuilder: PropertySpec.Builder) =
         when (type.fieldType) {
-            "kotlin.collections.MutableList" -> {
-                propertyBuilder.initializer("%M()", mutableListOf)
-            }
+            "kotlin.collections.MutableList" -> propertyBuilder.initializer("%M()", mutableListOf)
+            "kotlin.collections.MutableMap" -> propertyBuilder.initializer("%M()", mutableMapOf)
             else -> {
                 propertyBuilder.initializer("null")
             }
@@ -107,6 +106,8 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                             "kotlin.Long" -> " ?: 0L"
                             //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
                             "kotlin.collections.MutableList" -> ".map { it.convertToMessage() }.toTypedArray()"
+                            //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
+                            "kotlin.collections.MutableMap" -> ".convertMap({ it.key }, { it.value?.convertToMessage() })"
                             else -> ""
                         }
                         addStatement("message.%L = %L%L", field.fieldName, field.fieldName, fieldSetStatement)
@@ -123,5 +124,6 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
 
     companion object {
         val mutableListOf = MemberName("kotlin.collections", "mutableListOf")
+        val mutableMapOf = MemberName("kotlin.collections", "mutableMapOf")
     }
 }
