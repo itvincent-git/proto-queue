@@ -26,13 +26,21 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             .addComment("Generate by protoqueue-rpc, don't edit this file please")
             .indent("    ")
             .apply {
-                createDataObjects(this)
+                createDataObjectWrapperClass(this)
             }
             .build()
             .writeTo(outputDir)
     }
 
-    private fun createDataObjects(builder: FileSpec.Builder) {
+    private fun createDataObjectWrapperClass(builder: FileSpec.Builder) {
+        TypeSpec.classBuilder(dataObjectFileStruct.fileClassName)
+            .apply {
+                createDataObjects(this)
+                builder.addType(build())
+            }
+    }
+
+    private fun createDataObjects(builder: TypeSpec.Builder) {
         for (dataObjectStruct in dataObjectFileStruct.objects) {
             TypeSpec.classBuilder(dataObjectStruct.genMessageTypeSimpleName)
                 .apply {

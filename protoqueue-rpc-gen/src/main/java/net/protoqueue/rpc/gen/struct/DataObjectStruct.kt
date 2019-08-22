@@ -15,7 +15,7 @@ class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: St
     val objects = mutableListOf<DataObjectStruct>()
     val fileClassName: ClassName
         get() {
-            return ClassName(filePackage, fileName)
+            return ClassName(filePackage, fileName + DO_SURFIX)
         }
 
     override fun toString(): String {
@@ -34,7 +34,7 @@ class DataObjectStruct(val messageType: String) {
     val fields = mutableListOf<DataFieldStruct>()
     val messageTypePackage: String = messageType.substringBeforeLast(".")
     val messageTypeSimpleName: String = messageType.substringAfterLast(".")
-    val genMessageTypeSimpleName: String = messageType.substringAfterLast(".") + DO_SURFIX
+    val genMessageTypeSimpleName: String = messageTypeSimpleName + DO_SURFIX
     val genMessageTypeClassName =
         ClassName(messageTypePackage.substringBeforeLast("."), messageTypeSimpleName + DO_SURFIX)
     val originMessageTypeClassName = ClassName(messageTypePackage, messageTypeSimpleName)
@@ -52,7 +52,7 @@ open class DataFieldType protected constructor(
     val fieldTypePackage: String = fieldType.substringBeforeLast(".")
     val fieldTypeSimpleName: String = fieldType.substringAfterLast(".")
     val genFieldTypeClassName =
-        ClassName(if (!isOriginalType) fieldTypePackage.substringBeforeLast(".") else fieldTypePackage,
+        ClassName(if (!isOriginalType) fieldTypePackage + DO_SURFIX else fieldTypePackage,
             fieldTypeSimpleName + if (!isOriginalType) DO_SURFIX else "").copy(
             nullable = nullable)
     val originFieldTypeClassName = ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)
