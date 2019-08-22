@@ -55,14 +55,14 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         for (fieldStruct in dataObjectStruct.fields) {
             PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
                 .mutable()
-                .initializer("null")
                 .apply {
+                    getFieldInitializer(fieldStruct.fieldType, this)
                     builder.addProperty(build())
                 }
         }
     }
 
-    fun getFieldTypeName(type: DataFieldType): TypeName = when (type) {
+    private fun getFieldTypeName(type: DataFieldType): TypeName = when (type) {
         is DataFieldParameterType -> {
             val parameterTypes = type.parameterTypes.map {
                 it.genFieldTypeClassName
@@ -74,6 +74,16 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         }
     }
 
+    private fun getFieldInitializer(type: DataFieldType, propertyBuilder: PropertySpec.Builder) =
+        when (type.fieldType) {
+            "kotlin.collections.MutableList" -> {
+                propertyBuilder.initializer("%M()", mutableListOf)
+            }
+            else -> {
+                propertyBuilder.initializer("null")
+            }
+        }
+
     private fun createConvertToMessageFunction(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
         FunSpec.builder("convertToMessage")
             .returns(dataObjectStruct.originMessageTypeClassName)
@@ -84,6 +94,6 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     }
 
     companion object {
-        val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+        val mutableListOf = MemberName("kotlin.collections", "mutableListOf")
     }
 }
