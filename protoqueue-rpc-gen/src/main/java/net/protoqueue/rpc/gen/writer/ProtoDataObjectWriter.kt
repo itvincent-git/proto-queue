@@ -105,7 +105,31 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                             "kotlin.Float" -> " ?: 0.0f"
                             "kotlin.Long" -> " ?: 0L"
                             //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
-                            "kotlin.collections.MutableList" -> ".map { it.convertToMessage() }.toTypedArray()"
+                            "kotlin.collections.MutableList" -> {
+                                if (field.fieldType is DataFieldParameterType) {
+                                    val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
+                                    if (firstParameterType != null) {
+                                        if (!firstParameterType.isOriginalType) {
+                                            ".map { it.convertToMessage() }.toTypedArray()"
+                                        } else {
+                                            //系统类型时
+                                            when (firstParameterType.fieldType) {
+                                                "kotlin.Int" -> ".toIntArray()"
+                                                "kotlin.Boolean" -> ".toBooleanArray()"
+                                                "kotlin.Double" -> ".toDoubleArray()"
+                                                "kotlin.Float" -> ".toFloatArray()"
+                                                "kotlin.Long" -> ".toLongArray()"
+                                                else -> ""
+                                            }
+                                        }
+                                    } else {
+                                        ".toTypedArray()"
+                                    }
+                                } else {
+                                    //没有泛型定义时，使用转array
+                                    ".toTypedArray()"
+                                }
+                            }
                             //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
                             "kotlin.collections.MutableMap" -> ".convertMap({ it.key }, { it.value?.convertToMessage() })"
                             else -> ""
