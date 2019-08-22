@@ -47,6 +47,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         for (fieldStruct in dataObjectStruct.fields) {
             PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
                 .mutable()
+                .initializer("null")
                 .apply {
                     builder.addProperty(build())
                 }
