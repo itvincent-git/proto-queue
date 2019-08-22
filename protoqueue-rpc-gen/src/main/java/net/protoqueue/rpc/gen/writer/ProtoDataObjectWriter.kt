@@ -137,7 +137,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                                 "kotlin.Double" -> add(".toDoubleArray()")
                                 "kotlin.Float" -> add(".toFloatArray()")
                                 "kotlin.Long" -> add(".toLongArray()")
-                                else -> ""
+                                else -> add(".toTypedArray()")
                             }
                         }
                     } else {
