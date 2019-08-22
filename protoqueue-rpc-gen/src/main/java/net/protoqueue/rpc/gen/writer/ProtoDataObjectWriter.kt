@@ -29,6 +29,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             .indent("    ")
             .apply {
                 createDataObjectWrapperClass(this)
+                createMessageConvertToDataObjectExFunction(this)
             }
             .build()
             .writeTo(outputDir)
@@ -55,7 +56,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         }
     }
 
-    //创建字段属性
+    //创建DO类字段属性
     private fun createDataObjectFields(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
         for (fieldStruct in dataObjectStruct.fields) {
             PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
@@ -67,7 +68,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         }
     }
 
-    //生成字段类型
+    //生成DO类字段类型
     private fun getFieldTypeName(type: DataFieldType): TypeName = when (type) {
         is DataFieldParameterType -> {
             val parameterTypes = type.parameterTypes.map {
@@ -114,6 +115,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             }
     }
 
+    //创建DO转Message类字段赋值语句
     private fun createFieldStatementCodeBlock(field: DataFieldStruct) = buildCodeBlock {
         //message.firstLoginTime = firstLoginTime ?: 0
         when (field.fieldType.fieldType) {
@@ -137,6 +139,9 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                                 "kotlin.Double" -> add(".toDoubleArray()")
                                 "kotlin.Float" -> add(".toFloatArray()")
                                 "kotlin.Long" -> add(".toLongArray()")
+                                //TODO 处理更多子类型
+                                //"kotlin.collections.MutableList" -> add("")
+                                //"kotlin.collections.MutableMap" ->
                                 else -> add(".toTypedArray()")
                             }
                         }
@@ -149,7 +154,77 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                 }
             }
             //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
+            //TODO 处理内部泛型
             "kotlin.collections.MutableMap" -> add(".%M({ it.key }, { it.value?.convertToMessage() })", convertMap)
+            else -> ""
+        }
+    }
+
+    //创建Message转DO的扩展方法
+    private fun createMessageConvertToDataObjectExFunction(builder: FileSpec.Builder) {
+        //fun UserFreezeInfo.convertToDataObject(): WhSvcUserDO.UserFreezeInfoDO {
+        for (dataObjectStruct in dataObjectFileStruct.objects) {
+            FunSpec.builder("convertToDataObject")
+                .receiver(dataObjectStruct.originMessageTypeClassName)
+                .returns(dataObjectStruct.genMessageTypeClassName)
+                .apply {
+                    //    val o = WhSvcUserDO.UserFreezeInfoDO()
+                    addStatement("val o = %T()", dataObjectStruct.genMessageTypeClassName)
+                    //    o.freezeUnixTimestamp = freezeUnixTimestamp
+                    for (field in dataObjectStruct.fields) {
+                        if (field.fieldType.isOriginalType) {
+                            addStatement("o.%L = %L%L",
+                                field.fieldName,
+                                field.fieldName,
+                                createConvertToDataObjectFieldStatementCodeBlock(field))
+                        } else {
+                            //message.header = header?.convertToMessage()
+                            addStatement("o.%L = %L?.convertToDataObject()", field.fieldName, field.fieldName)
+                        }
+                    }
+                    //    return o
+                    addStatement("return o")
+                    builder.addFunction(build())
+                }
+        }
+    }
+
+    //创建Message转DO的字段赋值语句
+    private fun createConvertToDataObjectFieldStatementCodeBlock(field: DataFieldStruct) = buildCodeBlock {
+        //message.firstLoginTime = firstLoginTime ?: 0
+        when (field.fieldType.fieldType) {
+            //o.status = status.mapTo(ArrayList(status.size)) { it.convertToDataObject() }
+            "kotlin.collections.MutableList" -> {
+                if (field.fieldType is DataFieldParameterType) {
+                    val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
+                    if (firstParameterType != null) {
+                        if (!firstParameterType.isOriginalType) {
+                            add(".mapTo(ArrayList(%L.size)) { it.%M() }",
+                                field.fieldName,
+                                MemberName(
+                                    firstParameterType
+                                        .fieldTypePackage
+                                        .substringBeforeLast("."), "convertToDataObject"))
+                        } else {
+                            //系统类型时
+                            when (firstParameterType.fieldType) {
+                                //TODO 处理更多子类型
+                                //"kotlin.collections.MutableList" -> add("")
+                                //"kotlin.collections.MutableMap" ->
+                                else -> add(".toMutableList()")
+                            }
+                        }
+                    } else {
+                        add(".toMutableList()")
+                    }
+                } else {
+                    //没有泛型定义时，使用转array
+                    add(".toMutableList()")
+                }
+            }
+            //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
+            //TODO 处理内部泛型
+            "kotlin.collections.MutableMap" -> add(".%M({ it.key }, { it.value?.convertToDataObject() })", convertMap)
             else -> ""
         }
     }

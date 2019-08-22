@@ -10,8 +10,8 @@ package net.protoqueue.rpc.runtime.util
 fun <K, V, K1, V1> Map<K, V>.convertMap(
     transformKey: (Map.Entry<K, V>) -> K1,
     transformValue: (Map.Entry<K, V>) -> V1
-): Map<K1, V1> {
-    return convertMapTo(HashMap<K1, V1>(size), transformKey, transformValue)
+): HashMap<K1, V1> {
+    return convertMapTo(HashMap(size), transformKey, transformValue)
 }
 
 /**

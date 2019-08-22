@@ -36,7 +36,7 @@ class DataObjectStruct(val messageType: String) {
     val messageTypeSimpleName: String = messageType.substringAfterLast(".")
     val genMessageTypeSimpleName: String = messageTypeSimpleName + DO_SURFIX
     val genMessageTypeClassName =
-        ClassName(messageTypePackage.substringBeforeLast("."), messageTypeSimpleName + DO_SURFIX)
+        ClassName(messageTypePackage + DO_SURFIX, messageTypeSimpleName + DO_SURFIX)
     val originMessageTypeClassName = ClassName(messageTypePackage, messageTypeSimpleName)
 
     override fun toString(): String {
