@@ -7,7 +7,9 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.buildCodeBlock
 import net.protoqueue.rpc.gen.struct.DataFieldParameterType
+import net.protoqueue.rpc.gen.struct.DataFieldStruct
 import net.protoqueue.rpc.gen.struct.DataFieldType
 import net.protoqueue.rpc.gen.struct.DataObjectFileStruct
 import net.protoqueue.rpc.gen.struct.DataObjectStruct
@@ -97,44 +99,10 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                 addStatement("val message = %T()", dataObjectStruct.originMessageTypeClassName)
                 for (field in dataObjectStruct.fields) {
                     if (field.fieldType.isOriginalType) {
-                        //message.firstLoginTime = firstLoginTime ?: 0
-                        val fieldSetStatement = when (field.fieldType.fieldType) {
-                            "kotlin.Int" -> " ?: 0"
-                            "kotlin.Boolean" -> " ?: false"
-                            "kotlin.Double" -> " ?: 0.0"
-                            "kotlin.Float" -> " ?: 0.0f"
-                            "kotlin.Long" -> " ?: 0L"
-                            //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
-                            "kotlin.collections.MutableList" -> {
-                                if (field.fieldType is DataFieldParameterType) {
-                                    val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
-                                    if (firstParameterType != null) {
-                                        if (!firstParameterType.isOriginalType) {
-                                            ".map { it.convertToMessage() }.toTypedArray()"
-                                        } else {
-                                            //系统类型时
-                                            when (firstParameterType.fieldType) {
-                                                "kotlin.Int" -> ".toIntArray()"
-                                                "kotlin.Boolean" -> ".toBooleanArray()"
-                                                "kotlin.Double" -> ".toDoubleArray()"
-                                                "kotlin.Float" -> ".toFloatArray()"
-                                                "kotlin.Long" -> ".toLongArray()"
-                                                else -> ""
-                                            }
-                                        }
-                                    } else {
-                                        ".toTypedArray()"
-                                    }
-                                } else {
-                                    //没有泛型定义时，使用转array
-                                    ".toTypedArray()"
-                                }
-                            }
-                            //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
-                            "kotlin.collections.MutableMap" -> ".convertMap({ it.key }, { it.value?.convertToMessage() })"
-                            else -> ""
-                        }
-                        addStatement("message.%L = %L%L", field.fieldName, field.fieldName, fieldSetStatement)
+                        addStatement("message.%L = %L%L",
+                            field.fieldName,
+                            field.fieldName,
+                            createFieldStatementCodeBlock(field))
                     } else {
                         //message.header = header?.convertToMessage()
                         addStatement("message.%L = %L?.convertToMessage()", field.fieldName, field.fieldName)
@@ -146,8 +114,49 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             }
     }
 
+    private fun createFieldStatementCodeBlock(field: DataFieldStruct) = buildCodeBlock {
+        //message.firstLoginTime = firstLoginTime ?: 0
+        when (field.fieldType.fieldType) {
+            "kotlin.Int" -> add(" ?: 0")
+            "kotlin.Boolean" -> add(" ?: false")
+            "kotlin.Double" -> add(" ?: 0.0")
+            "kotlin.Float" -> add(" ?: 0.0f")
+            "kotlin.Long" -> add(" ?: 0L")
+            //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
+            "kotlin.collections.MutableList" -> {
+                if (field.fieldType is DataFieldParameterType) {
+                    val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
+                    if (firstParameterType != null) {
+                        if (!firstParameterType.isOriginalType) {
+                            add(".map { it.convertToMessage() }.toTypedArray()")
+                        } else {
+                            //系统类型时
+                            when (firstParameterType.fieldType) {
+                                "kotlin.Int" -> add(".toIntArray()")
+                                "kotlin.Boolean" -> add(".toBooleanArray()")
+                                "kotlin.Double" -> add(".toDoubleArray()")
+                                "kotlin.Float" -> add(".toFloatArray()")
+                                "kotlin.Long" -> add(".toLongArray()")
+                                else -> ""
+                            }
+                        }
+                    } else {
+                        add(".toTypedArray()")
+                    }
+                } else {
+                    //没有泛型定义时，使用转array
+                    add(".toTypedArray()")
+                }
+            }
+            //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
+            "kotlin.collections.MutableMap" -> add(".%M({ it.key }, { it.value?.convertToMessage() })", convertMap)
+            else -> ""
+        }
+    }
+
     companion object {
         val mutableListOf = MemberName("kotlin.collections", "mutableListOf")
         val mutableMapOf = MemberName("kotlin.collections", "mutableMapOf")
+        val convertMap = MemberName("net.protoqueue.rpc.runtime.util", "convertMap")
     }
 }
