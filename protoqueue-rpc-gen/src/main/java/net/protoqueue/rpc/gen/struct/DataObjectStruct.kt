@@ -19,7 +19,7 @@ class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: St
         }
 
     override fun toString(): String {
-        return "DataObjectFileStruct(filePackage='$filePackage', fileName='$fileName', objects=$objects)"
+        return "DataObjectFileStruct(filePackage='$filePackage', fileName='$fileName', objects=$objects, enums='$enums')"
     }
 }
 
@@ -28,6 +28,10 @@ class EnumStruct(/*数组名*/val enumsName: String) {
      * 数组原生名以及默认值
      */
     val enumFields = mutableListOf<Pair<String, Int>>()
+
+    override fun toString(): String {
+        return "EnumStruct [enumsName :$enumsName, enumFields $enumFields]"
+    }
 }
 
 class DataObjectStruct(val messageType: String) {

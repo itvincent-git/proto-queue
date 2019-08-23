@@ -70,7 +70,7 @@ class DescFileTypesReader(private val descFilePath: String) {
             struct
         }
         val enumTypes = fdp.enumTypeList.map {
-            val struct = EnumStruct(packageName + "." + it.name)
+            val struct = EnumStruct(packageName + "." + outClassName + "." + it.name)
             struct.enumFields.addAll(it.valueList.map {
                 Pair(it.name, it.number)
             })
