@@ -6,7 +6,7 @@ import com.squareup.kotlinpoet.ClassName
  * PB Message的转换类
  * Created by zhongyongsheng on 2019-08-20.
  */
-private const val DO_SURFIX = "DO"
+private const val MESSAGE_SURFIX = "Message"
 
 class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: String,
     /*放置转换类的文件名*/val fileName: String
@@ -15,7 +15,7 @@ class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: St
     val objects = mutableListOf<DataObjectStruct>()
     val fileClassName: ClassName
         get() {
-            return ClassName(filePackage, fileName + DO_SURFIX)
+            return ClassName(filePackage, fileName + MESSAGE_SURFIX)
         }
 
     override fun toString(): String {
@@ -34,9 +34,9 @@ class DataObjectStruct(val messageType: String) {
     val fields = mutableListOf<DataFieldStruct>()
     val messageTypePackage: String = messageType.substringBeforeLast(".")
     val messageTypeSimpleName: String = messageType.substringAfterLast(".")
-    val genMessageTypeSimpleName: String = messageTypeSimpleName + DO_SURFIX
+    val genMessageTypeSimpleName: String = messageTypeSimpleName + MESSAGE_SURFIX
     val genMessageTypeClassName =
-        ClassName(messageTypePackage + DO_SURFIX, messageTypeSimpleName + DO_SURFIX)
+        ClassName(messageTypePackage + MESSAGE_SURFIX, messageTypeSimpleName + MESSAGE_SURFIX)
     val originMessageTypeClassName = ClassName(messageTypePackage, messageTypeSimpleName)
 
     override fun toString(): String {
@@ -52,8 +52,8 @@ open class DataFieldType protected constructor(
     val fieldTypePackage: String = fieldType.substringBeforeLast(".")
     val fieldTypeSimpleName: String = fieldType.substringAfterLast(".")
     val genFieldTypeClassName =
-        ClassName(if (!isOriginalType) fieldTypePackage + DO_SURFIX else fieldTypePackage,
-            fieldTypeSimpleName + if (!isOriginalType) DO_SURFIX else "").copy(
+        ClassName(if (!isOriginalType) fieldTypePackage + MESSAGE_SURFIX else fieldTypePackage,
+            fieldTypeSimpleName + if (!isOriginalType) MESSAGE_SURFIX else "").copy(
             nullable = nullable)
     val originFieldTypeClassName = ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)
 
