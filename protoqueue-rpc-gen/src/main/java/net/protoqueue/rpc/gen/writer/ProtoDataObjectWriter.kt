@@ -13,6 +13,7 @@ import net.protoqueue.rpc.gen.struct.DataFieldStruct
 import net.protoqueue.rpc.gen.struct.DataFieldType
 import net.protoqueue.rpc.gen.struct.DataObjectFileStruct
 import net.protoqueue.rpc.gen.struct.DataObjectStruct
+import net.protoqueue.rpc.gen.struct.EnumStruct
 import java.io.File
 import java.io.IOException
 
@@ -40,6 +41,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         TypeSpec.classBuilder(dataObjectFileStruct.fileClassName)
             .apply {
                 createDataObjects(this)
+                createEnumClasses(this)
                 builder.addType(build())
             }
     }
@@ -226,6 +228,29 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             //TODO 处理内部泛型
             "kotlin.collections.MutableMap" -> add(".%M({ it.key }, { it.value?.convertToDataObject() })", convertMap)
             else -> ""
+        }
+    }
+
+    //创建enum类
+    private fun createEnumClasses(builder: TypeSpec.Builder) {
+        for (enumStruct in dataObjectFileStruct.enums) {
+            TypeSpec.interfaceBuilder(enumStruct.genMessageTypeSimpleName)
+                .addType(TypeSpec.companionObjectBuilder().apply {
+                    createEnumFields(this, enumStruct)
+                }.build())
+                .apply {
+                    builder.addType(build())
+                }
+        }
+    }
+
+    private fun createEnumFields(builder: TypeSpec.Builder, enumStruct: EnumStruct) {
+        for ((name, value) in enumStruct.enumFields) {
+            PropertySpec.builder(name, Int::class)
+                .initializer("%S", value)
+                .apply {
+                    builder.addProperty(build())
+                }
         }
     }
 

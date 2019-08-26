@@ -28,6 +28,11 @@ class EnumStruct(/*数组名*/val enumsName: String) {
      * 数组原生名以及默认值
      */
     val enumFields = mutableListOf<Pair<String, Int>>()
+    val messageTypePackage: String = enumsName.substringBeforeLast(".")
+    val messageTypeSimpleName: String = enumsName.substringAfterLast(".")
+    val genMessageTypeSimpleName: String = messageTypeSimpleName + MESSAGE_SURFIX
+    val genMessageTypeClassName =
+        ClassName(messageTypePackage + MESSAGE_SURFIX, messageTypeSimpleName + MESSAGE_SURFIX)
 
     override fun toString(): String {
         return "EnumStruct [enumsName :$enumsName, enumFields $enumFields]"
