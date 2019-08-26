@@ -247,7 +247,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     private fun createEnumFields(builder: TypeSpec.Builder, enumStruct: EnumStruct) {
         for ((name, value) in enumStruct.enumFields) {
             PropertySpec.builder(name, Int::class)
-                .initializer("%S", value)
+                .initializer("%L", value)
                 .apply {
                     builder.addProperty(build())
                 }
