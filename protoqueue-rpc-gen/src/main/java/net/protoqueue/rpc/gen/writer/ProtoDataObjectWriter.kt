@@ -244,6 +244,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         }
     }
 
+    //创建enum字段
     private fun createEnumFields(builder: TypeSpec.Builder, enumStruct: EnumStruct) {
         for ((name, value) in enumStruct.enumFields) {
             PropertySpec.builder(name, Int::class)
