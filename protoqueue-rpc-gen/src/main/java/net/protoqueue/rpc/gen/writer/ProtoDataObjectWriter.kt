@@ -3,6 +3,7 @@ package net.jbridge.compiler.writer
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
@@ -53,6 +54,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                 .apply {
                     createDataObjectFields(this, dataObjectStruct)
                     createConvertToMessageFunction(this, dataObjectStruct)
+                    createDataObjectConstructor(this, dataObjectStruct)
                     builder.addType(build())
                 }
         }
@@ -69,6 +71,33 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                 }
         }
     }
+
+    private fun createDataObjectConstructor(
+        builder: TypeSpec.Builder,
+        dataObjectStruct: DataObjectStruct
+    ) {
+        FunSpec.constructorBuilder()
+            .apply {
+                for (fieldStruct in dataObjectStruct.fields) {
+                    val parameterBuilder = ParameterSpec.builder(fieldStruct.fieldName,
+                        getFieldTypeName(fieldStruct.fieldType))
+                    getConstructorInitializer(fieldStruct.fieldType, parameterBuilder)
+                    addParameter(parameterBuilder.build())
+                    addStatement("this.%N = %N", fieldStruct.fieldName, fieldStruct.fieldName)
+                }
+                builder.primaryConstructor(build())
+            }
+    }
+
+    //生成字段初始化值
+    private fun getConstructorInitializer(type: DataFieldType, propertyBuilder: ParameterSpec.Builder) =
+        when (type.fieldType) {
+            "kotlin.collections.MutableList" -> propertyBuilder.defaultValue("%M()", mutableListOf)
+            "kotlin.collections.MutableMap" -> propertyBuilder.defaultValue("%M()", mutableMapOf)
+            else -> {
+                propertyBuilder.defaultValue("null")
+            }
+        }
 
     //生成DO类字段类型
     private fun getFieldTypeName(type: DataFieldType): TypeName = when (type) {
