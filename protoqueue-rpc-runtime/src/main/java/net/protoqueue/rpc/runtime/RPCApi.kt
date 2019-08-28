@@ -14,7 +14,7 @@ object RPCApi {
      * 必须先初始化，实现RPCAdapter的方法，才能正常收发数据
      */
     @JvmStatic
-    fun <K, V> initialize(_adapter: RPCAdapter) {
+    fun initialize(_adapter: RPCAdapter) {
         adapter = _adapter
     }
 
