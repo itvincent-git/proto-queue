@@ -77,6 +77,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             indent()
             addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
                 RPCApi::class, messageNanoClassName)
+            indent()
             addStatement("""{ _, _, data ->""")
             //val res = GetUserBasicInfoRes.parseFrom(data)
             indent()
@@ -96,6 +97,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //           }
             unindent()
             addStatement("}")
+            unindent()
             //           )
             addStatement(")")
             //       }
