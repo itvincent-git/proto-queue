@@ -66,7 +66,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
                 .mutable()
                 .apply {
-                    getFieldInitializer(fieldStruct, this)
+                    initializer(fieldStruct.fieldName)
                     builder.addProperty(build())
                 }
         }
@@ -111,16 +111,6 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             type.genFieldTypeClassName
         }
     }
-
-    //生成字段初始化值
-    private fun getFieldInitializer(fieldStruct: DataFieldStruct, propertyBuilder: PropertySpec.Builder) =
-        when (fieldStruct.fieldType.fieldType) {
-            "kotlin.collections.MutableList" -> propertyBuilder.initializer("%M()", mutableListOf)
-            "kotlin.collections.MutableMap" -> propertyBuilder.initializer("%M()", mutableMapOf)
-            else -> {
-                propertyBuilder.initializer(fieldStruct.fieldName)
-            }
-        }
 
     //创建DO转Message类方法
     private fun createConvertToMessageFunction(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
