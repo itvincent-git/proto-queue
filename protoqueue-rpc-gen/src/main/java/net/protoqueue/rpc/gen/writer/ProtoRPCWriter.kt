@@ -75,9 +75,9 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
             indent()
-            addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()), { _, _, data 
-                |->""".trimMargin(),
+            addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
                 RPCApi::class, messageNanoClassName)
+            addStatement("""{ _, _, data ->""")
             //val res = GetUserBasicInfoRes.parseFrom(data)
             indent()
             addStatement("""val res = %T.parseFrom(data)""",
