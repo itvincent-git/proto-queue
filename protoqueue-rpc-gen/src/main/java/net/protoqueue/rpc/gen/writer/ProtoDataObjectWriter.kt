@@ -66,12 +66,13 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
                 .mutable()
                 .apply {
-                    getFieldInitializer(fieldStruct.fieldType, this)
+                    getFieldInitializer(fieldStruct, this)
                     builder.addProperty(build())
                 }
         }
     }
 
+    //创建DO constructor方法
     private fun createDataObjectConstructor(
         builder: TypeSpec.Builder,
         dataObjectStruct: DataObjectStruct
@@ -83,7 +84,6 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                         getFieldTypeName(fieldStruct.fieldType))
                     getConstructorInitializer(fieldStruct.fieldType, parameterBuilder)
                     addParameter(parameterBuilder.build())
-                    addStatement("this.%N = %N", fieldStruct.fieldName, fieldStruct.fieldName)
                 }
                 builder.primaryConstructor(build())
             }
@@ -113,12 +113,12 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     }
 
     //生成字段初始化值
-    private fun getFieldInitializer(type: DataFieldType, propertyBuilder: PropertySpec.Builder) =
-        when (type.fieldType) {
+    private fun getFieldInitializer(fieldStruct: DataFieldStruct, propertyBuilder: PropertySpec.Builder) =
+        when (fieldStruct.fieldType.fieldType) {
             "kotlin.collections.MutableList" -> propertyBuilder.initializer("%M()", mutableListOf)
             "kotlin.collections.MutableMap" -> propertyBuilder.initializer("%M()", mutableMapOf)
             else -> {
-                propertyBuilder.initializer("null")
+                propertyBuilder.initializer(fieldStruct.fieldName)
             }
         }
 
