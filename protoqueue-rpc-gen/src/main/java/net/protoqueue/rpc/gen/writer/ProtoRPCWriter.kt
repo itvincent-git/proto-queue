@@ -121,7 +121,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                 .addParameter(
                     ParameterSpec.builder("handler", LambdaTypeName.get(null,
                         listOf(getHandlerParameter(func)),
-                        ClassName(func.rspTypePackage, func.rspTypeSimpleName).copy(nullable = true))
+                        func.genRspTypeClassName.copy(nullable = true))
                     ).build())
                 .returns(RPCHandlerObserver::class)
                 .let {
@@ -143,7 +143,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             indent()
             beginControlFlow("""if (functionName == subscribeFuncName)""")
             //                   val notify = UserFreezeNotifyInfo.parseFrom(data)
-            addStatement("""val notify = %T.parseFrom(data)""", ClassName(func.reqTypePackage, func.reqTypeSimpleName))
+            addStatement("""val notify = %T.parseFrom(data).convertToDataObject()""", ClassName(func.reqTypePackage,
+                func.reqTypeSimpleName))
             //                   handler(notify)
             addStatement("""handler(notify)""")
             unindent()
@@ -157,7 +158,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     }
 
     private fun getHandlerParameter(func: FunctionStruct): ParameterSpec {
-        return ParameterSpec.builder("", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build()
+        return ParameterSpec.builder("", func.genReqTypeClassName).build()
     }
 
     companion object {
