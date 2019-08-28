@@ -16,6 +16,7 @@ import net.protoqueue.rpc.gen.struct.FunctionStruct
 import net.protoqueue.rpc.gen.struct.ServiceStruct
 import net.protoqueue.rpc.runtime.RPCError
 import net.protoqueue.rpc.runtime.RPCHandlerObserver
+import net.protoqueue.rpc.runtime.RPCParameter
 import net.protoqueue.rpc.runtime.RPCResponse
 import java.io.File
 
@@ -51,7 +52,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     private fun addRequestFun(builder: TypeSpec.Builder) {
         for (func in serviceStruct.funList) {
             /**
-             * suspend fun batchGetUserBasicInfo(req: WhSvcUser.GetUserBasicInfoReq): RPCResponse<GetUserBasicInfoRes>
+             * suspend fun batchGetUserBasicInfo(req: WhSvcUser.GetUserBasicInfoReq, parameter: RPCParameter? =
+             * null): RPCResponse<GetUserBasicInfoRes>
              */
             FunSpec.builder(func.funName)
                 .addModifiers(KModifier.SUSPEND)
@@ -59,6 +61,13 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                     ParameterSpec.builder("req", func.genReqTypeClassName).build())
                 .returns(RPCResponse::class.asClassName().parameterizedBy(
                     func.genRspTypeClassName))
+                .addParameter(
+                    ParameterSpec.builder(
+                        "parameter",
+                        RPCParameter::class.asClassName().copy(nullable = true))
+                        .defaultValue("null")
+                        .build()
+                )
                 .let {
                     addRequestInnerCode(it, func)
                     builder.addFunction(it.build())
@@ -96,7 +105,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                 RPCError::class.asClassName())
             //           }
             unindent()
-            addStatement("}")
+            addStatement("}, parameter")
             unindent()
             //           )
             addStatement(")")

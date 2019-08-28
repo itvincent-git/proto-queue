@@ -1,5 +1,7 @@
 package net.protoqueue.rpc.gen
 
+import net.protoqueue.rpc.runtime.RPCParameter
+
 /**
  * RPCApi
  * 使用前需要先调用initialize()方法，自定义adapter
@@ -12,7 +14,7 @@ object RPCApi {
      * 必须先初始化，实现RPCAdapter的方法，才能正常收发数据
      */
     @JvmStatic
-    fun initialize(_adapter: RPCAdapter) {
+    fun <K, V> initialize(_adapter: RPCAdapter) {
         adapter = _adapter
     }
 
@@ -66,6 +68,13 @@ interface RPCAdapter {
 
     /**
      * 实现发送数据
+     *
+     * @param serviceName service名
+     * @param functionName service方法名
+     * @param bytes 发送的数据
+     * @param successCallback 成功回调
+     * @param errorCallback 失败回调
+     * @param parameter 透传的参数
      */
     fun send(
         serviceName: String,
@@ -86,5 +95,3 @@ interface RPCAdapter {
      */
     fun unsubscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver)
 }
-
-data class RPCParameter(val timeout: Long = 0L)
