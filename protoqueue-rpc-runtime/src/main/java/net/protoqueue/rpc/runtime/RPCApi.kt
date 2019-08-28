@@ -18,6 +18,7 @@ object RPCApi {
         adapter = _adapter
     }
 
+    //自动生成代码使用，请不要直接使用
     fun send(
         serviceName: String,
         functionName: String,
@@ -29,10 +30,12 @@ object RPCApi {
         adapter?.send(serviceName, functionName, bytes, successCallback, errorCallback, parameter)
     }
 
+    //自动生成代码使用，请不要直接使用
     fun subscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver) {
         adapter?.subscribe(serviceName, functionName, receiver)
     }
 
+    //自动生成代码使用，请不要直接使用
     fun unsubscribe(serviceName: String, functionName: String, receiver: RPCNotifyReceiver) {
         adapter?.unsubscribe(serviceName, functionName, receiver)
     }
@@ -44,7 +47,8 @@ object RPCApi {
 typealias RPCResponseCallback = (
     serviceName: String,
     funcName: String,
-    data: ByteArray
+    data: ByteArray,
+    parameter: RPCParameter?
 ) -> Unit
 
 /**
@@ -58,7 +62,8 @@ typealias RPCErrorCallback = (sdkResCode: Int, srvResCode: Int) -> Unit
 typealias RPCNotifyReceiver = (
     serviceName: String,
     functionName: String,
-    data: ByteArray
+    data: ByteArray,
+    parameter: RPCParameter?
 ) -> Unit
 
 /**

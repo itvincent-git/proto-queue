@@ -126,12 +126,17 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     private fun addHandlerFun(builder: TypeSpec.Builder) {
         for (func in serviceStruct.funList) {
             /**
-             * fun userFreezeNotify(handler: (UserFreezeNotifyInfo) -> Unit): RPCHandlerObserver {
+             * fun userFreezeNotify(handler: (UserFreezeNotifyInfo, RPCParameter?) -> Unit): RPCHandlerObserver {
              */
             FunSpec.builder(func.funName)
                 .addParameter(
                     ParameterSpec.builder("handler", LambdaTypeName.get(null,
-                        listOf(getHandlerParameter(func)),
+                        listOf(getHandlerParameter(func),
+                            ParameterSpec.builder(
+                                "parameter",
+                                RPCParameter::class.asClassName().copy(nullable = true))
+                                .build()
+                        ),
                         func.genRspTypeClassName.copy(nullable = true))
                     ).build())
                 .returns(RPCHandlerObserver::class)
@@ -148,7 +153,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //val subscribeFuncName = "userFreezeNotify"
             addStatement("""val subscribeFuncName = %S""", func.funName)
             //val receiver: RPCNotifyReceiver = { _, functionName, data ->
-            addStatement("""val receiver: %T = { _, functionName, data ->""",
+            addStatement("""val receiver: %T = { _, functionName, data, parameter ->""",
                 ClassName("net.protoqueue.rpc.gen", "RPCNotifyReceiver"))
             //               if (functionName == subscribeFuncName) {
             indent()
@@ -157,7 +162,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""val notify = %T.parseFrom(data).convertToDataObject()""", ClassName(func.reqTypePackage,
                 func.reqTypeSimpleName))
             //                   handler(notify)
-            addStatement("""handler(notify)""")
+            addStatement("""handler(notify, parameter)""")
             unindent()
             addStatement("""}""")
             endControlFlow()
@@ -168,6 +173,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
         })
     }
 
+    //res类型参数
     private fun getHandlerParameter(func: FunctionStruct): ParameterSpec {
         return ParameterSpec.builder("", func.genReqTypeClassName).build()
     }
