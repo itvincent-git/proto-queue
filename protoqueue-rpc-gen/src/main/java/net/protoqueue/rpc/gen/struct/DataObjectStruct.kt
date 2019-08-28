@@ -6,7 +6,7 @@ import com.squareup.kotlinpoet.ClassName
  * PB Message的转换类
  * Created by zhongyongsheng on 2019-08-20.
  */
-private const val MESSAGE_SURFIX = "Kt"
+internal const val MESSAGE_SURFIX = "Kt"
 
 class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: String,
     /*放置转换类的文件名*/val fileName: String

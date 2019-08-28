@@ -1,5 +1,7 @@
 package net.protoqueue.rpc.gen.struct
 
+import com.squareup.kotlinpoet.ClassName
+
 /**
  * 一个rpc接口结构
  * @author linmin1 on 2019-08-14.
@@ -15,6 +17,10 @@ data class FunctionStruct(
     val reqTypeSimpleName: String = reqType.substringAfterLast(".")
     val rspTypePackage: String = rspType.substringBeforeLast(".")
     val rspTypeSimpleName: String = rspType.substringAfterLast(".")
+    val genReqTypeClassName =
+        ClassName(reqTypePackage + MESSAGE_SURFIX, reqTypeSimpleName + MESSAGE_SURFIX)
+    val genRspTypeClassName =
+        ClassName(rspTypePackage + MESSAGE_SURFIX, rspTypeSimpleName + MESSAGE_SURFIX)
 }
 
 data class TypeClass(

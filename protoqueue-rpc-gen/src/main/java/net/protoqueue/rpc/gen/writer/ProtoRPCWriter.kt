@@ -56,9 +56,9 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             FunSpec.builder(func.funName)
                 .addModifiers(KModifier.SUSPEND)
                 .addParameter(
-                    ParameterSpec.builder("req", ClassName(func.reqTypePackage, func.reqTypeSimpleName)).build())
+                    ParameterSpec.builder("req", func.genReqTypeClassName).build())
                 .returns(RPCResponse::class.asClassName().parameterizedBy(
-                    ClassName(func.rspTypePackage, func.rspTypeSimpleName)))
+                    func.genRspTypeClassName))
                 .let {
                     addRequestInnerCode(it, func)
                     builder.addFunction(it.build())
@@ -75,14 +75,15 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
             indent()
-            addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req), { _, _, data ->""",
+            addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()), { _, _, data 
+                |->""".trimMargin(),
                 RPCApi::class, messageNanoClassName)
             //val res = GetUserBasicInfoRes.parseFrom(data)
             indent()
             addStatement("""val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
             //continuation.resume(RPCResponse(res))
-            addStatement("""continuation.%M(%T(res))""", resume, RPCResponse::class)
+            addStatement("""continuation.%M(%T(res.convertToDataObject()))""", resume, RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             unindent()
             addStatement("""}, { sdkResCode, srvResCode ->""")
