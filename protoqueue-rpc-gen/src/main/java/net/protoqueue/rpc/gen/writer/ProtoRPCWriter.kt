@@ -87,13 +87,13 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
                 RPCApi::class, messageNanoClassName)
             indent()
-            addStatement("""{ _, _, data ->""")
+            addStatement("""{ _, _, data, parameter ->""")
             //val res = GetUserBasicInfoRes.parseFrom(data)
             indent()
             addStatement("""val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
             //continuation.resume(RPCResponse(res))
-            addStatement("""continuation.%M(%T(res.convertToDataObject()))""", resume, RPCResponse::class)
+            addStatement("""continuation.%M(%T(res.convertToDataObject(), parameter = parameter))""", resume, RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             unindent()
             addStatement("""}, { sdkResCode, srvResCode ->""")
