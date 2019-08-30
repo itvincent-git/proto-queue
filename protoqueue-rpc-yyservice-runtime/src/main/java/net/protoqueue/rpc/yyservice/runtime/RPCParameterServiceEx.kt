@@ -23,9 +23,9 @@ fun parseFromResponse(
  * 将广播包转成RPCParameter
  */
 fun parseNotify(
-    isBroadcast: Boolean?,
-    groupType: Long?,
-    groupId: Long?
+    isBroadcast: Boolean? = null,
+    groupType: Long? = null,
+    groupId: Long? = null
 ): RPCParameter {
     return RPCParameter().apply { values["notify"] = RPCNotifyParameter(isBroadcast, groupType, groupId) }
 }
