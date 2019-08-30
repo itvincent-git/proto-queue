@@ -10,7 +10,7 @@ import net.protoqueue.rpc.runtime.RPCParameter
 /**
  * 将回包转成RPCParameter
  */
-fun parseFromResponse(
+fun RPCParameter.parseFromResponse(
     resCode: Int? = null,
     resMsg: String? = null,
     serviceHeader: Map<String, String>? = null,
@@ -22,7 +22,7 @@ fun parseFromResponse(
 /**
  * 将广播包转成RPCParameter
  */
-fun parseNotify(
+fun RPCParameter.parseNotify(
     isBroadcast: Boolean?,
     groupType: Long?,
     groupId: Long?
