@@ -11,14 +11,23 @@ import net.protoqueue.rpc.runtime.RPCParameter
  * 将回包转成RPCParameter
  */
 fun parseFromResponse(
-    resCode: Int?,
-    resMsg: String?,
-    serviceHeader: Map<String, String>?,
-    traceId: String?
+    resCode: Int? = null,
+    resMsg: String? = null,
+    serviceHeader: Map<String, String>? = null,
+    traceId: String? = null
 ): RPCParameter {
-    val p = RPCParameter()
-    p.values["response"] = RPCResponseParameter(resCode, resMsg, serviceHeader, traceId)
-    return p
+    return RPCParameter().apply { values["response"] = RPCResponseParameter(resCode, resMsg, serviceHeader, traceId) }
+}
+
+/**
+ * 将广播包转成RPCParameter
+ */
+fun parseNotify(
+    isBroadcast: Boolean?,
+    groupType: Long?,
+    groupId: Long?
+): RPCParameter {
+    return RPCParameter().apply { values["notify"] = RPCNotifyParameter(isBroadcast, groupType, groupId) }
 }
 
 inline fun RPCParameter.getResCode(): Int? {
@@ -37,9 +46,27 @@ inline fun RPCParameter.getTraceId(): String? {
     return (values["response"] as? RPCResponseParameter)?.traceId
 }
 
+inline fun RPCParameter.getIsBroadcast(): Boolean? {
+    return (values["notify"] as? RPCNotifyParameter)?.isBroadcast
+}
+
+inline fun RPCParameter.getGroupType(): Long? {
+    return (values["notify"] as? RPCNotifyParameter)?.groupType
+}
+
+inline fun RPCParameter.getGroupId(): Long? {
+    return (values["notify"] as? RPCNotifyParameter)?.groupId
+}
+
 data class RPCResponseParameter(
     val resCode: Int?,
     val resMsg: String?,
     val serviceHeader: Map<String, String>?,
     val traceId: String?
+)
+
+data class RPCNotifyParameter(
+    val isBroadcast: Boolean?,
+    val groupType: Long?,
+    val groupId: Long?
 )
