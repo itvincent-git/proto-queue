@@ -255,38 +255,77 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         //message.firstLoginTime = firstLoginTime ?: 0
         when (field.fieldType.fieldType) {
             //o.status = status.mapTo(ArrayList(status.size)) { it.convertToDataObject() }
-            "kotlin.collections.MutableList" -> {
-                if (field.fieldType is DataFieldParameterType) {
-                    val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
-                    if (firstParameterType != null) {
-                        if (!firstParameterType.isOriginalType) {
-                            add(".mapTo(ArrayList(%L.size)) { it.%M() }",
-                                field.fieldName,
-                                MemberName(
-                                    firstParameterType
-                                        .fieldTypePackage
-                                        .substringBeforeLast("."), "convertToDataObject"))
-                        } else {
-                            //系统类型时
-                            when (firstParameterType.fieldType) {
-                                //TODO 处理更多子类型
-                                //"kotlin.collections.MutableList" -> add("")
-                                //"kotlin.collections.MutableMap" ->
-                                else -> add(".toMutableList()")
-                            }
-                        }
-                    } else {
-                        add(".toMutableList()")
-                    }
-                } else {
-                    //没有泛型定义时，使用转array
-                    add(".toMutableList()")
-                }
-            }
+            "kotlin.collections.MutableList" -> createConvertToFieldListCodeBlock(field)
             //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
             //TODO 处理内部泛型
-            "kotlin.collections.MutableMap" -> add(".%M({ it.key }, { it.value?.convertToDataObject() })", convertMap)
+            "kotlin.collections.MutableMap" -> createConvertToFieldMapCodeBlock(field)
             else -> ""
+        }
+    }
+
+    //创建message.list = xxxx的语句
+    private fun CodeBlock.Builder.createConvertToFieldListCodeBlock(
+        field: DataFieldStruct
+    ) {
+        if (field.fieldType is DataFieldParameterType) {
+            val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
+            if (firstParameterType != null) {
+                if (!firstParameterType.isOriginalType) {
+                    add(".mapTo(ArrayList(%L.size)) { it.%M() }",
+                        field.fieldName,
+                        MemberName(
+                            firstParameterType
+                                .fieldTypePackage
+                                .substringBeforeLast("."), "convertToDataObject"))
+                } else {
+                    //系统类型时
+                    when (firstParameterType.fieldType) {
+                        //TODO 处理更多子类型
+                        //"kotlin.collections.MutableList" -> add("")
+                        //"kotlin.collections.MutableMap" ->
+                        else -> add(".toMutableList()")
+                    }
+                }
+            } else {
+                add(".toMutableList()")
+            }
+        } else {
+            //没有泛型定义时，使用转array
+            add(".toMutableList()")
+        }
+    }
+
+    //创建message.map = xxxx的语句
+    private fun CodeBlock.Builder.createConvertToFieldMapCodeBlock(
+        field: DataFieldStruct
+    ) {
+        //map must has 2 ParameterType
+        if (field.fieldType is DataFieldParameterType && field.fieldType.parameterTypes.size == 2) {
+            val firstParameterType = field.fieldType.parameterTypes[0]
+            val secondParameterType = field.fieldType.parameterTypes[1]
+            if (firstParameterType != null) {
+                if (!firstParameterType.isOriginalType) {
+                    add(".%M({ it.key?.convertToDataObject() }, ", convertMap)
+                } else {
+                    //系统类型时
+                    add(".%M({ it.key }, ", convertMap)
+                }
+            } else {
+                add(".%M({ it.key }, ", convertMap)
+            }
+            if (secondParameterType != null) {
+                if (!secondParameterType.isOriginalType) {
+                    add("{ it.value?.convertToDataObject() })")
+                } else {
+                    //系统类型时
+                    add("{ it.value })")
+                }
+            } else {
+                add("{ it.value })")
+            }
+        } else {
+            //没有泛型定义时，使用转array
+            add(".%M({ it.key }, { it.value })", convertMap)
         }
     }
 
