@@ -1,5 +1,6 @@
 package net.jbridge.compiler.writer
 
+import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.MemberName
@@ -146,38 +147,77 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             "kotlin.Float" -> add(" ?: 0.0f")
             "kotlin.Long" -> add(" ?: 0L")
             //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
-            "kotlin.collections.MutableList" -> {
-                if (field.fieldType is DataFieldParameterType) {
-                    val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
-                    if (firstParameterType != null) {
-                        if (!firstParameterType.isOriginalType) {
-                            add(".map { it.convertToMessage() }.toTypedArray()")
-                        } else {
-                            //系统类型时
-                            when (firstParameterType.fieldType) {
-                                "kotlin.Int" -> add(".toIntArray()")
-                                "kotlin.Boolean" -> add(".toBooleanArray()")
-                                "kotlin.Double" -> add(".toDoubleArray()")
-                                "kotlin.Float" -> add(".toFloatArray()")
-                                "kotlin.Long" -> add(".toLongArray()")
-                                //TODO 处理更多子类型
-                                //"kotlin.collections.MutableList" -> add("")
-                                //"kotlin.collections.MutableMap" ->
-                                else -> add(".toTypedArray()")
-                            }
-                        }
-                    } else {
-                        add(".toTypedArray()")
-                    }
-                } else {
-                    //没有泛型定义时，使用转array
-                    add(".toTypedArray()")
-                }
-            }
+            "kotlin.collections.MutableList" -> createFieldStatementListBlock(field)
             //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
             //TODO 处理内部泛型
-            "kotlin.collections.MutableMap" -> add(".%M({ it.key }, { it.value?.convertToMessage() })", convertMap)
+            "kotlin.collections.MutableMap" -> createFieldStatementMapBlock(field)
             else -> ""
+        }
+    }
+
+    //创建message.list 数组类型的转换
+    private fun CodeBlock.Builder.createFieldStatementListBlock(
+        field: DataFieldStruct
+    ) {
+        if (field.fieldType is DataFieldParameterType) {
+            val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
+            if (firstParameterType != null) {
+                if (!firstParameterType.isOriginalType) {
+                    add(".map { it.convertToMessage() }.toTypedArray()")
+                } else {
+                    //系统类型时
+                    when (firstParameterType.fieldType) {
+                        "kotlin.Int" -> add(".toIntArray()")
+                        "kotlin.Boolean" -> add(".toBooleanArray()")
+                        "kotlin.Double" -> add(".toDoubleArray()")
+                        "kotlin.Float" -> add(".toFloatArray()")
+                        "kotlin.Long" -> add(".toLongArray()")
+                        //TODO 处理更多子类型
+                        //"kotlin.collections.MutableList" -> add("")
+                        //"kotlin.collections.MutableMap" ->
+                        else -> add(".toTypedArray()")
+                    }
+                }
+            } else {
+                add(".toTypedArray()")
+            }
+        } else {
+            //没有泛型定义时，使用转array
+            add(".toTypedArray()")
+        }
+    }
+
+    //创建message.map 数组类型的转换
+    private fun CodeBlock.Builder.createFieldStatementMapBlock(
+        field: DataFieldStruct
+    ) {
+        //map must has 2 ParameterType
+        if (field.fieldType is DataFieldParameterType && field.fieldType.parameterTypes.size == 2) {
+            val firstParameterType = field.fieldType.parameterTypes[0]
+            val secondParameterType = field.fieldType.parameterTypes[1]
+            if (firstParameterType != null) {
+                if (!firstParameterType.isOriginalType) {
+                    add(".%M({ it.key?.convertToMessage() }, ", convertMap)
+                } else {
+                    //系统类型时
+                    add(".%M({ it.key }, ", convertMap)
+                }
+            } else {
+                add(".%M({ it.key }, ", convertMap)
+            }
+            if (secondParameterType != null) {
+                if (!secondParameterType.isOriginalType) {
+                    add("{ it.value?.convertToMessage() })")
+                } else {
+                    //系统类型时
+                    add("{ it.value })")
+                }
+            } else {
+                add("{ it.value })")
+            }
+        } else {
+            //没有泛型定义时，使用转array
+            add(".%M({ it.key }, { it.value })", convertMap)
         }
     }
 
