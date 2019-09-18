@@ -8,6 +8,9 @@ import com.squareup.kotlinpoet.ClassName
  */
 internal const val MESSAGE_SURFIX = "Kt"
 
+/**
+ * 一个pb文件的结构
+ */
 class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: String,
     /*放置转换类的文件名*/val fileName: String
 ) {
@@ -23,6 +26,9 @@ class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: St
     }
 }
 
+/**
+ * 枚举类结构
+ */
 class EnumStruct(/*数组名*/val enumsName: String) {
     /**
      * 数组原生名以及默认值
@@ -39,6 +45,9 @@ class EnumStruct(/*数组名*/val enumsName: String) {
     }
 }
 
+/**
+ * message类的结构
+ */
 class DataObjectStruct(val messageType: String) {
     val fields = mutableListOf<DataFieldStruct>()
     val messageTypePackage: String = messageType.substringBeforeLast(".")
@@ -55,6 +64,9 @@ class DataObjectStruct(val messageType: String) {
 
 data class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
 
+/**
+ * 字段数据类型结构
+ */
 open class DataFieldType protected constructor(
     val fieldType: String, val nullable: Boolean, val isOriginalType: Boolean
 ) {
@@ -81,6 +93,9 @@ open class DataFieldType protected constructor(
     }
 }
 
+/**
+ * 带泛型的字段数据类型结构
+ */
 class DataFieldParameterType private constructor(
     fieldType: String, nullable: Boolean, isOriginalType: Boolean
 ) :
