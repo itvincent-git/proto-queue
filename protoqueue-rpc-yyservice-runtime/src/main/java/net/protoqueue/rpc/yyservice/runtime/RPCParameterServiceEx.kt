@@ -50,55 +50,55 @@ fun parseRequest(
     }
 }
 
-inline fun RPCParameter.getResCode(): Int? {
+fun RPCParameter.getResCode(): Int? {
     return (values[SERVICE_RES] as? RPCResponseParameter)?.resCode
 }
 
-inline fun RPCParameter.getResMsg(): String? {
+fun RPCParameter.getResMsg(): String? {
     return (values[SERVICE_RES] as? RPCResponseParameter)?.resMsg
 }
 
-inline fun RPCParameter.getServiceHeaders(): Map<String, String>? {
+fun RPCParameter.getServiceHeaders(): Map<String, String>? {
     return (values[SERVICE_RES] as? RPCResponseParameter)?.serviceHeader
 }
 
-inline fun RPCParameter.getTraceId(): String? {
+fun RPCParameter.getTraceId(): String? {
     return (values[SERVICE_RES] as? RPCResponseParameter)?.traceId
 }
 
-inline fun RPCParameter.getIsBroadcast(): Boolean? {
+fun RPCParameter.getIsBroadcast(): Boolean? {
     return (values[SERVICE_NOTIFY] as? RPCNotifyParameter)?.isBroadcast
 }
 
-inline fun RPCParameter.getGroupType(): Long? {
+fun RPCParameter.getGroupType(): Long? {
     return (values[SERVICE_NOTIFY] as? RPCNotifyParameter)?.groupType
 }
 
-inline fun RPCParameter.getGroupId(): Long? {
+fun RPCParameter.getGroupId(): Long? {
     return (values[SERVICE_NOTIFY] as? RPCNotifyParameter)?.groupId
 }
 
-inline fun RPCParameter.getNeverBind(): Boolean? {
+fun RPCParameter.getNeverBind(): Boolean? {
     return (values[SERVICE_REQ] as? RPCRequestParameter)?.neverBind
 }
 
-inline fun RPCParameter.getNeedBind(): Boolean? {
+fun RPCParameter.getNeedBind(): Boolean? {
     return (values[SERVICE_REQ] as? RPCRequestParameter)?.needBind
 }
 
-inline fun RPCParameter.getTimeout(): Long? {
+fun RPCParameter.getTimeout(): Long? {
     return (values[SERVICE_REQ] as? RPCRequestParameter)?.timeOut
 }
 
-inline fun RPCParameter.getBusinessContext(): String? {
+fun RPCParameter.getBusinessContext(): String? {
     return (values[SERVICE_REQ] as? RPCRequestParameter)?.businessContext
 }
 
-inline fun RPCParameter.getRequestTraceId(): String? {
+fun RPCParameter.getRequestTraceId(): String? {
     return (values[SERVICE_REQ] as? RPCRequestParameter)?.traceId
 }
 
-inline fun RPCParameter.getRetryStrategy(): ArrayList<Int>? {
+fun RPCParameter.getRetryStrategy(): ArrayList<Int>? {
     return (values[SERVICE_REQ] as? RPCRequestParameter)?.retryStrategy
 }
 
