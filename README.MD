@@ -1,4 +1,4 @@
-- ## Protoqueue-RPC 特点
+## Protoqueue-RPC 特点
 
   ### 一键生成
 
@@ -207,7 +207,7 @@
 
   #### 参数可扩展
 
-  广播下发的数据可以通过`RPCParameter`
+  广播下发的数据可以通过`RPCParameter`扩展接收到的参数，例如是否广播、groupType、groupId
 
   ```kotlin
   /**
@@ -219,9 +219,26 @@
       data: ByteArray,
       parameter: RPCParameter?
   ) -> Unit
-  
+
+
+SvcUserNotifyService.Handler.userFreezeNotify { notify, parameter ->
+  //可判断是单播时才执行                                             
+  if (parameter?.getIsBroadcast() == false) {
+     userFreezeLiveData.setOrPostValue(notify)
+  }
+  null
+}
   ```
 
-  
+  请求的协议时也可以通过`RPCParameter`扩展请求的参数 ，例如超时时间、重试次数：
+
+```kotlin
+//设置重试策略
+val parameter = parseRequest(retryStrategy = arrayListOf(10000, 10000, 10000, 10000, 10000))
+val resp = SvcUserService.Client.login(WhSvcUserKt.UserLoginReqKt(), parameter)
+        
+```
+
+>上面这些扩展的方法都是可以业务根据自己的需求/不同的sdk进行扩展。
 
   
