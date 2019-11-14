@@ -11,6 +11,10 @@ gen_path="${bin_path}/../src/main/java"
 #描述文件生成路径
 desc_path="desc/proto.desc"
 
+if [ ! -d "desc" ]; then
+	mkdir "desc"
+fi
+
 if [ ! -d "${gen_path}" ]; then
 	mkdir "${gen_path}"
 fi
