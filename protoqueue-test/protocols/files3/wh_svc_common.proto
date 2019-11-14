@@ -1,0 +1,86 @@
+// 公共类（不区分service通道跟rpc）
+syntax = "proto3";
+package wh.svc.common;
+option objc_class_prefix = "PTB";
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+enum App {
+    AppUnknown = 0;
+    WooHoo = 1;
+}
+
+enum Platform {
+    PlatformUnknown = 0;
+    PlatformAndroid = 1;
+    PlatformIos = 2;
+}
+
+// 响应码
+enum ResponseCode {
+    Success = 0;                // 成功
+    ErrSystem = 1;              // 系统错误
+    ErrUnauthorized = 2;        // 权限不足
+    ErrInvalidParameter = 3;    // 参数错误
+    ErrServerBusy = 4;          // 服务繁忙
+    ErrTooFrequency = 5;        // 请求过于频繁（针对单人频率）
+    ErrRestricted = 6;          // 限制操作
+    ErrMaintenance = 7;         // 功能维护中
+    ErrLowVersion = 8;          // 版本过低
+    ErrCensorWords = 9;         // 包含敏感词
+    ErrNotExists = 10;          // 内容不存在
+    ErrExists = 11;             // 内容已存在
+    ErrExceedLimit = 12;        // 超出限制
+
+
+    // 用户服务错误码  [1000,1099]
+    ErrUserFrozen = 1000;   // 用户已被冻结
+
+    // 关系服务错误码 [1100, 1199]
+    ErrRelationGreetSendMax = 1100; // 发送打招呼次数达到上限
+    ErrRelationGreetToOneMax = 1101; // 对同一人打招呼达到上限
+
+    // 多人房错误码 [1200, 1201]
+    ErrPartyRoomLimitedByKicked = 1200; // 操作因为被踢出房或踢下麦等限制
+}
+
+enum Sex {
+    SexUnknown = 0;
+    FeMale = 1;
+    Male = 2;
+}
+
+message ResponseHeader {
+    int32 resCode = 1;  // 响应码,@see ResponseCode
+    string resMsg = 2;  // 响应提示语，不展示给用户，客户端打印日志调试用，可不传
+    string resTips = 3; // 展示给用户的提示语，非确定提示可通过公共toast显示，可不传
+}
+
+message NotifyHeader {
+    int64 seqId = 1; // 序号（用于通知乱序处理，seqId越大说明通知发生越晚，一般为毫秒时间戳）
+}
+
+message Empty{
+}
+
+// 虚拟房间号
+message RoomVid {
+    int64 owner = 1;
+    int32 type = 2;
+    string session = 3;
+}
+
+// 用户账号类型
+enum UserAccountType {
+    AccountUnknown = 0;
+    AccountFaceBook = 1;
+    AccountGoogle = 2;
+    AccountPhone = 3;
+}
+
+// 房间类型
+enum RoomType{
+    RoomTypeUnknown = 0;
+    VideoChat = 1; // 视频聊天房
+    PartyRoom = 2; // 多人视频房
+}

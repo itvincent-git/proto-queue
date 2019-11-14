@@ -1,0 +1,44 @@
+syntax = "proto3";
+// 地理位置服务api
+package wh.svc.location;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcLocationService {
+    // 获取位置上报间隔
+    rpc getReportConfig (GetReportConfigReq) returns (GetReportConfigRes);
+    // 位置上报
+    rpc reportLocation (ReportLocationReq) returns (ReportLocationRes);
+    // 修改“用户是否禁用位置服务”
+    rpc switchLocation(SwitchLocationReq) returns (SwitchLocationRes);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message GetReportConfigReq {
+}
+
+message GetReportConfigRes {
+    common.ResponseHeader header = 1;
+    int64 interval = 2; // 上报间隔，单位毫秒
+}
+
+message ReportLocationReq {
+    double latitude = 1; // 纬度
+    double longitude = 2; // 经度
+    string city = 3;  // 城市
+    string country = 4; // 国家码
+}
+
+message ReportLocationRes {
+    common.ResponseHeader header = 1;
+}
+
+message SwitchLocationReq {
+    bool disable = 1;
+}
+
+message SwitchLocationRes {
+    common.ResponseHeader header = 1;
+}

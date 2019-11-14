@@ -1,0 +1,52 @@
+syntax = "proto3";
+package wh.svc.online;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+// 用户在线状态服务
+service SvcUserOnlineService {
+    // 开始上报心跳，返回心跳间隔时间，单位毫秒
+    rpc startHeartbeat (StartHeartbeatReq) returns (StartHeartbeatRes);
+    // 心跳
+    rpc heatBeat (HeartbeatReq) returns (HeartbeatRes);
+    // 批量获取用户在线状态
+    rpc batchGetUserOnlineStatus (BatchGetUserOnlineStatusReq) returns (BatchGetUserOnlineStatusRes);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message StartHeartbeatReq {
+}
+
+message StartHeartbeatRes {
+    common.ResponseHeader header = 1;
+    int64 interval = 2; // 心跳间隔，单位毫秒
+}
+
+message HeartbeatReq {
+}
+
+message HeartbeatRes {
+    common.ResponseHeader header = 1;
+}
+
+message UserBizStatus {
+    // 业务状态，由具体业务定。 使用string的原因是增加一种业务后，在线服务不需要再发版
+    // VideoChat - 视频聊天
+    string bizType = 1;
+    int64 status = 2;
+}
+message UserOnlineStatus {
+    bool online = 1; // 用户是否在线
+    repeated UserBizStatus status = 2; //业务状态值
+    int64 latestLoginTimestamp = 3;  // 上次登录时间，online为false时有效
+}
+
+message BatchGetUserOnlineStatusReq {
+    repeated int64 uidList = 1; // 最大数量50
+}
+message BatchGetUserOnlineStatusRes {
+    common.ResponseHeader header = 1;
+    map<int64, UserOnlineStatus> statusMap = 2; // 如果用户不在线，不会放到map中
+}

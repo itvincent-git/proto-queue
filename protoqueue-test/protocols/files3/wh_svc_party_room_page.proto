@@ -1,0 +1,44 @@
+syntax = "proto3";
+// 多人聊天服务
+package wh.svc.partyroom.page;
+option objc_class_prefix = "PBPartyRoomPage";
+
+import "wh_svc_common.proto";
+
+service SvcPartyRoomPageService {
+    // 获取好友/关注相关推荐列表
+    rpc relatedRecommendList (RelatedRecommendReq) returns (RelatedRecommendRes);
+    // 获取首页列表
+    rpc homePageList (HomePageListReq) returns (HomePageListRes);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message RelatedRecommendReq {
+}
+
+message RelatedRecommendRes {
+    common.ResponseHeader header = 1;
+    repeated RelatedRecommendItem recommendItems = 2; // 推荐的房间列表
+}
+
+message RelatedRecommendItem {
+    int64 uid = 1; // 用户uid
+    common.RoomVid roomVid = 2; // 用户在哪个房间
+}
+
+message HomePageListReq {
+    string cursor = 1; // 游标，第一次请求游标填0
+    int32 limit = 2; // 最多返回多少个内容（单页可能不会返回limit条，但最多不超过limit条）
+}
+
+message HomePageListRes {
+    common.ResponseHeader header = 1;
+    repeated RoomItem roomItems = 2;
+    string nextCursor = 3; // 下一个游标，如果下一个游标无值，或""，表示已达到底部
+}
+
+message RoomItem {
+    common.RoomVid roomVid = 1;
+    int64 hotScore = 2; // 热度
+}

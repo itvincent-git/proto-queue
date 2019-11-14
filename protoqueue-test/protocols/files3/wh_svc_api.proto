@@ -1,0 +1,91 @@
+syntax = "proto3";
+//公共服务api
+package wh.svc.api;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcApiService {
+    // 设置隐私
+    rpc setPrivacySetting (SetPrivacySettingReq) returns (SetPrivacySettingRes);
+    // 查询隐私设置
+    rpc getPrivacySetting (GetPrivacySettingReq) returns (GetPrivacySettingRes);
+
+    // 获取单播时用户没有接收到的命令，启动客户端时请求，客户端处理后需要调commandCallback
+    rpc getPendingCommand (GetPendingCommandReq) returns (GetPendingCommandRes);
+    // 命令处理结果回调
+    rpc commandCallback (CommandCallbackReq) returns (CommandCallbackRes);
+}
+
+// 由客户端实现
+service SvcApiNotifyService {
+    // 命令通知单播，客户端处理后需要调commandCallback
+    rpc commandNotify (CommandInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message SetPrivacySettingReq {
+    PrivacySettingType type = 1;
+    bool status = 2;
+}
+
+message SetPrivacySettingRes {
+    common.ResponseHeader header = 1;
+}
+
+message GetPrivacySettingReq {
+}
+
+message GetPrivacySettingRes {
+    common.ResponseHeader header = 1;
+    bool recommendToFbFriend = 2;
+    bool recommendToGFriend = 3;
+    bool recommendToNear = 4;
+}
+
+message CommandInfo {
+    string cmdId = 1; // 命令唯一标志，在回调结果时携带这个id返回
+    CmdType cmdType = 2; // 命令类型
+    LogCondition logCondition = 3; // 日志拉取配置
+}
+
+message LogCondition {
+    int64 startTime = 1;
+    int64 endTime = 2;
+    bool containSdk = 3;
+}
+
+message GetPendingCommandReq {
+}
+
+message GetPendingCommandRes {
+    common.ResponseHeader header = 1;
+    repeated CommandInfo commandInfos = 2;
+}
+
+message CommandCallbackReq {
+    string cmdId = 1;
+    bool ack = 2;
+    LogResult logResult = 3;
+}
+
+message LogResult {
+    string logUrl = 1;
+}
+
+message CommandCallbackRes {
+    common.ResponseHeader header = 1;
+}
+
+enum CmdType {
+    CmdUnknown = 0;
+    LogPull = 1; // 日志拉取
+}
+
+enum PrivacySettingType {
+    PrivacyTypeUnknown = 0;
+    RecommendToFbFriend = 1;
+    RecommendToGFriend = 2;
+    RecommendToNear = 3;
+}

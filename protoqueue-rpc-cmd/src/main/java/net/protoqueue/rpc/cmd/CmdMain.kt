@@ -13,8 +13,9 @@ class CmdMain {
     private data class Args(var descPath: String, var outDir: String, var outPackageName: String)
 
     fun run(param: Array<String>) {
-        val descPath = File("proto.desc").absolutePath
-        val outFilePath = System.getProperty("user.dir") + File.separator + "output" + File.separator
+        val descPath = File("./../protoqueue-test/protocols/desc/proto.desc").absolutePath
+//        val outFilePath = System.getProperty("user.dir") + File.separator + "output" + File.separator
+        val outFilePath = File("./../protoqueue-test/src/main/java/").absolutePath
         val outPackageName = "com.woohoo.app.common.protocol.rpc"
         doRun(descPath, outFilePath, outPackageName)
     }

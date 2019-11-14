@@ -1,0 +1,186 @@
+syntax = "proto3";
+// 用户svc api
+package wh.svc.user;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+// 用户服务，服务端实现
+service SvcUserService {
+    // 登陆，返回用户基本资料
+    rpc login (UserLoginReq) returns (UserLoginRes);
+    // 更新基本资料
+    rpc updateUserInfo (UpdateUserInfoReq) returns (UpdateUserInfoRes);
+    // 保存用户的相册列表（含排序），需包含用户相册所有图片信息，最多6张照片，超过时后端截断数量
+    rpc savePhotoListRes (SavePhotoListReq) returns (SavePhotoListRes);
+    // 获取个人资料卡资料
+    rpc getUserPersonalCard (GetUserPersonalCardReq) returns (GetUserPersonalCardRes);
+    // 批量获取用户基本信息
+    rpc batchGetUserInfo (GetUserInfoReq) returns (GetUserInfoRes);
+    // 用户绑定账号
+    rpc bindAccount (UserBindAccountReq) returns (UserBindAccountRes);
+    // 用户解绑账号
+    rpc unBindAccount (UserUnBindAccountReq) returns (UserUnBindAccountRes);
+    // 获取用户账号信息
+    rpc getUserAccount (GetUserAccountReq) returns (GetUserAccountRes);
+    // 刷新用户账户token，如果账户id跟已绑定id不一致，则返回ErrInvalidParameter
+    rpc refreshAccountToken (RefreshAccountTokenReq) returns (RefreshAccountTokenRes);
+    // 获取用户列表，仅临时测试用，上线后服务端将移除此接口
+    rpc getUserInfoListForTest (GetUserInfoListForTestReq) returns (GetUserInfoListForTestRes);
+    // 分享用户，获取分享id
+    rpc shareUser (ShareUserReq) returns (ShareUserRes);
+    // 根据分享id，获取分享信息
+    rpc getUserInfoByShareId (GetUserInfoByShareIdReq) returns (GetUserInfoByShareIdRes);
+    // 搜索用户
+    rpc searchUser (SearchUserReq) returns (SearchUserRes);
+}
+
+// 用于单播/广播，以NotifyService结尾，由客户端实现，服务端不需要实现。
+service SvcUserNotifyService {
+    // 封禁单播， 单播不需要单播
+    rpc userFreezeNotify (UserFreezeNotifyInfo) returns (common.Empty);
+}
+
+// 封禁通知
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message UserFreezeNotifyInfo {
+    UserFreezeInfo freezeInfo = 1;
+}
+message UserFreezeInfo {
+    uint64 freezeUnixTimestamp = 1; // 冻结截止Unix时间戳，单位秒
+    string reason = 2;
+}
+
+message UserLoginReq {
+}
+
+message UserLoginRes {
+    common.ResponseHeader header = 1;
+    int64 firstLoginTime = 2;
+    bool isFirstLogin = 3;
+    UserInfo userInfo = 4;
+    UserFreezeInfo freezeInfo = 5; // 如果用户已封禁，此字段不为空
+}
+message UpdateUserInfoReq {
+    UserInfo userInfo = 1;
+}
+message UpdateUserInfoRes {
+    common.ResponseHeader header = 1;
+    UserInfo userInfo = 2;
+}
+
+message UserInfo {
+    int64 uid = 1;
+    int64 vid = 2;
+    string nick = 3;
+    string avatar = 4; // 头像
+    common.Sex sex = 5;
+    string intro = 6; // 个人介绍
+    int64 birthday = 7; // 生日，十进制，个十两位代表日，百千两位代表月，万位以上代表年。举例： 20120324
+    string voiceUrl = 8; // 个人录音
+    string city = 9; // 所在城市，火星传空
+    string country = 10; // 所在国家，填国家码，全大写，火星则填 MARS
+    Constellation constellation = 11; //星座
+}
+message SavePhotoListReq {
+    repeated string photoList = 1;
+}
+message SavePhotoListRes {
+    common.ResponseHeader header = 1;
+}
+// 个人资料卡
+message GetUserPersonalCardReq {
+    int64 uid = 1;
+}
+message GetUserPersonalCardRes {
+    common.ResponseHeader header = 1;
+    UserInfo userInfo = 2;
+    repeated string photoUrl = 3;
+}
+message GetUserInfoReq {
+    repeated int64 uidList = 1;
+}
+message GetUserInfoRes {
+    common.ResponseHeader header = 1;
+    repeated UserInfo userInfoList = 2; // 不保证响应的顺序与请求参数uidList一一对应，如果目标uid不存在，不会返回
+}
+message UserAccount {
+    common.UserAccountType accountType = 1;
+    string openId = 2;
+    string token = 3;
+}
+message UserBindAccountReq {
+    UserAccount account = 1;
+}
+message UserBindAccountRes {
+    common.ResponseHeader header = 1;
+}
+message RefreshAccountTokenReq {
+    UserAccount account = 1;
+}
+message RefreshAccountTokenRes {
+    common.ResponseHeader header = 1;
+}
+
+message UserUnBindAccountReq {
+    common.UserAccountType accountType = 1;
+}
+message UserUnBindAccountRes {
+    common.ResponseHeader header = 1;
+}
+
+message GetUserAccountReq {
+    repeated common.UserAccountType queryAccountType = 1; // 要查询的账号
+    UserAccount loginAccount = 2;   // 用户当前自己登陆的账号
+}
+message GetUserAccountRes {
+    common.ResponseHeader header = 1;
+    repeated UserAccount accountList = 2;
+}
+
+message GetUserInfoListForTestReq {
+}
+message GetUserInfoListForTestRes {
+    common.ResponseHeader header = 1;
+    repeated UserInfo userInfoList = 2;
+}
+
+enum Constellation {
+    ConstellationUnknown = 0;
+    Aquarius = 1; //水瓶座(1/20-2/18)
+    Pisces = 2; //雙魚座(2/19-3/20)
+    Aries = 3; //牧羊座(3/21-4/20)
+    Taurus = 4; //金牛座(4/21-5/20)
+    Gemini = 5; //雙子座(5/21-6/21)
+    Cancer = 6; //巨蟹座(6/22-7/22)
+    Leo = 7; //獅子座(7/23-8/22)
+    Virgo = 8; //處女座(8/23-9/22)
+    Libra = 9; //天秤座(9/23-10/23)
+    Scorpio = 10; //天蠍座(10/24-11/22)
+    Sagittarius = 11; //射手座(11/23-12/21)
+    Capricorn = 12; //摩羯座(12/22-1/20)
+}
+
+message ShareUserReq {
+}
+message ShareUserRes {
+    common.ResponseHeader header = 1;
+    string shareId = 2;
+}
+
+message GetUserInfoByShareIdReq {
+    string shareId = 1;
+}
+message GetUserInfoByShareIdRes {
+    common.ResponseHeader header = 1;
+    UserInfo userInfo = 2;
+}
+
+message SearchUserReq {
+    string keyword = 1;
+}
+
+message SearchUserRes {
+    repeated int64 uidList = 1;
+}

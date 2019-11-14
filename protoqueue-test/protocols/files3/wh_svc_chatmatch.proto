@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package wh.svc.chatmatch;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcChatMatchService {
+    // 获取我的匹配信息
+    rpc getMatchConfigs (GetMatchConfigReq) returns (GetMatchConfigRes);
+    // 开始匹配，可能的返回码：ErrRestricted、ErrMaintenance、ErrLowVersion
+    rpc startMatch (StartMatchReq) returns (StartMatchRes);
+    // 匹配心跳
+    rpc matchHeartbeat (MatchHeartbeatReq) returns (MatchHeartbeatRes);
+    // 取消匹配
+    rpc cancelMatch (CancelMatchReq) returns (CancelMatchRes);
+    // 接受匹配，如果接受匹配时匹配已经超时，则将收到reInMatchingNotify通知
+    rpc acceptMatch (AcceptMatchReq) returns (AcceptMatchRes);
+    // 拒绝匹配，用户拒绝后不会重进匹配池（不会收到reInMatchingNotify通知），如果客户端在非匹配界面收到matchAcceptNotify通知，应调用此方法拒绝匹配
+    rpc rejectMatch (RejectMatchReq) returns (RejectMatchRes);
+
+    // 邀请目标用户视频聊天，客户端发IM通知对方，如果邀请已发起，返回ErrExists
+    rpc inviteUser (InviteUserReq) returns (InviteUserRes);
+    // 取消邀请
+    rpc cancelInvitation (CancelInvitationReq) returns (CancelInvitationRes);
+    // 接受邀请，可能的返回码：ErrNotExists
+    rpc acceptInvitation (AcceptInvitationReq) returns (AcceptInvitationRes);
+    // 拒绝邀请
+    rpc rejectInvitation (RejectInvitationReq) returns (RejectInvitationRes);
+}
+
+service SvcChatMatchNotifyService {
+    // 匹配到通知，询问是否接受
+    rpc matchReadyNotify (MatchReadyNotifyInfo) returns (common.Empty);
+    // 重进匹配池匹配通知，如果收到此广播，表示用户已经重进匹配池，应回到匹配界面，或调用cancelMatching
+    rpc reInMatchingNotify (ReInMatchingNotifyInfo) returns (common.Empty);
+
+    // 邀请被取消通知
+    rpc cancelInvitationNotify (CancelInvitationNotifyInfo) returns (common.Empty);
+    // 邀请被拒绝通知
+    rpc rejectInvitationNotify (RejectInvitationNotifyInfo) returns (common.Empty);
+    // 邀请被接受通知
+    rpc acceptInvitationNotify (AcceptInvitationNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message GetMatchConfigReq {
+}
+message GetMatchConfigRes {
+    common.ResponseHeader header = 1;
+    int32 interval = 2; // 匹配心跳间隔，单位毫秒
+    int32 matchDelay = 3; // 第一次发起匹配时，延迟多久后真正发起匹配请求，单位毫秒
+    int32 acceptDuration = 4; // 匹配到用户后，接受的可操作时间，收到匹配通知，超过此时间后，客户端应发起接受匹配的请求。如果服务端延迟（acceptDuration+3秒）没有收到客户端请求，将取消本次匹配
+    repeated string tips = 5; // 匹配tips文案，随机返回10条
+}
+// 匹配标签选择
+enum NeedSex {
+    Whatever = 0; // 都行
+    NeedFemale = 1; // 女
+    NeedMale = 2; // 男
+}
+
+message StartMatchReq {
+    common.Sex sex = 1; //我的性别
+    NeedSex needSex = 2; //我的性别
+    int64 firstLoginTime = 3; // 第一次登陆时间
+    int32 age = 4; // 年龄
+    double latitude = 5; // 纬度
+    double longitude = 6; // 经度
+}
+
+message StartMatchRes {
+    common.ResponseHeader header = 1;
+    int32 restrictedSeconds = 2; // 剩余限制时间，单位秒，错误码为ErrRestricted时有效
+}
+
+message MatchHeartbeatReq {
+    common.Sex sex = 1; //我的性别
+    NeedSex needSex = 2; //我的性别
+    int64 firstLoginTime = 3; // 第一次登陆时间
+    int32 age = 4; // 年龄
+    double latitude = 5; // 纬度
+    double longitude = 6; // 经度
+}
+
+message MatchHeartbeatRes {
+    common.ResponseHeader header = 1;
+}
+
+message CancelMatchReq {
+
+}
+message CancelMatchRes {
+    common.ResponseHeader header = 1;
+    bool success = 2; // 是否取消成功
+}
+
+message MatchReadyNotifyInfo {
+    string matchId = 1; // 匹配id，接受或拒绝时携带上来
+    int64 hisUid = 2; // 对方uid
+    int64 seqId = 3; // 流水号，纳秒时间戳
+}
+
+message AcceptMatchReq {
+    string matchId = 1; // 匹配id，接受或拒绝时携带上来
+}
+message AcceptMatchRes {
+    common.ResponseHeader header = 1;
+}
+message RejectMatchReq {
+    string matchId = 1; // 匹配id，接受或拒绝时携带上来
+    bool reInQueue = 2; //是否重进匹配池
+    bool notBlacklist = 3; //不要将对方拉入黑名单
+}
+message RejectMatchRes {
+    common.ResponseHeader header = 1;
+}
+message ReInMatchingNotifyInfo {
+    int64 uid = 1; // 单播占位，暂时没什么用
+    int64 seqId = 2; // 流水号，纳秒时间戳
+}
+
+message InviteUserReq {
+    int64 invitee = 1; // 被邀请人uid（对方uid）
+}
+
+message InviteUserRes {
+    common.ResponseHeader header = 1;
+    string invitationId = 2; // 邀请id
+    int64 expireTimestamp = 3; // 到期时间戳，单位毫秒
+}
+
+message AcceptInvitationReq {
+    string invitationId = 1; // 邀请id
+}
+message AcceptInvitationRes {
+    common.ResponseHeader header = 1;
+}
+message RejectInvitationReq {
+    string invitationId = 1; // 邀请id
+}
+message RejectInvitationRes {
+    common.ResponseHeader header = 1;
+}
+
+message CancelInvitationNotifyInfo {
+    string invitationId = 1; // 邀请id
+    int64 inviter = 2; // 邀请人uid
+}
+message RejectInvitationNotifyInfo {
+    string invitationId = 1; // 邀请id
+    int64 invitee = 2; // 被邀请人uid
+}
+message AcceptInvitationNotifyInfo {
+    string invitationId = 1; // 邀请id
+    int64 invitee = 2; // 被邀请人uid
+}
+message CancelInvitationReq {
+    string invitationId = 1; // 邀请id
+}
+message CancelInvitationRes {
+    common.ResponseHeader header = 1;
+}

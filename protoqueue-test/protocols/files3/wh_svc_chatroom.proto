@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package wh.svc.chatroom;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcChatRoomService{
+    //创建音视频Token    
+    rpc createMediaToken(CreateMediaTokenReq) returns (CreateMediaTokenRes);
+}
+
+
+// 房间Nofify服务（客户端实现）
+service SvcChatRoomNotifyService{  
+    // 公屏通知
+    rpc onPublicScreenMessageNotify (PublicScreenMessageNotify) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+enum TokenType {
+    TokenUnknown = 0;
+    TokenVideo = 1;
+    TokenAudio = 2;
+}
+
+message CreateMediaTokenReq {
+    common.RoomVid roomVid = 1;
+    int64 roomId = 2;
+    TokenType type = 3;
+}
+
+message CreateMediaTokenRes{
+    common.ResponseHeader header = 1;
+    string token = 2;
+}
+
+// 公屏通知
+message PublicScreenMessageNotify{
+    int64 roomId = 1; // 房间Id
+    int64 sender = 2; // 发送者
+    bool system = 3;  // 系统通知   
+    map<string,string> content = 4;  // 公屏内容(采用富文本的形式)
+}

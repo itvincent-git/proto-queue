@@ -1,0 +1,52 @@
+syntax = "proto3";
+// 用户推荐svc api
+package wh.svc.ussrremd;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+// 用户推荐服务，服务端实现
+service SvcUserRecommendService {
+    // 获取推荐用户列表
+    rpc getRecommendUserList (GetRecommendUserReq) returns (GetRecommendUserRes);
+
+    // 上报第三方好友，全量上报
+    rpc reportThirdFriend (ReportThirdFriendReq) returns (ReportThirdFriendRes);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message GetRecommendUserReq {
+}
+
+message GetRecommendUserRes {
+    common.ResponseHeader header = 1;
+    repeated FaceBookRecommendUser faceBookList = 2;
+    repeated NearByRecommendUser nearByList = 3;
+}
+
+message FaceBookRecommendUser {
+    int64 uid = 1; // uid
+}
+
+message NearByRecommendUser {
+    int64 uid = 1; // uid
+    RecommendUserLocation location = 2; // 用户所在位置信息，本字段可能为空
+}
+message RecommendUserLocation {
+    double distance = 2; // 距离
+    string city = 3; // 城市
+}
+message ReportThirdFriendReq {
+    common.UserAccountType accountType = 1;
+    repeated ThirdFriend thirdFriendList = 2;
+}
+message ReportThirdFriendRes {
+    common.ResponseHeader header = 1;
+}
+message ThirdFriend {
+    string openId = 1; // 第三方账户的openId
+    string nick = 2;
+    string avatar = 3;
+    common.Sex sex = 4;
+}

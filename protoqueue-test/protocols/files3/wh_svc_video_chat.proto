@@ -1,0 +1,357 @@
+syntax = "proto3";
+// 视频聊天服务
+package wh.svc.videochat;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcVideoChatService {
+    // 获取面具列表
+    rpc getMaskList (GetMaskListReq) returns (GetMaskListRes);
+    // 佩戴面具
+    rpc wearMask (WearMaskReq) returns (WearMaskRes);
+
+    // 获取互动表情列表
+    rpc getEmojiList (GetEmojiListReq) returns (GetEmojiListRes);
+    // 使用互动表情
+    rpc useEmoji (UseEmojiReq) returns (UseEmojiRes);
+
+    // 加入聊天，错误码： ErrNotExists - 视频聊天不存在
+    rpc joinChat (JoinChatReq) returns (JoinChatRes);
+    // 查询用户聊天状态，聊天是否存在，用户是否进入聊天
+    rpc getUserChatStatus (GetUserChatStatusReq) returns (GetUserChatStatusRes);
+    // 获取当前聊天信息， 错误码： ErrNotExists - 视频聊天不存在
+    rpc getChatInfo (GetChatInfoReq) returns (GetChatInfoRes);
+
+    // 邀请摘面具，错误码： ErrNotExists - 视频聊天不存在， ErrTooFrequency - 操作太频繁
+    rpc inviteTakeOffMask (InviteTakeOffMaskReq) returns (InviteTakeOffMaskRes);
+    // 应答摘面具邀请，错误码： ErrNotExists - 邀请不存在
+    rpc replyTakeOffMask (ReplyTakeOffMaskReq) returns (ReplyTakeOffMaskRes);
+
+    // 击掌，错误码：ErrNotExists - 视频聊天不存在
+    rpc clickClap (ClickClapReq) returns (ClickClapRes);
+
+    // 获取视频聊天匹配记录
+    rpc getUserChatHistory (GetUserChatHistoryReq) returns (GetUserChatHistoryRes);
+    // 删除视频聊天匹配记录
+    rpc delUserChatHistory (DelUserChatHistoryReq) returns (DelUserChatHistoryRes);
+
+    // 邀请开始一个玩法, 错误码：ErrExists 已经存在游戏了
+    rpc inviteStartPlay (InviteStartPlayReq) returns (InviteStartPlayRes);
+    // 回复开始玩法的邀请
+    rpc replyStartPlay (ReplyStartPlayReq) returns (ReplyStartPlayRes);
+    // 取消开始玩法的邀请
+    rpc cancelStartPlay (CancelStartPlayReq) returns (CancelStartPlayRes);
+    // 查询正在进行的玩法
+    rpc getPlayingInfo (GetPlayingInfoReq) returns (GetPlayingInfoRes);
+}
+
+service SvcVideoChatNotifyService {
+    // 对方使用互动表情
+    rpc peerUseEmojiNotify (PeerUseEmojiNotifyInfo) returns (common.Empty);
+
+    // 通知客户端，需要进房
+    rpc readyJoinChatNotify (ReadyJoinChatNotifyInfo) returns (common.Empty);
+
+    // 发起摘下面具的单播
+    rpc inviteTakeOffMaskNotify (InviteTakeOffMaskNotifyInfo) returns (common.Empty);
+    // 应答摘面具邀请通知
+    rpc rejectTakeOffMaskNotify (RejectTakeOffMaskNotifyInfo) returns (common.Empty);
+    // 摘下面具
+    rpc takeoffMaskNotify (TakeOffMaskNotifyInfo) returns (common.Empty);
+
+    // 点击击掌
+    rpc peerClickClapNotify (PeerClickClapNotifyInfo) returns (common.Empty);
+    // 完成击掌
+    rpc finishClapNotify (FinishClapNotifyInfo) returns (common.Empty);
+
+    // 对方发起玩法邀请的通知
+    rpc peerInviteStartPlayNotify (PeerInviteStartPlayNotifyInfo) returns (common.Empty);
+    // 对方回应发起玩法的邀请的通知
+    rpc peerReplyStartPlayNotify (PeerReplyStartPlayNotifyInfo) returns (common.Empty);
+    // 对方取消开始玩法邀请的通知
+    rpc peerCancelStartPlayNotify (PeerCancelStartPlayNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message GetMaskListReq {
+}
+
+message GetMaskListRes {
+    common.ResponseHeader header = 1;
+    repeated Mask maskList = 2;
+}
+
+message WearMaskReq {
+    string maskId = 1;
+}
+
+message WearMaskRes {
+    common.ResponseHeader header = 1;
+}
+
+message GetEmojiListReq {
+    int64 lastModifyTime = 1; // 列表最近一次更新时间，单位毫秒，首次获取可以不传
+}
+
+message GetEmojiListRes {
+    common.ResponseHeader header = 1;
+    repeated Emoji emojiList = 2; // 如果列表没有更新过，则返回空列表
+    int64 lastModifyTime = 3; // 列表最近一次更新时间，单位毫秒
+}
+
+message UseEmojiReq {
+    string chatId = 1;
+    string emojiId = 2;
+}
+
+message UseEmojiRes {
+    common.ResponseHeader header = 1;
+}
+
+message CdTime {
+    int64 totalSecs = 1; // 进度条总秒数
+    int64 remainSecs = 2; // 剩余秒数
+}
+
+message JoinChatReq {
+    string chatId = 1;
+}
+message JoinChatRes {
+    common.ResponseHeader header = 1;
+    CdTime cdTime = 2; // 进度条
+    int64 peerUid = 3; // 对方UID
+    MaskStatus maskStatus = 4; // 面具状态
+}
+
+message LeaveChatReq {
+    string chatId = 1;
+}
+message LeaveChatRes {
+    common.ResponseHeader header = 1;
+}
+
+message ChatHeartbeatReq {
+    string chatId = 1;
+}
+message ChatHeartbeatRes {
+    common.ResponseHeader header = 1;
+}
+
+message GetUserChatStatusReq {
+    string chatId = 1;
+}
+message GetUserChatStatusRes {
+    common.ResponseHeader header = 1;
+    bool chatExist = 2;
+}
+
+message GetChatInfoReq {
+    string chatId = 1;
+    int64 peerUid = 2;
+}
+message GetChatInfoRes {
+    common.ResponseHeader header = 1;
+    MaskStatus maskStatus = 2;
+    ClapStatus clapStatus = 3; // 自己的击掌状态
+    ClapStatus peerClapStatus = 4; // 对方的击掌状态
+    CdTime cdTime = 5;
+}
+
+message InviteTakeOffMaskReq {
+    string chatId = 1;
+}
+message InviteTakeOffMaskRes {
+    common.ResponseHeader header = 1;
+    CdTime cdTime = 2; // 进度条
+}
+
+message ReplyTakeOffMaskReq {
+    string chatId = 1;
+    bool agree = 2;
+}
+message ReplyTakeOffMaskRes {
+    common.ResponseHeader header = 1;
+}
+
+message ClickClapReq {
+    string chatId = 1;
+    // 对方UID
+    int64 peerUid = 2;
+}
+message ClickClapRes {
+    common.ResponseHeader header = 1;
+}
+
+message UserChatHistory {
+    int64 uid = 1;
+    int64 matchTime = 2; // 匹配时间，秒时间戳
+}
+message GetUserChatHistoryReq {
+    int64 lastMatchTime = 1; // 上次返回的lastMatchTime，首次查询传0
+    int32 limit = 2;
+}
+message GetUserChatHistoryRes {
+    common.ResponseHeader header = 1;
+    int64 lastMatchTime = 2; // 最后一条记录对应的匹配时间
+    repeated UserChatHistory histories = 3;
+}
+
+message DelUserChatHistoryReq {
+    int64 targetUid = 1;
+}
+message DelUserChatHistoryRes {
+    common.ResponseHeader header = 1;
+}
+
+message InviteStartPlayReq {
+    string chatId = 1;
+    PlayType playType = 2;
+}
+message InviteStartPlayRes {
+    common.ResponseHeader header = 1;
+}
+
+message ReplyStartPlayReq {
+    string chatId = 1;
+    PlayType playType = 2;
+    InviteReplyType reply = 3;
+}
+message ReplyStartPlayRes {
+    common.ResponseHeader header = 2;
+}
+
+message CancelStartPlayReq {
+    string chatId = 1;
+    PlayType playType = 2;
+}
+message CancelStartPlayRes {
+    common.ResponseHeader header = 2;
+}
+
+message GetPlayingInfoReq {
+    string chatId = 1;
+}
+message GetPlayingInfoRes {
+    common.ResponseHeader header = 1;
+    repeated PlayingInfo playingInfos = 2;
+}
+
+message Mask {
+    string maskId = 1; // 面具id
+    string name = 2; // 面具名
+    string picUrl = 3; // 缩略图地址
+    repeated Material wearMaterialList = 4; // 佩戴面具时-素材列表
+    repeated Material takeoffMaterialList = 5; // 摘下面具时-素材列表
+    repeated Material pureMaterialList = 6; // 摘下面具后-素材列表
+}
+enum MaskStatus {
+    Unknown = 0;
+    On = 1; // 戴面具
+    Off = 2; // 摘下面具
+}
+enum MaterialType {
+    UnknownMaterialType = 0;
+    Decal = 1; // 贴纸
+    Effect = 2; // 特效
+    Filter = 3; // 滤镜
+    Emotion = 4; // 表情
+    Dance = 5; // 舞印
+}
+
+enum ChatSource {
+    UnKnown = 0; // 未知
+    MatchPlaza = 1; // 匹配广场
+    IM = 2; // IM
+}
+
+enum ResourceType {
+    UnknownResourceType = 0;
+    SVGA = 1;
+}
+
+enum ClapStatus {
+    UnKnownClapStatus = 0; // 未知
+    ExistClapInvite = 1; // 存在击掌邀请
+    NotExistClapInvite = 2; // 不存在击掌邀请
+}
+
+enum InviteReplyType {
+    UnKnownInviteReplyStatus = 0; // 未知
+    Agree = 1; // 同意
+    Reject = 2; // 拒绝
+    NotSupportPlayType = 3; // 不支持的玩法
+}
+
+// 玩法类型
+enum PlayType {
+    PlayTypeUnknown = 0;
+    Tacit = 1; // 默契大挑战
+}
+
+message Material {
+    MaterialType materialType = 1; // 素材类型
+    int64 materialId = 2; // 素材id
+    string name = 3; // 素材名
+    string zipUrl = 4; // 资源包地址
+    string md5 = 5; // md5校验码
+}
+
+message Emoji {
+    string emojiId = 1; // 表情id
+    string name = 2; // 表情名
+    string picUrl = 3; // 缩略图地址
+    ResourceType resourceType = 4; // 资源类型
+    string resourceUrl = 5; // 资源地址
+}
+message PlayingInfo {
+    PlayType playType = 1;
+    string playingId = 2;
+}
+
+message PeerUseEmojiNotifyInfo {
+    string chatId = 1;
+    string emojiId = 2; // 对方使用的表情id
+}
+
+message ReadyJoinChatNotifyInfo {
+    string chatId = 1;
+    int64 roomId = 2;
+    ChatSource chatSource = 3;
+    int64 uid1 = 4; // 本局聊天用户
+    int64 uid2 = 5;
+    common.RoomVid roomVId = 6; // 换token需要用
+    string token = 7; // 进房token
+}
+message InviteTakeOffMaskNotifyInfo {
+    string chatId = 1;
+    int64 inviterUid = 2;
+}
+message RejectTakeOffMaskNotifyInfo {
+    string chatId = 1;
+    int64 rejectUid = 2; // 发起拒绝的UID
+}
+message TakeOffMaskNotifyInfo {
+    string chatId = 1;
+}
+message PeerClickClapNotifyInfo {
+    string chatId = 1;
+    int64 clapUid = 2; // 击掌的uid
+}
+message FinishClapNotifyInfo {
+    string chatId = 1;
+}
+message PeerInviteStartPlayNotifyInfo {
+    string chatId = 1;
+    PlayType playType = 2;
+}
+message PeerReplyStartPlayNotifyInfo {
+    string chatId = 1;
+    PlayType playType = 2;
+    InviteReplyType reply = 3;
+}
+message  PeerCancelStartPlayNotifyInfo {
+    string chatId = 1;
+    PlayType playType = 2;
+}

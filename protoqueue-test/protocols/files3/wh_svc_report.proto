@@ -1,0 +1,61 @@
+syntax = "proto3";
+// 举报服务
+package wh.svc.report;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+// 举报服务，服务端实现
+service SvcReportService {
+    // 举报违规行为
+    rpc reportViolation (ReportViolationReq) returns (ReportViolationRes);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message ReportViolationReq {
+    BizType bizType = 1; // 业务场景
+    ViolationType violationType = 2; //违规类型
+    int64 targetUid = 3; // 被举报人
+    string desc = 4; // 举报描述
+    repeated string picList = 5; // 举证图片，适用于截图场景，IM或者视频
+    int64 roomId = 6; // 房间id
+    string chatId = 7; // 聊天id
+    repeated IMChatMessage messageList = 8; // IM聊天消息列表，最多取30条
+}
+
+message IMChatMessage {
+    bool selfSend = 1; // 消息是否由举报者发出的
+    IMChatContentType contentType = 2; // 消息类型
+    string content = 3; // 文字类型传文本，图片类型传url
+    int64 timestamp = 4;
+}
+
+message ReportViolationRes {
+    common.ResponseHeader header = 1;
+}
+
+// 业务场景
+enum BizType {
+    BizTypeUnknown = 0;
+    PersonalInfo = 1; // 个人资料
+    VideoRoom = 2; // 视频房间
+    ChatMatchRecord = 3; // 聊天匹配记录
+    IM = 4; // im举报
+}
+
+// 违规类型
+enum ViolationType {
+    ViolationTypeUnknown = 0;
+    Advertisement = 1; // 广告
+    Salacity = 2; // 色情
+    Harass = 3; // 骚扰
+    Illegal = 4; // 违法
+}
+
+// IM聊天消息类型
+enum IMChatContentType {
+    ContentTypeUnknown = 0;
+    TEXT = 1;
+    IMG = 2;
+}

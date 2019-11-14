@@ -1,0 +1,193 @@
+syntax = "proto3";
+// 关系服务
+package wh.svc.relation;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcRelationService {
+    // 关注或取消关注
+    rpc changeFollow (FollowOpReq) returns (FollowOpRes);
+    // 获取粉丝列表
+    rpc getFansList (GetFansListReq) returns (GetFansListRes);
+    // 获取关注列表
+    rpc getFollowList (GetFollowListReq) returns (GetFollowListRes);
+    // 获取好友列表
+    rpc getFriendList (GetFriendListReq) returns (GetFriendListRes);
+    // 获取关注数（包括关注数、粉丝数、好友数）
+    rpc getRelationCount (GetRelationCountReq) returns (GetRelationCountRes);
+    // 检查与目标用户关系
+    rpc checkRelation (CheckRelationReq) returns (CheckRelationRes);
+    // 拉黑或取消拉黑
+    rpc changeBlackList (ChangeBlackListReq) returns (ChangeBlackListRes);
+    // 获取黑名单列表
+    rpc getBlackList (GetBlackListReq) returns (GetBlackListRes);
+    // 打招呼
+    rpc greeting (GreetReq) returns (GreetRes);
+}
+
+// 由客户端实现
+service SvcRelationNotifyService {
+    // 关系状态变更单播
+    rpc relationChangeNotify (RelationChangeMsg) returns (common.Empty);
+}
+
+// 关注的来源
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+enum FollowSource {
+    SourceUnknown = 0;
+    Profile = 1; //个人资料页关注
+    MinProfileCard = 2; //小资料卡
+    IM = 3; // IM关注
+    Recommend = 4; // 推荐
+    AutoFollow = 5; // 自动关注
+    PartyRoom = 6; //多人房
+}
+
+// 关注操作
+enum FollowOpType {
+    FollowOpUnknown = 0;
+    OpFollow = 1; //关注
+    OpUnFollow = 2; //取消关注
+}
+
+enum BlackOpType {
+    BlackOpUnknown = 0;
+    Add = 1; // 添加
+    Remove = 2; // 移除
+}
+
+// 关系类型
+enum RelationType {
+    RelationUnknown = 0;
+    Fans = 1; // 粉丝
+    Follow = 2; // 关注
+    Friend = 3; // 互相关注（好友）
+    BlackList = 4; // 黑名单
+}
+
+enum RelationChangeType {
+    OpUnknown = 0;
+    OpBeFollowed = 1;
+    OpRemoveFollow = 2;
+    OpBeFriend = 3;
+    OpRemoveFriend = 4;
+}
+
+message FansInfo {
+    int64 uid = 1;
+}
+
+message FollowInfo {
+    int64 uid = 1;
+}
+
+message FriendInfo {
+    int64 uid = 1;
+}
+
+message BlackInfo {
+    int64 uid = 1;
+    int64 addTime = 2; // 加入黑名单时间，0时区时间戳（秒）
+}
+
+message FollowOpReq {
+    int64 targetUid = 1; // 目标uid
+    FollowSource followSource = 2; // 关注渠道@see FollowSource
+    FollowOpType opType = 3; // 操作类型 @see FollowOpType
+}
+message FollowOpRes {
+    common.ResponseHeader header = 1;
+}
+
+message GetFansListReq {
+    int64 targetUid = 1; // 被查询Uid
+    string lastId = 2; // 上一次查询的最后一个id
+    int32 limit = 3; // 每页大小
+}
+message GetFansListRes {
+    common.ResponseHeader header = 1;
+    string lastId = 2; // 用于下一次查询的最后一个id
+    repeated FansInfo fansInfos = 3; // 粉丝列表
+}
+
+message GetFollowListReq {
+    int64 targetUid = 1; // 被查询Uid
+    string lastId = 2; // 上一次查询的最后一个id
+    int32 limit = 3; // 每页大小
+}
+message GetFollowListRes {
+    common.ResponseHeader header = 1;
+    string lastId = 2; // 用于下一次查询的最后一个id
+    repeated FollowInfo followInfos = 3; // 关注列表
+}
+
+message GetFriendListReq {
+    int64 targetUid = 1; // 被查询Uid
+    string lastId = 2; // 上一次查询的最后一个id
+    int32 limit = 3; // 每页大小
+}
+message GetFriendListRes {
+    common.ResponseHeader header = 1;
+    string lastId = 2; // 用于下一次查询的最后一个id
+    repeated FriendInfo friendInfos = 3; // 好友列表
+}
+
+// 查询粉丝、关注、相互关注数量
+message GetRelationCountReq {
+    int64 targetUid = 1; // 被查询用户Uid
+}
+message GetRelationCountRes {
+    common.ResponseHeader header = 1;
+    int64 fansNum = 2;
+    int64 followNum = 3;
+    int64 friendNum = 4;
+}
+
+message ChangeBlackListReq {
+    int64 targetUid = 1;
+    BlackOpType opType = 2;
+}
+message ChangeBlackListRes {
+    common.ResponseHeader header = 1;
+}
+
+message GetBlackListReq {
+    int64 targetUid = 1; // 被查询Uid
+    string lastId = 2; // 上一次查询的最后一个id,
+    int32 limit = 3; // 每页大小
+}
+message GetBlackListRes {
+    common.ResponseHeader header = 1;
+    string lastId = 2; // 用于下一次查询的最后一个id
+    repeated BlackInfo blackInfos = 3;
+}
+
+message CheckRelationReq {
+    int64 targetUid = 1; // 被查询用户
+    bool checkFollow = 2;
+    bool checkFans = 3;
+    bool checkFriend = 4;
+    bool checkBlackList = 5;
+}
+message CheckRelationRes {
+    common.ResponseHeader header = 1;
+    bool follow = 2; // 是否关注targetUid
+    bool fans = 3; // 是否为targetUid的粉丝
+    bool friend = 4; // 是否互为好友
+    bool blackList = 5; // 是否拉黑了targetUid
+}
+
+message GreetReq {
+    int64 targetUid = 1;
+}
+message GreetRes{
+    common.ResponseHeader header = 1;
+}
+
+message RelationChangeMsg {
+    int64 srcUid = 1;
+    FollowSource followSource = 2; //此字段 仅在关注、取关类型中有意义
+    RelationChangeType changeType = 3;
+}

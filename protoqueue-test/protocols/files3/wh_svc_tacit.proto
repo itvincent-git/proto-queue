@@ -1,0 +1,112 @@
+syntax = "proto3";
+// 默契大挑战
+package wh.svc.tacit;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcTacitService {
+    // 回答问题,错误码：ErrNotExists - 题目不存在 ErrExists - 已经回答过
+    rpc answer (AnswerReq) returns (AnswerRes);
+    // 获取默契称号
+    rpc getTacitTitle (TacitTitleReq) returns (TacitTitleRes);
+    // 获取默契大挑战基本信息
+    rpc getTacitBasicInfo (GetTacitBasicInfoReq) returns (GetTacitBasicInfoRes);
+}
+
+service SvcTacitNotifyService {
+    // 开始默契大挑战广播，带第一道题
+    rpc startTacitNotify (StartTacitNotifyInfo) returns (common.Empty);
+    // 用户回答问题的广播
+    rpc userAnswerNotify (UserAnswerNotifyInfo) returns (common.Empty);
+    // 下一题的广播
+    rpc nextQuestionNotify (NextQuestionNotifyInfo) returns (common.Empty);
+    // 默契大挑战结束广播
+    rpc finishTacitNotify (FinishTacitNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message AnswerReq {
+    string roundId = 1;
+    int64 questionId = 2;
+    int64 answerId = 3;
+    int32 questionOrder = 4;
+}
+message AnswerRes {
+    common.ResponseHeader header = 1;
+}
+
+message TacitTitleReq {
+    int64 targetUid = 1;
+}
+message TacitTitleRes {
+    common.ResponseHeader header = 1;
+    int64 matchDegree = 2; // 默契度，百分比值乘以100
+    string title = 3;
+}
+
+message GetTacitBasicInfoReq{
+    string roundId = 1;
+}
+message GetTacitBasicInfoRes {
+    common.ResponseHeader header = 1;
+    string roundId = 2;
+    int32 questionCount = 3; // 总题数
+}
+
+enum QuestionType {
+    Unknown = 0;
+    TEXT = 1; // 文字
+    IMG = 2; // 图片
+}
+
+message Question {
+    int64 questionId = 1; // 问题id（唯一）
+    int32 questionOrder = 2; // 第几题，从1开始
+    int32 remainMs = 3; // 剩余时间（毫秒）
+    QuestionType type = 4;
+    string content = 5; // 题干
+    repeated Answer answers = 6; // 回答列表
+}
+
+message Answer {
+    int64 answerId = 1;
+    string content = 2;
+}
+
+message UserAnswer {
+    int64 uid = 1;
+    int64 answerId = 2;
+}
+
+message QuestionResult {
+    int64 questionId = 1;
+    repeated UserAnswer userAnswers = 2;
+    int64 showMs = 3; // 显示时长，毫秒
+    int32 questionOrder = 4; // 第几题，从1开始
+}
+
+message StartTacitNotifyInfo {
+    string roundId = 1;
+    int32 questionCount = 2; // 总题数
+    Question question = 3;
+}
+
+message NextQuestionNotifyInfo {
+    string roundId = 1;
+    QuestionResult preQuestionResult = 2;
+    Question nextQuestion = 3; // 如果为空，表示不存在一下题
+}
+
+message UserAnswerNotifyInfo {
+    string roundId = 1;
+    int64 questionId = 2;
+    int64 uid = 3;
+}
+
+message FinishTacitNotifyInfo {
+    string roundId = 1;
+    int64 matchDegree = 2; // 默契度，百分比值乘以100
+    string title = 3;
+}
