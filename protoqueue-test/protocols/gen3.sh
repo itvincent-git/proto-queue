@@ -1,6 +1,7 @@
 #!/bin/bash
 
 bin_path=$(cd $(dirname $0) && pwd -P)
+cd "${bin_path}"
 
 echo "gen_java path : ${bin_path}"
 
