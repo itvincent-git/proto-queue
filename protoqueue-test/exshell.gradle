@@ -1,0 +1,113 @@
+/**
+ * 用于在gradle的task中便捷添加任务
+ * registeredExc 可以执行一个脚本 脚本需要放入exshell文件夹下面
+ * registeredCmd 可以执行一条命令
+ */
+
+
+
+registeredExcOnlyMac("genProtocols", "生成PB协议相关", "../protoqueue-test/protocols/gen3.sh")
+
+//////////////////这是基础//////////////////
+/**
+ * 注册task 执行一个脚本
+ * @param name 任务名
+ * @param des 任务描述
+ * @param excPath 脚本位置
+ */
+void registeredShell(String name, String des, String macShellPath, String windowShellPath) {
+    if (org.gradle.internal.os.OperatingSystem.current().macOsX) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine 'sh', "${project.rootProject.projectDir}${File.separatorChar}exshell${File.separatorChar}$macShellPath"
+            }
+        }
+    }
+    else if (org.gradle.internal.os.OperatingSystem.current().windows) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine "${project.rootProject.projectDir}${File.separatorChar}exshell${File.separatorChar}$windowShellPath"
+            }
+        }
+    }
+}
+
+/**
+ * 仅在mac上注册task 执行一个脚本
+ * @param name 任务名
+ * @param des 任务描述
+ * @param excPath 脚本位置
+ */
+void registeredExcOnlyMac(String name, String des, String excPath) {
+    if (org.gradle.internal.os.OperatingSystem.current().macOsX) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine 'sh', "${project.rootProject.projectDir}${File.separatorChar}exshell${File.separatorChar}$excPath"
+            }
+        }
+    }
+}
+
+/**
+ * 仅在window上注册task 执行一个脚本
+ * @param name 任务名
+ * @param des 任务描述
+ * @param excPath 脚本位置
+ */
+void registeredExcOnlyWin(String name, String des, String excPath) {
+    if (org.gradle.internal.os.OperatingSystem.current().windows) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine "${project.rootProject.projectDir}${File.separatorChar}exshell${File.separatorChar}$excPath"
+            }
+        }
+    }
+}
+
+/**
+ * 执行一条命令 可以在所有平台上
+ * @param name 任务名
+ * @param des 任务描述
+ * @param args 命令本体
+ */
+void registeredCmd(String name, String des, String... args) {
+    //if (org.gradle.internal.os.OperatingSystem.current().macOsX) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine args
+            }
+        }
+    //}
+}
+
+/**
+ * 执行一条命令 仅在mac上
+ * @param name 任务名
+ * @param des 任务描述
+ * @param args 命令本体
+ */
+void registeredCmdOnlyMac(String name, String des, String... args) {
+    if (org.gradle.internal.os.OperatingSystem.current().macOsX) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine args
+            }
+        }
+    }
+}
+
+/**
+ * 执行一条命令 仅在win上
+ * @param name 任务名
+ * @param des 任务描述
+ * @param args 命令本体
+ */
+void registeredCmdOnlyWin(String name, String des, String... args) {
+    if (org.gradle.internal.os.OperatingSystem.current().windows) {
+        project.task(name, group: "exshell", description: des).doLast {
+            exec {
+                commandLine args
+            }
+        }
+    }
+}
