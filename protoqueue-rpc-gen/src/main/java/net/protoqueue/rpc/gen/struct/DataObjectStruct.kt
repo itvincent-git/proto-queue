@@ -1,6 +1,7 @@
 package net.protoqueue.rpc.gen.struct
 
 import com.squareup.kotlinpoet.ClassName
+import net.protoqueue.rpc.gen.util.GenUtil
 
 /**
  * PB Message的转换类
@@ -62,7 +63,12 @@ class DataObjectStruct(val messageType: String) {
     }
 }
 
-data class DataFieldStruct(val fieldName: String, val fieldType: DataFieldType)
+/**
+ * 字段类型
+ */
+data class DataFieldStruct(private val originFieldName: String, val fieldType: DataFieldType) {
+    val fieldName = GenUtil.underlineToHump(originFieldName)
+}
 
 /**
  * 字段数据类型结构
@@ -76,7 +82,8 @@ open class DataFieldType protected constructor(
         ClassName(if (!isOriginalType) fieldTypePackage + MESSAGE_SURFIX else fieldTypePackage,
             fieldTypeSimpleName + if (!isOriginalType) MESSAGE_SURFIX else "").copy(
             nullable = nullable)
-    val originFieldTypeClassName = ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)
+    val originFieldTypeClassName =
+        ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)
 
     override fun toString(): String {
         return "DataFieldType(fieldType='$fieldType', nullable=$nullable, isOriginalType=$isOriginalType"
@@ -112,9 +119,13 @@ class DataFieldParameterType private constructor(
 
     companion object {
 
-        fun get(fieldType: String, nullable: Boolean, isOriginalType: Boolean, vararg types: DataFieldType):
+        fun get(
+            fieldType: String, nullable: Boolean, isOriginalType: Boolean,
+            vararg types: DataFieldType
+        ):
             DataFieldParameterType {
-            return DataFieldParameterType(fieldType, nullable, isOriginalType).addParameterTypes(*types)
+            return DataFieldParameterType(fieldType, nullable, isOriginalType).addParameterTypes(
+                *types)
         }
     }
 }
