@@ -23,7 +23,8 @@ class DataObjectFileStruct(/*放置转换类的文件包名*/val filePackage: St
         }
 
     override fun toString(): String {
-        return "DataObjectFileStruct(filePackage='$filePackage', fileName='$fileName', objects=$objects, enums='$enums')"
+        return "DataObjectFileStruct(filePackage='$filePackage', fileName='$fileName', " +
+            "objects=$objects, enums='$enums')"
     }
 }
 

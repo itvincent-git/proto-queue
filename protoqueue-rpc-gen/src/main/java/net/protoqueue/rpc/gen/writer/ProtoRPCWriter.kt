@@ -37,7 +37,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
 
     //private val serviceName = "SvcUserService"
     override fun createFileProperty(): PropertySpec.Builder {
-        return PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE, KModifier.CONST)
+        return PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE,
+            KModifier.CONST)
             .initializer("%S", serviceStruct.serviceName)
     }
 
@@ -84,7 +85,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
             indent()
-            addStatement("""%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
+            addStatement(
+                """%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
                 RPCApi::class, messageNanoClassName)
             indent()
             addStatement("""{ _, _, data, parameter ->""")
@@ -93,7 +95,9 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""val res = %T.parseFrom(data)""",
                 ClassName(func.rspTypePackage, func.rspTypeSimpleName))
             //continuation.resume(RPCResponse(res))
-            addStatement("""continuation.%M(%T(res.convertToDataObject(), parameter = parameter))""", resume, RPCResponse::class)
+            addStatement(
+                """continuation.%M(%T(res.convertToDataObject(), parameter = parameter))""", resume,
+                RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             unindent()
             addStatement("""}, { sdkResCode, srvResCode ->""")
@@ -159,17 +163,20 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             indent()
             beginControlFlow("""if (functionName == subscribeFuncName)""")
             //                   val notify = UserFreezeNotifyInfo.parseFrom(data)
-            addStatement("""val notify = %T.parseFrom(data).convertToDataObject()""", ClassName(func.reqTypePackage,
-                func.reqTypeSimpleName))
+            addStatement("""val notify = %T.parseFrom(data).convertToDataObject()""",
+                ClassName(func.reqTypePackage,
+                    func.reqTypeSimpleName))
             //                   handler(notify)
             addStatement("""handler(notify, parameter)""")
             unindent()
             addStatement("""}""")
             endControlFlow()
             //RPCApi.subscribe(serviceName, subscribeFuncName, receiver)
-            addStatement("""%T.subscribe(serviceName, subscribeFuncName, receiver)""", RPCApi::class)
+            addStatement("""%T.subscribe(serviceName, subscribeFuncName, receiver)""",
+                RPCApi::class)
             //return RPCHandlerObserver(serviceName, subscribeFuncName, receiver)
-            addStatement("""return %T(serviceName, subscribeFuncName, receiver)""", RPCHandlerObserver::class)
+            addStatement("""return %T(serviceName, subscribeFuncName, receiver)""",
+                RPCHandlerObserver::class)
         })
     }
 
@@ -179,7 +186,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     }
 
     companion object {
-        val suspendCancellableCoroutine = MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+        val suspendCancellableCoroutine =
+            MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
         val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
         val resume = MemberName("kotlin.coroutines", "resume")
         val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
