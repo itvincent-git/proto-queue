@@ -1,0 +1,140 @@
+syntax = "proto3";
+// 多人房游戏中心
+package wh.svc.partyroom.gamecenter;
+option objc_class_prefix = "PBPartyRoomGameCenter";
+
+import "wh_svc_common.proto";
+
+service SvcPartyRoomGameCenterService {
+    // 查询列表
+    // v1.4支持游戏有： perform_and_guess（你演我猜） five_sec_challenge（五秒大挑战）
+    rpc getGameList(GetGameListReq) returns (GetGameListRes);
+    // 查询状态
+    rpc getGameStatus(GetGameStatusReq) returns (GetGameStatusRes);
+    // 准备游戏
+    rpc prepareGame(PrepareGameReq) returns (PrepareGameRes);
+    // 接受邀请
+    rpc acceptGame(AcceptGameReq) returns (AcceptGameRes);
+    // 拒绝邀请
+    rpc refuseGame(RefuseGameReq) returns (RefuseGameRes);
+    // 开始游戏
+    rpc startGame(StartGameReq) returns (StartGameRes);
+}
+
+service SvnPartyRoomGameCenterNotifyService {
+    // 游戏准备通知（广播）
+    // 1.房主点击发起游戏会触发该通知
+    rpc onGamePrepareNotify(GamePrepareNotify) returns (common.Empty);
+
+    // 游戏状态变化通知（广播）
+    // 1.房主发起游戏会触发该通知
+    // 2.被邀请人接受或者拒绝游戏邀请会触发该通知
+    // 3.游戏开始会触发该通知
+    rpc onGameStatusChangeNotify(GameStatusChangeNotify) returns (common.Empty);
+
+    // 游戏解散通知（广播）
+    // 1.该通知只会发生在游戏准备阶段
+    // 2.房主主动退出或者断线会触发该通知
+    rpc onGameDismissNotify(GameDismissNotify) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+enum GameStatus {
+    NoneGame = 0;     // 无游戏（此状态表示房主未发起任何游戏）
+    Preparing = 1;   // 准备中（房主点击发起游戏后进入此状态）
+    Playing = 2;      // 游戏中（所有人都准备好了，并且房主点击了开始游戏后进入此状态）
+}
+
+message GameInfo {
+    string gameId = 1;  // 游戏Id
+    int32 minOnChatCount = 2; // 发起该游戏要求的最低麦上人数，0表示没有限制
+}
+
+message GetGameListReq {
+    common.RoomVid roomVid = 1;
+}
+
+message GetGameListRes {
+    common.ResponseHeader header = 1;
+    repeated GameInfo gameList = 2;
+}
+
+message GamePlayer {
+    int64 uid = 1; 
+    int32 prepareStatus = 2; // 0：尚未做选择  1：同意加入游戏 2：拒绝加入游戏
+}
+
+message GetGameStatusReq {
+    common.RoomVid roomVid = 1;
+}
+
+message GetGameStatusRes {
+    common.ResponseHeader header = 1;
+    GameStatus status = 2;
+    string gameId  = 3;                       // 游戏Id status = Preparing|Playing 时有意义
+    string roundId = 4;                       // 轮次Id status = Preparing|Playing 时有意义
+    repeated GamePlayer playerList = 5;       // 游戏玩家列表 status = Preparing|Playing 时有意义
+    int32 timeout = 6;                        // 超时时间（秒）,0表示不超时
+}
+
+message PrepareGameReq {
+    common.RoomVid roomVid = 1;
+    string gameId = 2;
+}
+
+message PrepareGameRes {
+    common.ResponseHeader header = 1;
+}
+
+message AcceptGameReq {
+    common.RoomVid roomVid = 1;
+    string gameId = 2;
+    string roundId = 3;
+}
+
+message AcceptGameRes {
+    common.ResponseHeader header = 1;
+}
+
+message RefuseGameReq {
+    common.RoomVid roomVid = 1;
+    string gameId = 2;
+    string roundId = 3;
+}
+
+message RefuseGameRes {
+    common.ResponseHeader header = 1;
+}
+
+message StartGameReq {
+    common.RoomVid roomVid = 1;
+    string gameId = 2;
+    string roundId = 3;
+}
+
+message StartGameRes {
+    common.ResponseHeader header = 1;
+}
+
+message GamePrepareNotify {
+    common.RoomVid roomVid = 1;
+    string gameId = 2;
+    string roundId = 3;
+    int32 timeout = 4; // 超时时间（秒）
+}
+
+// 各个字段的意义可以参考 GetGameStatusRes
+message GameStatusChangeNotify {
+    GameStatus status = 1;
+    string gameId  = 2;                       // 游戏Id status = Preparing|Playing 时有意义
+    string roundId = 3;                       // 轮次Id status = Preparing|Playing 时有意义
+    repeated GamePlayer playerList = 4;       // 游戏玩家列表 status = Preparing|Playing 时有意义 
+    int32 timeout = 5;                        // 超时时间（秒）,0表示不超时
+}
+
+message GameDismissNotify {
+    GameStatus status = 1;
+    string gameId = 2;
+    string roundId = 3;
+}

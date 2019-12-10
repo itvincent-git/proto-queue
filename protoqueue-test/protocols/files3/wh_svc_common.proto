@@ -42,6 +42,16 @@ enum ResponseCode {
 
     // 多人房错误码 [1200, 1201]
     ErrPartyRoomLimitedByKicked = 1200; // 操作因为被踢出房或踢下麦等限制
+    ErrPartyRoomAlreadyParticipated = 1201; // 用户已经在麦上了
+    ErrPartyRoomExceedMaxParticipantCount = 1202; // 麦上用户超过限制
+    ErrPartyRoomNotParticipated = 1203; // 用户没有在麦上
+    ErrPartyRoomInvitationNotExists = 1204 ; // 邀请不存在
+    ErrPartyRoomExceedMaxApplyCount = 1205 ;// 超过最大申请数（invite me）
+    ErrPartyRoomNotManager = 1026; // 用户不是房间管理员
+    ErrPartyRoomNotInRoom = 1027; // 用户不在房间内
+    ErrPartyRoomInRoom = 1028; // 用户已在房间内
+
+
 }
 
 enum Sex {
@@ -83,4 +93,12 @@ enum RoomType{
     RoomTypeUnknown = 0;
     VideoChat = 1; // 视频聊天房
     PartyRoom = 2; // 多人视频房
+}
+
+message PartyRoomInfo {
+    common.RoomVid roomVid = 1;
+    string title = 2;
+    string topic = 3;
+    repeated int64 participants = 4; // 当前麦上用户
+    int64 userCount = 5; // 在房人数
 }

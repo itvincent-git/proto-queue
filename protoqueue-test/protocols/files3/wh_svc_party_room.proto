@@ -5,38 +5,37 @@ option objc_class_prefix = "PBPartyRoom";
 
 import "wh_svc_common.proto";
 
-service SvcPartyRoomService{
+service SvcPartyRoomService {
     // 创建并进房
-    rpc createAndJoinRoom(CreateAndJoinRoomReq) returns (CreateAndJoinRoomRes);
+    rpc createAndJoinRoom (CreateAndJoinRoomReq) returns (CreateAndJoinRoomRes);
 
     // 进房
-    rpc joinRoom(JoinRoomReq) returns (JoinRoomRes);
+    rpc joinRoom (JoinRoomReq) returns (JoinRoomRes);
 
     // 退房
-    rpc leaveRoom(LeaveRoomReq) returns (LeaveRoomRes);
+    rpc leaveRoom (LeaveRoomReq) returns (LeaveRoomRes);
 
     // 心跳
-    rpc heartbeat(HeartbeatReq) returns (HeartbeatRes);
+    rpc heartbeat (HeartbeatReq) returns (HeartbeatRes);
 
     // 获取群聊话题列表
-    rpc getChatTopics(GetChatTopicsReq) returns (GetChatTopicsRes);
+    rpc getChatTopics (GetChatTopicsReq) returns (GetChatTopicsRes);
 
     // 获取聊天管理员
     // 第一次拉取后需要监听ChatManagerChangeNotify，动态更新管理员列表
-    rpc getChatManagers(GetChatManagersReq) returns (GetChatManagersRes);
+    rpc getChatManagers (GetChatManagersReq) returns (GetChatManagersRes);
 
     // 获取群聊参与人
     // 第一次拉去后需要监听ChatStatusChangeNotify，动态更新麦上用户
-    rpc getChatParticipants(GetChatParticipantsReq) returns (GetChatParticipantsRes);
-
+    rpc getChatParticipants (GetChatParticipantsReq) returns (GetChatParticipantsRes);
 
     // 游客申请加入群聊
     // 该方法会触发ApplyJoinChatNotify
-    rpc applyJoinChat(ApplyJoinChatReq) returns (ApplyJoinChatRes);
+    rpc applyJoinChat (ApplyJoinChatReq) returns (ApplyJoinChatRes);
 
     // 管理员同意游客加入群聊
     // 该方法会将申请标记为[已邀请]，同时会触发InviteJoinChatNotify的单播
-    rpc agreeJoinChatApplication(AgreeJoinChatApplicationReq) returns (AgreeJoinChatApplicationRes);
+    rpc agreeJoinChatApplication (AgreeJoinChatApplicationReq) returns (AgreeJoinChatApplicationRes);
 
     // 获取申请加入群聊的列表
     // 客户端在第一次拉取该列表后还需要在以下时机后维护该列表
@@ -45,64 +44,65 @@ service SvcPartyRoomService{
     // 3.收到用户退房通知后需要将对应用户的申请移除
     // 4.收到ChatManagerChangeNotify后管理员端需要重新拉取一次该列表
     // 5.收到ChatStatusChangeNotify后需要将麦上用户从该列表中移除
-    rpc getJoinChatApplications(GetJoinChatApplicationsReq) returns (GetJoinChatApplicationsRes);
-
+    rpc getJoinChatApplications (GetJoinChatApplicationsReq) returns (GetJoinChatApplicationsRes);
 
     // 管理员邀请游客加入群聊
     // 该方法会触发InviteJoinChatNotify的单播
-    rpc inviteJoinChat(InviteJoinChatReq) returns (InviteJoinChatRes);
+    rpc inviteJoinChat (InviteJoinChatReq) returns (InviteJoinChatRes);
 
     // 游客接受加入群聊邀请
     // 该方法会触发AcceptJoinChatInvitationNotify的广播
-    rpc acceptJoinChatInvitation(AcceptJoinChatInvitationReq) returns (AcceptJoinChatInvitationRes);
+    rpc acceptJoinChatInvitation (AcceptJoinChatInvitationReq) returns (AcceptJoinChatInvitationRes);
 
     // 游客拒绝加入群聊邀请
     // 该方法会触发RefuseJoinChatInvitationNotify的广播
-    rpc refuseJoinChatInvitation(RefuseJoinChatInvitationReq) returns (RefuseJoinChatInvitationRes);
-
+    rpc refuseJoinChatInvitation (RefuseJoinChatInvitationReq) returns (RefuseJoinChatInvitationRes);
 
     // 退出群聊
     // 该方法会触发ChatStatusChangeNotify的广播
-    rpc leaveChat(LeaveChatReq) returns (LeaveChatRes);
+    rpc leaveChat (LeaveChatReq) returns (LeaveChatRes);
 
     // 群聊用户切换聊天模式（视频|音频）
     // 该方法会触发ChatStatusChangeNotify的广播
-    rpc switchChatMode(SwitchChatModeReq) returns (SwitchChatModeRes);
+    rpc switchChatMode (SwitchChatModeReq) returns (SwitchChatModeRes);
 
     // 管理员踢用户
-    rpc kickUser(KickUserReq) returns (KickUserRes);
+    rpc kickUser (KickUserReq) returns (KickUserRes);
 
     // 查询用户在房间状态
-    rpc getUserInRoomStatus(GetUserInRoomStatusReq) returns (GetUserInRoomStatusRes);
+    rpc getUserInRoomStatus (GetUserInRoomStatusReq) returns (GetUserInRoomStatusRes);
+
+    // 摘面具
+    rpc takeOffMaskTips (TakeOffMaskTipsReq) returns (TakeOffMaskTipsRes);
 
     // 查询房间信息
-    rpc getRoomInfo(GetRoomInfoReq) returns (GetRoomInfoRes);
+    rpc getRoomInfo (GetRoomInfoReq) returns (GetRoomInfoRes);
 }
 
-service SvcPartyRoomNotifyService{
-    // 游客申请加入群聊通知
-    rpc onApplyJoinChatNotify(ApplyJoinChatNotify) returns (common.Empty);
+service SvcPartyRoomNotifyService {
+    // 游客申请加入群聊通知（广播）
+    rpc onApplyJoinChatNotify (ApplyJoinChatNotify) returns (common.Empty);
 
-    // 管理员邀请游客加入群聊通知
-    rpc onInviteJoinChatNotify(InviteJoinChatNotify) returns (common.Empty);
+    // 管理员邀请游客加入群聊通知（单播）
+    rpc onInviteJoinChatNotify (InviteJoinChatNotify) returns (common.Empty);
 
-    // 游客接受加入群聊通知
-    rpc onAcceptJoinChatInvitationNotify(AcceptJoinChatInvitationNotify) returns (common.Empty);
+    // 游客接受加入群聊通知（广播）
+    rpc onAcceptJoinChatInvitationNotify (AcceptJoinChatInvitationNotify) returns (common.Empty);
 
-    // 游客拒绝加入群聊通知
-    rpc onRefuseJoinChatInvitationNotify(RefuseJoinChatInvitationNotify) returns (common.Empty);
+    // 游客拒绝加入群聊通知（广播）
+    rpc onRefuseJoinChatInvitationNotify (RefuseJoinChatInvitationNotify) returns (common.Empty);
 
-    // 群聊变更通知
-    rpc onChatStatusChangeNotify(ChatStatusChangeNotify) returns (common.Empty);
+    // 群聊变更通知（广播）
+    rpc onChatStatusChangeNotify (ChatStatusChangeNotify) returns (common.Empty);
 
-    // 聊天管理员变更通知
-    rpc onChatManagerChangeNotify(ChatManagerChangeNotify) returns (common.Empty);
+    // 聊天管理员变更通知（广播）
+    rpc onChatManagerChangeNotify (ChatManagerChangeNotify) returns (common.Empty);
 
-    // 房间信息变更通知
-    rpc onRoomInfoChangeNotify(RoomInfoChangeNotify) returns (common.Empty);
+    // 踢人通知（广播）
+    rpc onKickUserNotify (KickUserNotifyNotify) returns (common.Empty);
 
-    // 踢人通知
-    rpc onKickUserNotify(KickUserNotifyNotify) returns (common.Empty);
+    // 用户摘面具（广播）
+    rpc takeOffMaskTipsNotify (TakeOffMaskTipsNotify) returns (common.Empty);
 }
 
 option java_package = "com.woohoo.app.common.protocol";
@@ -117,21 +117,30 @@ message CreateAndJoinRoomRes {
     common.RoomVid roomVid = 2;
     int64 roomId = 3;
     string token = 4;
-    int32 hbInterval = 5; // 心跳间隔，单位秒，0表示不发心跳
+    int32 hbInterval = 5; // 心跳间隔，单位秒，0表k示不发心跳
     string session = 6; // 一个session表示一次进房，需要在退房的时候带上
-    bool manager = 7; // 是否为管理员
+    int64 manager = 7; // 管理员
+    int64 owner = 8; // 房主
+    string title = 9;
+    string topic = 10; //主题内容
 }
 
 message JoinRoomReq {
     common.RoomVid roomVid = 1;
+    ChatMode ownerChatMode = 2; // 仅进自己的房需要传此参数
 }
 
 message JoinRoomRes {
     common.ResponseHeader header = 1;
-    int64 roomId = 2;
-    string session = 3; // 一个session表示一次进房，需要在退房的时候带上
-    int32 hbInterval = 4;
-    bool manager = 5; // 是否为管理员
+    common.RoomVid roomVid = 2;
+    int64 roomId = 3;
+    string token = 4;
+    int32 hbInterval = 5; // 心跳间隔，单位秒，0表k示不发心跳
+    string session = 6; // 一个session表示一次进房，需要在退房的时候带上
+    int64 manager = 7; // 管理员
+    int64 owner = 8; // 房主
+    string title = 9;
+    string topic = 10; //主题内容
 }
 
 message LeaveRoomReq {
@@ -145,6 +154,7 @@ message LeaveRoomRes {
 
 message HeartbeatReq {
     common.RoomVid roomVid = 1;
+    int32 status = 2; // 0：常规状态 1：用户开了视频并且在前台 2：用户开了视频但没有在前台
 }
 
 message HeartbeatRes {
@@ -155,7 +165,7 @@ message HeartbeatRes {
 message GetChatTopicsReq {
 
 }
-message Topic{
+message Topic {
     string id = 1;
     string icon = 2;
 }
@@ -174,16 +184,21 @@ message GetChatManagersRes {
     repeated int64 managers = 2;
 }
 
-enum ChatMode {
-    Unkonwn = 0;
-    Audio = 1;
-    Video = 2;
-    AllClose = 3;
+message ChatMode {
+    ChatModeStatus video = 1;
+    ChatModeStatus audio = 2;
+}
+
+enum ChatModeStatus {
+    ModeStatusUnknown = 0;
+    Open = 1;
+    Close = 2;
 }
 
 message ChatParticipant {
     int64 uid = 1;
     ChatMode chatMode = 2;
+
 }
 
 message GetChatParticipantsReq {
@@ -193,6 +208,7 @@ message GetChatParticipantsReq {
 message GetChatParticipantsRes {
     common.ResponseHeader header = 1;
     repeated ChatParticipant participants = 2;
+    int64 seqId = 3; // 序号（用于通知乱序处理，seqId越大说明通知发生越晚）
 }
 
 message ApplyJoinChatReq {
@@ -212,14 +228,6 @@ message AgreeJoinChatApplicationRes {
     common.ResponseHeader header = 1;
 }
 
-message RefuseJoinChatApplicationReq {
-    common.RoomVid roomVid = 1;
-    int64 applyUid = 2;
-}
-
-message RefuseJoinChatApplicationRes {
-    common.ResponseHeader header = 1;
-}
 
 message GetJoinChatApplicationsReq {
     common.RoomVid roomVid = 1;
@@ -241,6 +249,7 @@ message InviteJoinChatReq {
 
 message InviteJoinChatRes {
     common.ResponseHeader header = 1;
+    int64 remainSecs = 2; // 邀请剩余有效时间
 }
 
 message AcceptJoinChatInvitationReq {
@@ -251,7 +260,6 @@ message AcceptJoinChatInvitationReq {
 
 message AcceptJoinChatInvitationRes {
     common.ResponseHeader header = 1;
-    string token = 2;
 }
 
 message RefuseJoinChatInvitationReq {
@@ -274,10 +282,13 @@ message LeaveChatRes {
 message SwitchChatModeReq {
     common.RoomVid roomVid = 1;
     ChatMode chatMode = 2;
+    string session = 3; // 进房回包里的session
 }
 
 message SwitchChatModeRes {
     common.ResponseHeader header = 1;
+    repeated ChatParticipant participants = 2;
+    int64 seqId = 3; // 序号（用于通知乱序处理，seqId越大说明通知发生越晚）
 }
 
 enum KickType {
@@ -293,7 +304,7 @@ message KickUserReq {
 }
 
 message KickUserRes {
-
+    common.ResponseHeader header = 1;
 }
 
 message GetUserInRoomStatusReq {
@@ -302,46 +313,47 @@ message GetUserInRoomStatusReq {
 
 message GetUserInRoomStatusRes {
     common.ResponseHeader header = 1;
-    map<int64,common.RoomVid> uid2RoomVids = 2;
+    map<int64, common.RoomVid> uid2RoomVids = 2;
 }
 
-message RoomInfo {
+message TakeOffMaskTipsReq {
     common.RoomVid roomVid = 1;
-    string title = 2;
-    string topic = 3;
-    repeated int64 participants = 4; // 当前麦上用户
-    int64 userCount = 5; // 在房人数
+}
+message TakeOffMaskTipsRes {
+    common.ResponseHeader header = 1;
 }
 
 message GetRoomInfoReq {
-    repeated common.RoomVid roomVids = 1;
+    common.RoomVid roomVid = 1;
 }
-
 message GetRoomInfoRes {
     common.ResponseHeader header = 1;
-    repeated RoomInfo roomInfos = 2;
+    string title = 2;
+    string topic = 3; // url
 }
 
 message ApplyJoinChatNotify {
     common.NotifyHeader header = 1;
     common.RoomVid roomVid = 2;
     int64 applyUid = 3;
+    repeated JoinChatApplication list = 4; // 当前上麦申请列表
 }
 
 message InviteJoinChatNotify {
     common.NotifyHeader header = 1;
     common.RoomVid roomVid = 2;
     string inviteId = 3;
+    int64 remainSecs = 4; // 邀请剩余有效时间
 }
 
-message AcceptJoinChatInvitationNotify{
+message AcceptJoinChatInvitationNotify {
     common.NotifyHeader header = 1;
     common.RoomVid roomVid = 2;
     int64 uid = 3;
     string inviteId = 4;
 }
 
-message RefuseJoinChatInvitationNotify{
+message RefuseJoinChatInvitationNotify {
     common.NotifyHeader header = 1;
     common.RoomVid roomVid = 2;
     int64 uid = 3;
@@ -360,14 +372,14 @@ message ChatManagerChangeNotify {
     repeated int64 managers = 3;
 }
 
-message RoomInfoChangeNotify {
-    common.NotifyHeader header = 1;
-    RoomInfo roomInfo = 2;
-}
-
 message KickUserNotifyNotify {
     common.NotifyHeader header = 1;
     common.RoomVid roomVid = 2;
     int64 kickedUid = 3;
     KickType type = 4;
+}
+message TakeOffMaskTipsNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2;
+    int64 uid = 3;
 }

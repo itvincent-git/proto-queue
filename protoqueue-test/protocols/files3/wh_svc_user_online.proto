@@ -33,14 +33,15 @@ message HeartbeatRes {
 
 message UserBizStatus {
     // 业务状态，由具体业务定。 使用string的原因是增加一种业务后，在线服务不需要再发版
-    // VideoChat - 视频聊天
+    // VideoChat - 视频聊天 1 - 聊天中， 0 - 不在聊天
+    // PartyRoom - 正在多人视频聊天 status 1 - 在座，0 - 不在座
     string bizType = 1;
     int64 status = 2;
 }
 message UserOnlineStatus {
     bool online = 1; // 用户是否在线
     repeated UserBizStatus status = 2; //业务状态值
-    int64 latestLoginTimestamp = 3;  // 上次登录时间，online为false时有效
+    int64 latestLoginTimestamp = 3; // 上次登录时间，online为false时有效
 }
 
 message BatchGetUserOnlineStatusReq {

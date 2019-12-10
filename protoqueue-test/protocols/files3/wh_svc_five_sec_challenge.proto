@@ -1,0 +1,49 @@
+syntax = "proto3";
+// 五秒大挑战
+package wh.svc.fivesecchallenge;
+
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcFiveSecChallengeService {
+    // 上报结果
+    rpc reportResult (ReportResultReq) returns (ReportResultRes);
+}
+
+service SvcFiveSecChallengeNotifyService {
+    // 开启五秒大挑战
+    rpc startNotify (StartNotifyInfo) returns (common.Empty);
+    // 结束五秒大挑战
+    rpc finishNotify (FinishNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message ReportResultReq {
+    common.RoomVid roomVid = 1;
+    string challengeId = 2;
+    int64 stopSecs = 3; // 从开始到按下经历的秒数
+}
+
+message ReportResultRes {
+    common.ResponseHeader header = 1;
+}
+
+message StartNotifyInfo {
+    common.NotifyHeader header = 1;
+    string challengeId = 2;
+    int64 countdownSecs = 3; // 倒计时，秒
+    int64 totalSecs = 4; //一共显示的时间, 秒
+}
+
+message Rank {
+    int64 uid = 1;
+    int64 secs = 2;
+}
+
+message FinishNotifyInfo {
+    common.NotifyHeader header = 1;
+    string challengeId = 2;
+    repeated Rank ranks = 3;
+}

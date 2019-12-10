@@ -28,17 +28,12 @@ message RelatedRecommendItem {
 }
 
 message HomePageListReq {
-    string cursor = 1; // 游标，第一次请求游标填0
+    string cursor = 1; // 游标，第一次请求游标不传或传""
     int32 limit = 2; // 最多返回多少个内容（单页可能不会返回limit条，但最多不超过limit条）
 }
 
 message HomePageListRes {
     common.ResponseHeader header = 1;
-    repeated RoomItem roomItems = 2;
+    repeated common.PartyRoomInfo roomInfos = 2;
     string nextCursor = 3; // 下一个游标，如果下一个游标无值，或""，表示已达到底部
-}
-
-message RoomItem {
-    common.RoomVid roomVid = 1;
-    int64 hotScore = 2; // 热度
 }

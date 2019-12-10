@@ -22,6 +22,7 @@ message ReportViolationReq {
     int64 roomId = 6; // 房间id
     string chatId = 7; // 聊天id
     repeated IMChatMessage messageList = 8; // IM聊天消息列表，最多取30条
+    int64 roomOwner = 9; // 多人房房主uid
 }
 
 message IMChatMessage {
@@ -42,6 +43,7 @@ enum BizType {
     VideoRoom = 2; // 视频房间
     ChatMatchRecord = 3; // 聊天匹配记录
     IM = 4; // im举报
+    PartyRoom = 5; // 多人视频房
 }
 
 // 违规类型

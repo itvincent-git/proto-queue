@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+// 你演我猜游戏
+
+package wh.svc.chatroom;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcPerformAndGuessService {
+    // 获取当前游戏信息，用户客户端异常情况下恢复
+    // 让参与者恢复这场游戏： 进入房间 => 查询房间当前状态 => 房间处于“你演我猜”状态  => 我在麦上(在麦表示有参与，不在麦则表示没参与)  => 查询当前游戏信息 => 成功获取  => 恢复
+    rpc getCurrentPerformInfo (GetCurrentPerformInfoReq) returns (GetCurrentPerformInfoRes);
+    // 表演者选词，将触发performingNotify
+    rpc performPickWord (PerformPickWordReq) returns (PerformPickWordRes);
+    // 参与者回答正确，将触发participantScoreChangeNotify
+    rpc participantAnswerRight (ParticipantAnswerRightReq) returns (ParticipantAnswerRightRes);
+}
+
+service SvcPerformAndGuessNotifyService {
+    // 表演者正在选词（游戏开始第一个表演者上场，或者轮到下个表演者）。  音视频状态切换以服务端麦序状态变化广播为准
+    // 1. 游戏开始（所有人准备完毕，房主点击开始）时，触发本通知
+    // 2. 表演者本次表演完毕，轮到下个表演者，触发本通知
+    rpc performerPickingWordNotify (PerformerPickingWordNotifyInfo) returns (common.Empty);
+    // 表演者正在表演
+    // 1. 表演者选词完毕，触发本通知
+    rpc performingNotify (PerformingNotifyInfo) returns (common.Empty);
+    // 参与者分数变动
+    // 1. 参与者答题加分，触发本通知
+    // 2. 本次表演结束，未答题者扣分，触发本通知
+    rpc participantScoreChangeNotify (ParticipantScoreChangeNotifyInfo) returns (common.Empty);
+    // 一轮结束。  游戏有两轮以上，除最后一轮之外，每轮结束都会收到roundOverNotify，客户端用户公屏展示用户分数情况
+    rpc roundOverNotify (RoundOverNotifyInfo) returns (common.Empty);
+    // 游戏结束
+    rpc performOverNotify (PerformOverNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message GetCurrentPerformInfoReq {
+    common.RoomVid roomVid = 1;
+}
+message GetCurrentPerformInfoRes {
+    PerformBaseInfo baseInfo = 1;
+    PickingWordTurn pickingWord = 2; // 如果此字段有值，表示当前处于选词阶段
+    PerformingTurn performingTurn = 3; // 如果此字段有值，表示当前处于表演阶段
+}
+
+message PerformerPickingWordNotifyInfo {
+    common.NotifyHeader header = 1;
+    PerformBaseInfo baseInfo = 2;
+    PickingWordTurn pickingWord = 3; //选词列表，仅表演者需要使用到。
+}
+
+message PerformingNotifyInfo {
+    common.NotifyHeader header = 1;
+    PerformBaseInfo baseInfo = 2;
+    PerformingTurn performingTurn = 3;
+}
+
+message PerformingTurn {
+    string performerShowWord = 1; // 表演之看到的展示词
+    repeated string keyWords = 2; // 回答命中词列表。
+    repeated PerformingWordTips tips = 3; // 提示语定义
+    int32 remainSecs = 4; // 表演剩余秒数
+}
+
+message PerformBaseInfo {
+    string performId = 1; // 本次游戏id。对应game center的roundId
+    int64 performerUid = 2; // 当前表演者uid
+    int32 index = 3; // 当前为本次游戏，第几次表演
+}
+
+message PickingWordTurn {
+    string selectedWordId = 1; // 表演者当前选中什么词， 对应PickingWord#wordId
+    repeated PickingWord pickingWords = 2; // 选词列表，客户端假分页，客户端每页大小
+    int32 remainSecs = 3; // 选词剩余秒数
+}
+
+message PickingWord {
+    string wordId = 1;
+    string showWord = 2; // 显示语
+}
+
+message PerformingWordTips {
+    string language = 1; // 语言码，小写
+    repeated PerformingWordTipsDetail tips = 2; // 提示语
+}
+
+message PerformingWordTipsDetail {
+    int32 atRemainSecs = 1; // 剩余多少秒时展示此tips
+    string tips = 2; // 提示语
+}
+
+message ParticipantScoreChangeNotifyInfo {
+    common.NotifyHeader header = 1;
+    PerformBaseInfo baseInfo = 2;
+    int64 uid = 3;
+    int64 increment = 4; // 分数变动，扣分则为负数
+    int64 currentScore = 5; // 当前最新分数（变动后分数）
+}
+message RoundOverNotifyInfo {
+    common.NotifyHeader header = 1;
+    PerformBaseInfo baseInfo = 2;
+    map<int64, int64> userScore = 3; // 用户得分情况。key-uid, value = score
+}
+message PerformOverNotifyInfo {
+    common.NotifyHeader header = 1;
+    PerformBaseInfo baseInfo = 2;
+    map<int64, int64> userScore = 3; // 用户得分情况。key-uid, value = score
+}
+
+message PerformPickWordReq {
+    string performId = 1; // 本次游戏id。对应game center的roundId
+    string wordId = 2; // 选了哪个词
+}
+message PerformPickWordRes {
+
+}
+message ParticipantAnswerRightReq {
+    string performId = 1; // 本次游戏id。对应game center的roundId
+    int64 performerUid = 2; // 当前表演者uid
+    int32 index = 4; // 回传PerformBaseInfo#index
+    string keyWords = 5; // 回答的内容
+}
+message ParticipantAnswerRightRes {
+
+}

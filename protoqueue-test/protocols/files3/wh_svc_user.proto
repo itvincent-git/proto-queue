@@ -61,6 +61,7 @@ message UserLoginRes {
     bool isFirstLogin = 3;
     UserInfo userInfo = 4;
     UserFreezeInfo freezeInfo = 5; // 如果用户已封禁，此字段不为空
+    int64 serverTimestamp = 6;  // 服务器当前毫秒时间戳
 }
 message UpdateUserInfoReq {
     UserInfo userInfo = 1;
@@ -182,5 +183,6 @@ message SearchUserReq {
 }
 
 message SearchUserRes {
-    repeated int64 uidList = 1;
+    common.ResponseHeader header = 1;
+    repeated int64 uidList = 2;
 }

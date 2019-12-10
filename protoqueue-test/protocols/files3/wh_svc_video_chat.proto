@@ -102,8 +102,9 @@ message GetEmojiListRes {
 }
 
 message UseEmojiReq {
-    string chatId = 1;
+    string chatId = 1; // 1v1传chatId，服务端转roomVid兼容，其他房型传roomVid
     string emojiId = 2;
+    common.RoomVid roomVid = 3;
 }
 
 message UseEmojiRes {
@@ -312,7 +313,9 @@ message PlayingInfo {
 
 message PeerUseEmojiNotifyInfo {
     string chatId = 1;
-    string emojiId = 2; // 对方使用的表情id
+    string emojiId = 2;
+    int64 sendUid = 3;
+    common.RoomVid roomVid = 4; // chatId有传才有回，roomVid固定回，可用于区分房型
 }
 
 message ReadyJoinChatNotifyInfo {
@@ -351,7 +354,7 @@ message PeerReplyStartPlayNotifyInfo {
     PlayType playType = 2;
     InviteReplyType reply = 3;
 }
-message  PeerCancelStartPlayNotifyInfo {
+message PeerCancelStartPlayNotifyInfo {
     string chatId = 1;
     PlayType playType = 2;
 }

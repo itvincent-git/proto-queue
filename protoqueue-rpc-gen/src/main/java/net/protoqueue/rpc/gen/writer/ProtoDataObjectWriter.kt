@@ -122,13 +122,14 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                 addStatement("val message = %T()", dataObjectStruct.originMessageTypeClassName)
                 for (field in dataObjectStruct.fields) {
                     if (field.fieldType.isOriginalType) {
-                        addStatement("message.%L = %L%L",
+                        addStatement("message.%L = this.%L%L",
                             field.fieldName,
                             field.fieldName,
                             createFieldStatementCodeBlock(field))
                     } else {
                         //message.header = header?.convertToMessage()
-                        addStatement("message.%L = %L?.convertToMessage()", field.fieldName, field.fieldName)
+                        addStatement("message.%L = this.%L?.convertToMessage()", field.fieldName,
+                            field.fieldName)
                     }
                 }
                 //return message

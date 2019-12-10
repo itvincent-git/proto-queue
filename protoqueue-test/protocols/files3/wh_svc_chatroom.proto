@@ -6,15 +6,24 @@ option objc_class_prefix = "PTB";
 import "wh_svc_common.proto";
 
 service SvcChatRoomService{
-    //创建音视频Token    
+    // 创建音视频Token    
     rpc createMediaToken(CreateMediaTokenReq) returns (CreateMediaTokenRes);
+
+    // 发送公屏消息
+    rpc sendPublicScreenCodeMessage(SendPublicScreenCodeMessageReq) returns (SendPublicScreenCodeMessageRes);
+    
+    // 获取快捷发言文案
+    rpc getQuickTextList(GetQuickTextListReq) returns (GetQuickTextListRes);
 }
 
 
 // 房间Nofify服务（客户端实现）
 service SvcChatRoomNotifyService{  
-    // 公屏通知
+    // 公屏通知消息
     rpc onPublicScreenMessageNotify (PublicScreenMessageNotify) returns (common.Empty);
+
+    // 公屏CodeMessage通知
+    rpc onPublicScreenCodeMessageNotify(PublicScreenCodeMessageNotify) returns (common.Empty);
 }
 
 option java_package = "com.woohoo.app.common.protocol";
@@ -36,10 +45,44 @@ message CreateMediaTokenRes{
     string token = 2;
 }
 
+
+message CodeMessage{
+    string biz = 1; // 业务
+    string code = 2; // 消息码
+}
+
+message SendPublicScreenCodeMessageReq {
+    int64 roomId  = 1; 
+    int64 sender = 2;
+    bool system = 3;
+    CodeMessage message = 4;
+}
+
+message SendPublicScreenCodeMessageRes{
+    common.ResponseHeader header = 1;
+}
+
+message GetQuickTextListReq {
+    common.RoomVid roomVid = 1;
+}
+
+message GetQuickTextListRes {
+    common.ResponseHeader header = 1;
+    repeated string textList = 2;
+}
+
 // 公屏通知
 message PublicScreenMessageNotify{
     int64 roomId = 1; // 房间Id
     int64 sender = 2; // 发送者
     bool system = 3;  // 系统通知   
     map<string,string> content = 4;  // 公屏内容(采用富文本的形式)
+}
+
+// 发送公屏CodeMessage
+message PublicScreenCodeMessageNotify {
+    int64 roomId  = 1; 
+    int64 sender = 2;
+    bool system = 3;
+    CodeMessage message = 4;
 }
