@@ -301,32 +301,33 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         field: DataFieldStruct
     ) {
         //map must has 2 ParameterType
+        //map?.convertMap需要增加可空判断，不然原生java协议过来的时候有可能为null
         if (field.fieldType is DataFieldParameterType && field.fieldType.parameterTypes.size == 2) {
             val firstParameterType = field.fieldType.parameterTypes[0]
             val secondParameterType = field.fieldType.parameterTypes[1]
             if (firstParameterType != null) {
                 if (!firstParameterType.isOriginalType) {
-                    add(".%M({ it.key?.convertToDataObject() }, ", convertMap)
+                    add("?.%M({ it.key?.convertToDataObject() }, ", convertMap)
                 } else {
                     //系统类型时
-                    add(".%M({ it.key }, ", convertMap)
+                    add("?.%M({ it.key }, ", convertMap)
                 }
             } else {
-                add(".%M({ it.key }, ", convertMap)
+                add("?.%M({ it.key }, ", convertMap)
             }
             if (secondParameterType != null) {
                 if (!secondParameterType.isOriginalType) {
-                    add("{ it.value?.convertToDataObject() })")
+                    add("{ it.value?.convertToDataObject() }) ?: %M()", mutableMapOf)
                 } else {
                     //系统类型时
-                    add("{ it.value })")
+                    add("{ it.value }) ?: %M()", mutableMapOf)
                 }
             } else {
-                add("{ it.value })")
+                add("{ it.value }) ?: %M()", mutableMapOf)
             }
         } else {
             //没有泛型定义时，使用转array
-            add(".%M({ it.key }, { it.value })", convertMap)
+            add("?.%M({ it.key }, { it.value }) ?: %M()", convertMap, mutableMapOf)
         }
     }
 
