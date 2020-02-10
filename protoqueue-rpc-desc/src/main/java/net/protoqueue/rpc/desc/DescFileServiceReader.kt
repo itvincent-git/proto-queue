@@ -1,9 +1,12 @@
 package net.protoqueue.rpc.desc
 
 import com.google.protobuf.DescriptorProtos
+import com.google.protobuf.ExtensionRegistry
+import com.woohoo.app.common.protocol.OldserviceOptions
 import net.protoqueue.rpc.desc.DescUtil.getClassNameFromFdpName
 import net.protoqueue.rpc.gen.struct.FunctionStruct
 import net.protoqueue.rpc.gen.struct.ServiceStruct
+import net.protoqueue.rpc.gen.struct.XhAppId
 import java.io.File
 
 /**
@@ -21,7 +24,9 @@ class DescFileServiceReader(private val descFilePath: String) {
 
     fun readFile(): DescFileServiceReader {
         val fileDescriptorSet = File(descFilePath).inputStream().use {
-            DescriptorProtos.FileDescriptorSet.parseFrom(it)
+            val extensionRegistry = ExtensionRegistry.newInstance()
+            OldserviceOptions.registerAllExtensions(extensionRegistry)
+            DescriptorProtos.FileDescriptorSet.parseFrom(it, extensionRegistry)
         }
         readMessageTypeMap(fileDescriptorSet)
         fileDescriptorSet.fileList.forEach { fdp ->
@@ -56,11 +61,16 @@ class DescFileServiceReader(private val descFilePath: String) {
     private fun readProto(fdp: DescriptorProtos.FileDescriptorProto): List<ServiceStruct> {
         val packageName = fdp.readPackageName()
         return fdp.serviceList?.map { service ->
-            ServiceStruct().apply {
+            val rst = ServiceStruct().apply {
                 this.servicePackage = packageName
                 this.serviceName = service.name
                 this.funList = service.methodList?.map { it.convert() } ?: emptyList()
             }
+            if (service.hasOptions() && service.options.hasExtension(OldserviceOptions.xhAppid)) {
+                val xhAppId = service.options.getExtension(OldserviceOptions.xhAppid)
+                rst.updateXhAppId(XhAppId(xhAppId.product, xhAppId.test))
+            }
+            rst
         } ?: emptyList()
 //        fdp.serviceList?.forEach { service ->
 //            val packageName = fdp.readPackageName()

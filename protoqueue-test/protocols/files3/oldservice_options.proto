@@ -1,0 +1,12 @@
+syntax = "proto2";
+option java_package = "com.woohoo.app.common.protocol";
+import "google/protobuf/descriptor.proto";
+
+message AppId {
+    optional int32 product = 1;
+    optional int32 test = 2;
+}
+
+extend google.protobuf.ServiceOptions {
+    optional AppId xh_appid = 50000;
+}

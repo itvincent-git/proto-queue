@@ -1,11 +1,13 @@
 syntax = "proto3";
 
 package wh.svc.chatmatch;
+import "oldservice_options.proto";
 option objc_class_prefix = "PTB";
 
 import "wh_svc_common.proto";
 
 service SvcChatMatchService {
+    option (xh_appid) = {product:555 test:666};
     // 获取我的匹配信息
     rpc getMatchConfigs (GetMatchConfigReq) returns (GetMatchConfigRes);
     // 开始匹配，可能的返回码：ErrRestricted、ErrMaintenance、ErrLowVersion

@@ -1,0 +1,33 @@
+syntax = "proto3";
+// 飞刀游戏
+package wh.svc.game.fk;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+import "oldservice_options.proto";
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+service SvcFlyingKnifeGameService {
+    option (xh_appid) = {product:12345 test:60427};
+    // 发起游戏
+    rpc startGame (StartGameReq) returns (StartGameRes);
+}
+
+
+service SvcFlyingKnifeGameNotifyService {
+    // 所有人收到发起游戏通知，准备接受
+    rpc startGameNotify (StartGameNotifyInfo) returns (common.Empty);
+}
+
+message StartGameReq {
+    repeated int64 uids = 1; // 要邀请的用户列表
+}
+
+message StartGameRes {
+    common.ResponseHeader header = 1;
+    string gameId = 2;
+}
+
+message StartGameNotifyInfo {
+    string gameId = 1;
+}

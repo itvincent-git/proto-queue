@@ -22,7 +22,7 @@ fi
 #参数说明
 #python python preprocess.py 包名 *.proto
 echo "gen_java preprocess start.."
-python preprocess.py com.woohoo.app.common.protocol 3 ./files3/
+#python preprocess.py com.woohoo.app.common.protocol 3 ./files3/
 echo "gen_java preprocess end"
 
 
@@ -34,7 +34,8 @@ echo "use [${protoc_cmd}] to generate protocol files......."
 echo "gen_path=$gen_path"
 
 if [ ! "${protoc_cmd}" = "" ]; then
-	${protoc_cmd} --javanano_out=enum_style=java,optional_field_style=accessors,parcelable_messages=false,java_multiple_files＝false,ignore_services=true:${gen_path} --proto_path="${bin_path}/files3/" ${bin_path}/files3/*.proto
+	${protoc_cmd} --javanano_out=enum_style=java,optional_field_style=accessors,parcelable_messages=false,store_unknown_fields=true,java_multiple_files＝false,ignore_services=true:${gen_path} --proto_path="${bin_path}/files3/" ${bin_path}/files3/*.proto
+#    ${protoc_cmd} --java_out=:${gen_path} --proto_path="${bin_path}/files3/" ${bin_path}/files3/*.proto
 	if [ $? -ne 0 ];then
 		echo "failed to create protocol files"
 	else
