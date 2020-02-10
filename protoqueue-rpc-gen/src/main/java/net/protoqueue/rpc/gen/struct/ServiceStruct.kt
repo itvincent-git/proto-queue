@@ -20,16 +20,6 @@ data class ServiceStruct(/*服务名*/var serviceName: String = "",
             return ClassName(servicePackage, serviceName)
         }
 
-    fun updateXhAppId(appId: XhAppId?) {
-        if (appId != null) {
-            paramMap["xh_appid_product"] = appId.product.toString()
-            paramMap["xh_appid_product"] = appId.test.toString()
-        } else {
-            paramMap.remove("xh_appid_product")
-            paramMap.remove("xh_appid_product")
-        }
-    }
-
     override fun toString(): String {
         return "ServiceStruct(serviceName='$serviceName', servicePackage='$servicePackage'," +
             "paramMap = $paramMap ," +
