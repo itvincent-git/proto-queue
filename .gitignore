@@ -10,3 +10,4 @@
 .externalNativeBuild
 release.sh
 /localrepo
+.athena
