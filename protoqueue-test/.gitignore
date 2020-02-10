@@ -10,3 +10,4 @@
 .externalNativeBuild
 release.sh
 /localrepo
+src/main/java/com/woohoo/app/common/protocol/nano
