@@ -10,7 +10,7 @@ import com.squareup.kotlinpoet.ClassName
  *
  */
 data class ServiceStruct(/*服务名*/var serviceName: String = "",
-    /*服务包名*/var servicePackage: String = ""
+        /*服务包名*/var servicePackage: String = ""
 ) {
     /*多个rpc接口*/var funList: List<FunctionStruct> = emptyList()
     val paramMap = mutableMapOf<String, String>()
@@ -22,7 +22,7 @@ data class ServiceStruct(/*服务名*/var serviceName: String = "",
 
     override fun toString(): String {
         return "ServiceStruct(serviceName='$serviceName', servicePackage='$servicePackage'," +
-            "paramMap = $paramMap ," +
-            "funList=$funList)"
+                "paramMap = $paramMap ," +
+                "funList=$funList)"
     }
 }
