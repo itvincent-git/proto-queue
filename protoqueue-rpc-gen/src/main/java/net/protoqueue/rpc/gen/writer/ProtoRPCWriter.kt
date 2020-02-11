@@ -25,8 +25,8 @@ import java.io.File
  * Created by zhongyongsheng on 2018/4/14.
  */
 class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) :
-    BaseWriter(serviceStruct.serviceClassName, outputDir
-    ) {
+        BaseWriter(serviceStruct.serviceClassName, outputDir
+        ) {
 
     override fun createTypeSpecBuilder(): TypeSpec.Builder {
         val builder = TypeSpec.classBuilder(serviceStruct.serviceClassName)
@@ -38,8 +38,8 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
     //private val serviceName = "SvcUserService"
     override fun createFileProperty(): PropertySpec.Builder {
         return PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE,
-            KModifier.CONST)
-            .initializer("%S", serviceStruct.serviceName)
+                KModifier.CONST)
+                .initializer("%S", serviceStruct.serviceName)
     }
 
     //object Client
@@ -57,22 +57,22 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
              * null): RPCResponse<GetUserBasicInfoRes>
              */
             FunSpec.builder(func.funName)
-                .addModifiers(KModifier.SUSPEND)
-                .addParameter(
-                    ParameterSpec.builder("req", func.genReqTypeClassName).build())
-                .returns(RPCResponse::class.asClassName().parameterizedBy(
-                    func.genRspTypeClassName))
-                .addParameter(
-                    ParameterSpec.builder(
-                        "parameter",
-                        RPCParameter::class.asClassName().copy(nullable = true))
-                        .defaultValue("null")
-                        .build()
-                )
-                .let {
-                    addRequestInnerCode(it, func)
-                    builder.addFunction(it.build())
-                }
+                    .addModifiers(KModifier.SUSPEND)
+                    .addParameter(
+                            ParameterSpec.builder("req", func.genReqTypeClassName).build())
+                    .returns(RPCResponse::class.asClassName().parameterizedBy(
+                            func.genRspTypeClassName))
+                    .addParameter(
+                            ParameterSpec.builder(
+                                    "parameter",
+                                    RPCParameter::class.asClassName().copy(nullable = true))
+                                    .defaultValue("null")
+                                    .build()
+                    )
+                    .let {
+                        addRequestInnerCode(it, func)
+                        builder.addFunction(it.build())
+                    }
         }
     }
 
@@ -86,27 +86,28 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
             indent()
             addStatement(
-                """%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
-                RPCApi::class, messageNanoClassName)
+                    """%T.send(serviceName, functionName, %T.toByteArray(req.convertToMessage()),""",
+                    RPCApi::class, messageNanoClassName)
             indent()
             addStatement("""{ _, _, data, parameter ->""")
             //val res = GetUserBasicInfoRes.parseFrom(data)
             indent()
             addStatement("""val res = %T.parseFrom(data)""",
-                ClassName(func.rspTypePackage, func.rspTypeSimpleName))
+                    ClassName(func.rspTypePackage, func.rspTypeSimpleName))
             //continuation.resume(RPCResponse(res))
             addStatement(
-                """continuation.%M(%T(res.convertToDataObject(), parameter = parameter))""", resume,
-                RPCResponse::class)
+                    """continuation.%M(%T(res.convertToDataObject(), parameter = parameter))""",
+                    resume,
+                    RPCResponse::class)
             //}, { sdkResCode, srvResCode ->
             unindent()
             addStatement("""}, { sdkResCode, srvResCode ->""")
             //    continuation.resume(RPCResponse(error = RPCError(sdkResCode, srvResCode)))
             indent()
             addStatement("""continuation.%M(%T(error = %T(sdkResCode, srvResCode)))""",
-                resume,
-                RPCResponse::class.asClassName(),
-                RPCError::class.asClassName())
+                    resume,
+                    RPCResponse::class.asClassName(),
+                    RPCError::class.asClassName())
             //           }
             unindent()
             addStatement("}, parameter")
@@ -133,21 +134,22 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
              * fun userFreezeNotify(handler: (UserFreezeNotifyInfo, RPCParameter?) -> Unit): RPCHandlerObserver {
              */
             FunSpec.builder(func.funName)
-                .addParameter(
-                    ParameterSpec.builder("handler", LambdaTypeName.get(null,
-                        listOf(getHandlerParameter(func),
-                            ParameterSpec.builder(
-                                "parameter",
-                                RPCParameter::class.asClassName().copy(nullable = true))
-                                .build()
-                        ),
-                        func.genRspTypeClassName.copy(nullable = true))
-                    ).build())
-                .returns(RPCHandlerObserver::class)
-                .let {
-                    addHandlerInnerCode(it, func)
-                    builder.addFunction(it.build())
-                }
+                    .addParameter(
+                            ParameterSpec.builder("handler", LambdaTypeName.get(null,
+                                    listOf(getHandlerParameter(func),
+                                            ParameterSpec.builder(
+                                                    "parameter",
+                                                    RPCParameter::class.asClassName().copy(
+                                                            nullable = true))
+                                                    .build()
+                                    ),
+                                    func.genRspTypeClassName.copy(nullable = true))
+                            ).build())
+                    .returns(RPCHandlerObserver::class)
+                    .let {
+                        addHandlerInnerCode(it, func)
+                        builder.addFunction(it.build())
+                    }
         }
     }
 
@@ -158,14 +160,14 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             addStatement("""val subscribeFuncName = %S""", func.funName)
             //val receiver: RPCNotifyReceiver = { _, functionName, data ->
             addStatement("""val receiver: %T = { _, functionName, data, parameter ->""",
-                ClassName("net.protoqueue.rpc.gen", "RPCNotifyReceiver"))
+                    ClassName("net.protoqueue.rpc.gen", "RPCNotifyReceiver"))
             //               if (functionName == subscribeFuncName) {
             indent()
             beginControlFlow("""if (functionName == subscribeFuncName)""")
             //                   val notify = UserFreezeNotifyInfo.parseFrom(data)
             addStatement("""val notify = %T.parseFrom(data).convertToDataObject()""",
-                ClassName(func.reqTypePackage,
-                    func.reqTypeSimpleName))
+                    ClassName(func.reqTypePackage,
+                            func.reqTypeSimpleName))
             //                   handler(notify)
             addStatement("""handler(notify, parameter)""")
             unindent()
@@ -173,10 +175,10 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             endControlFlow()
             //RPCApi.subscribe(serviceName, subscribeFuncName, receiver)
             addStatement("""%T.subscribe(serviceName, subscribeFuncName, receiver)""",
-                RPCApi::class)
+                    RPCApi::class)
             //return RPCHandlerObserver(serviceName, subscribeFuncName, receiver)
             addStatement("""return %T(serviceName, subscribeFuncName, receiver)""",
-                RPCHandlerObserver::class)
+                    RPCHandlerObserver::class)
         })
     }
 
@@ -187,7 +189,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
 
     companion object {
         val suspendCancellableCoroutine =
-            MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+                MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
         val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
         val resume = MemberName("kotlin.coroutines", "resume")
         val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
