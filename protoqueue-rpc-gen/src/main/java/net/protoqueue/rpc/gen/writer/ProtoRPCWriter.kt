@@ -1,6 +1,7 @@
 package net.jbridge.compiler.writer
 
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.LambdaTypeName
@@ -18,6 +19,7 @@ import net.protoqueue.rpc.runtime.RPCError
 import net.protoqueue.rpc.runtime.RPCHandlerObserver
 import net.protoqueue.rpc.runtime.RPCParameter
 import net.protoqueue.rpc.runtime.RPCResponse
+import net.protoqueue.rpc.runtime.util.forEachIndex
 import java.io.File
 
 /**
@@ -70,17 +72,21 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                                     .build()
                     )
                     .let {
-                        addRequestInnerCode(it, func)
+                        addRequestInnerCode(it, func, serviceStruct.paramMap)
                         builder.addFunction(it.build())
                     }
         }
     }
 
     //service请求应答内部实现
-    private fun addRequestInnerCode(builder: FunSpec.Builder, func: FunctionStruct) {
+    private fun addRequestInnerCode(
+            builder: FunSpec.Builder, func: FunctionStruct, paramMap: Map<String, String>
+    ) {
         builder.addCode(buildCodeBlock {
             //val functionName = "batchGetUserBasicInfo"
             addStatement("""val functionName = %S""", func.funName)
+
+            addMergeParameter(paramMap)
             //return suspendCancellableCoroutine { continuation ->
             addStatement("""return %M { continuation -> """, suspendCancellableCoroutine)
             //RPCApi.send(serviceName, functionName, MessageNano.toByteArray(req), { serverName, funcName, data ->
@@ -110,7 +116,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
                     RPCError::class.asClassName())
             //           }
             unindent()
-            addStatement("}, parameter")
+            addStatement("}, %L", if (paramMap.isEmpty()) "parameter" else "mergeParameter")
             unindent()
             //           )
             addStatement(")")
@@ -118,6 +124,24 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
             unindent()
             addStatement("}")
         })
+    }
+
+    //为service请求应答内，增加mergeParameter功能，支持业务层扩展字段
+    private fun CodeBlock.Builder.addMergeParameter(
+            paramMap: Map<String, String>
+    ) {
+        if (paramMap.isNotEmpty()) {
+            //val mergeParameter = parameter.mergePairs("customKey" to "customValue",
+            //                    "customKey1" to "customValue1")
+            addStatement("""val mergeParameter = parameter.%M(%L)""",
+                    mergePairs, buildCodeBlock {
+                paramMap.forEachIndex { entry, index ->
+                    add("""%L%S to %S""",
+                            if (index != 0) ", " else "",
+                            entry.key, entry.value)
+                }
+            })
+        }
     }
 
     //object Handler
@@ -191,6 +215,7 @@ class ProtoRPCWriter(private val serviceStruct: ServiceStruct, outputDir: File) 
         val suspendCancellableCoroutine =
                 MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
         val resumeWithException = MemberName("kotlin.coroutines", "resumeWithException")
+        val mergePairs = MemberName("net.protoqueue.rpc.runtime", "mergePairs")
         val resume = MemberName("kotlin.coroutines", "resume")
         val messageNanoClassName = ClassName("com.google.protobuf.nano", "MessageNano")
     }
