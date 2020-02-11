@@ -20,12 +20,12 @@ object RPCApi {
 
     //自动生成代码使用，请不要直接使用
     fun send(
-        serviceName: String,
-        functionName: String,
-        bytes: ByteArray,
-        successCallback: RPCResponseCallback,
-        errorCallback: RPCErrorCallback? = null,
-        parameter: RPCParameter? = null
+            serviceName: String,
+            functionName: String,
+            bytes: ByteArray,
+            successCallback: RPCResponseCallback,
+            errorCallback: RPCErrorCallback? = null,
+            parameter: RPCParameter? = null
     ) {
         adapter?.send(serviceName, functionName, bytes, successCallback, errorCallback, parameter)
     }
@@ -45,10 +45,10 @@ object RPCApi {
  * 成功回调
  */
 typealias RPCResponseCallback = (
-    serviceName: String,
-    funcName: String,
-    data: ByteArray,
-    parameter: RPCParameter?
+        serviceName: String,
+        funcName: String,
+        data: ByteArray,
+        parameter: RPCParameter?
 ) -> Unit
 
 /**
@@ -60,10 +60,10 @@ typealias RPCErrorCallback = (sdkResCode: Int, srvResCode: Int) -> Unit
  * 通知接通器
  */
 typealias RPCNotifyReceiver = (
-    serviceName: String,
-    functionName: String,
-    data: ByteArray,
-    parameter: RPCParameter?
+        serviceName: String,
+        functionName: String,
+        data: ByteArray,
+        parameter: RPCParameter?
 ) -> Unit
 
 /**
@@ -82,12 +82,12 @@ interface RPCAdapter {
      * @param parameter 透传的参数
      */
     fun send(
-        serviceName: String,
-        functionName: String,
-        bytes: ByteArray,
-        successCallback: RPCResponseCallback,
-        errorCallback: RPCErrorCallback? = null,
-        parameter: RPCParameter? = null
+            serviceName: String,
+            functionName: String,
+            bytes: ByteArray,
+            successCallback: RPCResponseCallback,
+            errorCallback: RPCErrorCallback? = null,
+            parameter: RPCParameter? = null
     )
 
     /**
