@@ -24,3 +24,12 @@ fun <K, V, K1, V1, M : MutableMap<in K1, in V1>> Map<K, V>.convertMapTo(
 ): M {
     return entries.associateByTo(destination, transformKey, transformValue)
 }
+
+/**
+ * 循环，加上index序号
+ */
+inline fun <K, V> Map<out K, V>.forEachIndex(action: (Map.Entry<K, V>, Int) -> Unit): Unit {
+    var index = 0
+    for (element in this)
+        action(element, index++)
+}
