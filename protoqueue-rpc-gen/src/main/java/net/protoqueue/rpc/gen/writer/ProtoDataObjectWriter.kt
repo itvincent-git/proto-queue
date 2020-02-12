@@ -122,10 +122,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
                 addStatement("val message = %T()", dataObjectStruct.originMessageTypeClassName)
                 for (field in dataObjectStruct.fields) {
                     if (field.fieldType.isOriginalType) {
-                        addStatement("message.%L = this.%L%L",
-                            field.fieldName,
-                            field.fieldName,
-                            createFieldStatementCodeBlock(field))
+                        addCode(createFieldStatementCodeBlock(field))
                     } else {
                         //message.header = header?.convertToMessage()
                         addStatement("message.%L = this.%L?.convertToMessage()", field.fieldName,
@@ -140,26 +137,43 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
 
     //创建DO转Message类字段赋值语句
     private fun createFieldStatementCodeBlock(field: DataFieldStruct) = buildCodeBlock {
-        //message.firstLoginTime = firstLoginTime ?: 0
         when (field.fieldType.fieldType) {
-            "kotlin.Int" -> add(" ?: 0")
-            "kotlin.Boolean" -> add(" ?: false")
-            "kotlin.Double" -> add(" ?: 0.0")
-            "kotlin.Float" -> add(" ?: 0.0f")
-            "kotlin.Long" -> add(" ?: 0L")
+            //message.firstLoginTime = firstLoginTime ?: 0。基本类型java不允许有null类型
+            "kotlin.Int" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, " ?: 0")
+            "kotlin.Boolean" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, " ?: false")
+            "kotlin.Double" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, " ?: 0.0")
+            "kotlin.Float" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, " ?: 0.0f")
+            "kotlin.Long" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, " ?: 0L")
+            //this.title?.let { message.title = it } String会判断是否为null，如果为null，生成的pb.java会抛NullPointerException
+            "kotlin.String" -> {
+                if (field.fieldType.nullable) {
+                    addStatement("this.%L?.let { message.%L = it }", field.fieldName, field.fieldName)
+                } else {
+                    addStatement("message.%L = this.%L", field.fieldName, field.fieldName)
+                }
+            }
             //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
-            "kotlin.collections.MutableList" -> createFieldStatementListBlock(field)
+            "kotlin.collections.MutableList" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, createFieldStatementListBlock(field))
             //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
             //TODO 处理内部泛型
-            "kotlin.collections.MutableMap" -> createFieldStatementMapBlock(field)
-            else -> ""
+            "kotlin.collections.MutableMap" -> addStatement("message.%L = this.%L%L", field.fieldName,
+                    field.fieldName, createFieldStatementMapBlock(field))
+            else -> {
+
+            }
         }
     }
 
     //创建message.list 数组类型的转换
     private fun CodeBlock.Builder.createFieldStatementListBlock(
         field: DataFieldStruct
-    ) {
+    ) = buildCodeBlock {
         if (field.fieldType is DataFieldParameterType) {
             val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
             if (firstParameterType != null) {
@@ -191,7 +205,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     //创建message.map 数组类型的转换
     private fun CodeBlock.Builder.createFieldStatementMapBlock(
         field: DataFieldStruct
-    ) {
+    ) = buildCodeBlock {
         //map must has 2 ParameterType
         if (field.fieldType is DataFieldParameterType && field.fieldType.parameterTypes.size == 2) {
             val firstParameterType = field.fieldType.parameterTypes[0]
