@@ -115,11 +115,11 @@ class DescFileServiceReader(private val descFilePath: String) {
 
     private fun ServiceStruct.updateXhAppId(appId: XhAppId?) {
         if (appId != null) {
-            paramMap["xh_appid_product"] = appId.product.toString()
-            paramMap["xh_appid_product"] = appId.test.toString()
+            paramMap["rpc:xh_appid_product"] = appId.product.toString()
+            paramMap["rpc:xh_appid_test"] = appId.test.toString()
         } else {
-            paramMap.remove("xh_appid_product")
-            paramMap.remove("xh_appid_product")
+            paramMap.remove("rpc:xh_appid_product")
+            paramMap.remove("rpc:xh_appid_test")
         }
     }
 }
