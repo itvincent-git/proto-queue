@@ -23,82 +23,91 @@ import java.io.IOException
  * 生成RPC DataObject类
  * Created by zhongyongsheng on 2018/4/14.
  */
-class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStruct, val outputDir: File) {
+class ProtoDataObjectWriter(
+        private val dataObjectFileStruct: DataObjectFileStruct, val outputDir: File
+) {
 
     @Throws(IOException::class)
     fun write() {
-        FileSpec.builder(dataObjectFileStruct.fileClassName.packageName, dataObjectFileStruct.fileClassName.simpleName)
-            .addComment("Generate by protoqueue-rpc, don't edit this file please")
-            .indent("    ")
-            .apply {
-                createDataObjectWrapperClass(this)
-                createMessageConvertToDataObjectExFunction(this)
-            }
-            .build()
-            .writeTo(outputDir)
+        FileSpec.builder(dataObjectFileStruct.fileClassName.packageName,
+                dataObjectFileStruct.fileClassName.simpleName)
+                .addComment("Generate by protoqueue-rpc, don't edit this file please")
+                .indent("    ")
+                .apply {
+                    createDataObjectWrapperClass(this)
+                    createMessageConvertToDataObjectExFunction(this)
+                }
+                .build()
+                .writeTo(outputDir)
     }
 
     //创建DO外部类
     private fun createDataObjectWrapperClass(builder: FileSpec.Builder) {
         TypeSpec.classBuilder(dataObjectFileStruct.fileClassName)
-            .apply {
-                createDataObjects(this)
-                createEnumClasses(this)
-                builder.addType(build())
-            }
+                .apply {
+                    createDataObjects(this)
+                    createEnumClasses(this)
+                    builder.addType(build())
+                }
     }
 
     //创建多个DO类
     private fun createDataObjects(builder: TypeSpec.Builder) {
         for (dataObjectStruct in dataObjectFileStruct.objects) {
             TypeSpec.classBuilder(dataObjectStruct.genMessageTypeSimpleName)
-                .apply {
-                    createDataObjectFields(this, dataObjectStruct)
-                    createConvertToMessageFunction(this, dataObjectStruct)
-                    createDataObjectConstructor(this, dataObjectStruct)
-                    builder.addType(build())
-                }
+                    .apply {
+                        createDataObjectFields(this, dataObjectStruct)
+                        createConvertToMessageFunction(this, dataObjectStruct)
+                        createDataObjectConstructor(this, dataObjectStruct)
+                        builder.addType(build())
+                    }
         }
     }
 
     //创建DO类字段属性
-    private fun createDataObjectFields(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
+    private fun createDataObjectFields(
+            builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct
+    ) {
         for (fieldStruct in dataObjectStruct.fields) {
             PropertySpec.builder(fieldStruct.fieldName, getFieldTypeName(fieldStruct.fieldType))
-                .mutable()
-                .apply {
-                    initializer(fieldStruct.fieldName)
-                    builder.addProperty(build())
-                }
+                    .mutable()
+                    .apply {
+                        initializer(fieldStruct.fieldName)
+                        builder.addProperty(build())
+                    }
         }
     }
 
     //创建DO constructor方法
     private fun createDataObjectConstructor(
-        builder: TypeSpec.Builder,
-        dataObjectStruct: DataObjectStruct
+            builder: TypeSpec.Builder,
+            dataObjectStruct: DataObjectStruct
     ) {
         FunSpec.constructorBuilder()
-            .apply {
-                for (fieldStruct in dataObjectStruct.fields) {
-                    val parameterBuilder = ParameterSpec.builder(fieldStruct.fieldName,
-                        getFieldTypeName(fieldStruct.fieldType))
-                    getConstructorInitializer(fieldStruct.fieldType, parameterBuilder)
-                    addParameter(parameterBuilder.build())
+                .apply {
+                    for (fieldStruct in dataObjectStruct.fields) {
+                        val parameterBuilder = ParameterSpec.builder(fieldStruct.fieldName,
+                                getFieldTypeName(fieldStruct.fieldType))
+                        getConstructorInitializer(fieldStruct.fieldType, parameterBuilder)
+                        addParameter(parameterBuilder.build())
+                    }
+                    builder.primaryConstructor(build())
                 }
-                builder.primaryConstructor(build())
-            }
     }
 
     //生成字段初始化值
-    private fun getConstructorInitializer(type: DataFieldType, propertyBuilder: ParameterSpec.Builder) =
-        when (type.fieldType) {
-            "kotlin.collections.MutableList" -> propertyBuilder.defaultValue("%M()", mutableListOf)
-            "kotlin.collections.MutableMap" -> propertyBuilder.defaultValue("%M()", mutableMapOf)
-            else -> {
-                propertyBuilder.defaultValue("null")
+    private fun getConstructorInitializer(
+            type: DataFieldType, propertyBuilder: ParameterSpec.Builder
+    ) =
+            when (type.fieldType) {
+                "kotlin.collections.MutableList" -> propertyBuilder.defaultValue("%M()",
+                        mutableListOf)
+                "kotlin.collections.MutableMap" -> propertyBuilder.defaultValue("%M()",
+                        mutableMapOf)
+                else -> {
+                    propertyBuilder.defaultValue("null")
+                }
             }
-        }
 
     //生成DO类字段类型
     private fun getFieldTypeName(type: DataFieldType): TypeName = when (type) {
@@ -114,25 +123,28 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     }
 
     //创建DO转Message类方法
-    private fun createConvertToMessageFunction(builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct) {
+    private fun createConvertToMessageFunction(
+            builder: TypeSpec.Builder, dataObjectStruct: DataObjectStruct
+    ) {
         FunSpec.builder("convertToMessage")
-            .returns(dataObjectStruct.originMessageTypeClassName)
-            .apply {
-                //val message = UserLoginRes()
-                addStatement("val message = %T()", dataObjectStruct.originMessageTypeClassName)
-                for (field in dataObjectStruct.fields) {
-                    if (field.fieldType.isOriginalType) {
-                        addCode(createFieldStatementCodeBlock(field))
-                    } else {
-                        //message.header = header?.convertToMessage()
-                        addStatement("message.%L = this.%L?.convertToMessage()", field.fieldName,
-                            field.fieldName)
+                .returns(dataObjectStruct.originMessageTypeClassName)
+                .apply {
+                    //val message = UserLoginRes()
+                    addStatement("val message = %T()", dataObjectStruct.originMessageTypeClassName)
+                    for (field in dataObjectStruct.fields) {
+                        if (field.fieldType.isOriginalType) {
+                            addCode(createFieldStatementCodeBlock(field))
+                        } else {
+                            //message.header = header?.convertToMessage()
+                            addStatement("message.%L = this.%L?.convertToMessage()",
+                                    field.fieldName,
+                                    field.fieldName)
+                        }
                     }
+                    //return message
+                    addStatement("return message")
+                    builder.addFunction(build())
                 }
-                //return message
-                addStatement("return message")
-                builder.addFunction(build())
-            }
     }
 
     //创建DO转Message类字段赋值语句
@@ -152,27 +164,29 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
             //this.title?.let { message.title = it } String会判断是否为null，如果为null，生成的pb.java会抛NullPointerException
             "kotlin.String" -> {
                 if (field.fieldType.nullable) {
-                    addStatement("this.%L?.let { message.%L = it }", field.fieldName, field.fieldName)
+                    addStatement("this.%L?.let { message.%L = it }", field.fieldName,
+                            field.fieldName)
                 } else {
                     addStatement("message.%L = this.%L", field.fieldName, field.fieldName)
                 }
             }
             //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
-            "kotlin.collections.MutableList" -> addStatement("message.%L = this.%L%L", field.fieldName,
+            "kotlin.collections.MutableList" -> addStatement("message.%L = this.%L%L",
+                    field.fieldName,
                     field.fieldName, createFieldStatementListBlock(field))
             //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
             //TODO 处理内部泛型
-            "kotlin.collections.MutableMap" -> addStatement("message.%L = this.%L%L", field.fieldName,
+            "kotlin.collections.MutableMap" -> addStatement("message.%L = this.%L%L",
+                    field.fieldName,
                     field.fieldName, createFieldStatementMapBlock(field))
             else -> {
-
             }
         }
     }
 
     //创建message.list 数组类型的转换
     private fun CodeBlock.Builder.createFieldStatementListBlock(
-        field: DataFieldStruct
+            field: DataFieldStruct
     ) = buildCodeBlock {
         if (field.fieldType is DataFieldParameterType) {
             val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
@@ -204,7 +218,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
 
     //创建message.map 数组类型的转换
     private fun CodeBlock.Builder.createFieldStatementMapBlock(
-        field: DataFieldStruct
+            field: DataFieldStruct
     ) = buildCodeBlock {
         //map must has 2 ParameterType
         if (field.fieldType is DataFieldParameterType && field.fieldType.parameterTypes.size == 2) {
@@ -241,57 +255,59 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
         //fun UserFreezeInfo.convertToDataObject(): WhSvcUserDO.UserFreezeInfoDO {
         for (dataObjectStruct in dataObjectFileStruct.objects) {
             FunSpec.builder("convertToDataObject")
-                .receiver(dataObjectStruct.originMessageTypeClassName)
-                .returns(dataObjectStruct.genMessageTypeClassName)
-                .apply {
-                    //    val o = WhSvcUserDO.UserFreezeInfoDO()
-                    addStatement("val o = %T()", dataObjectStruct.genMessageTypeClassName)
-                    //    o.freezeUnixTimestamp = freezeUnixTimestamp
-                    for (field in dataObjectStruct.fields) {
-                        if (field.fieldType.isOriginalType) {
-                            addStatement("o.%L = %L%L",
-                                field.fieldName,
-                                field.fieldName,
-                                createConvertToDataObjectFieldStatementCodeBlock(field))
-                        } else {
-                            //message.header = header?.convertToMessage()
-                            addStatement("o.%L = %L?.convertToDataObject()", field.fieldName, field.fieldName)
+                    .receiver(dataObjectStruct.originMessageTypeClassName)
+                    .returns(dataObjectStruct.genMessageTypeClassName)
+                    .apply {
+                        //    val o = WhSvcUserDO.UserFreezeInfoDO()
+                        addStatement("val o = %T()", dataObjectStruct.genMessageTypeClassName)
+                        //    o.freezeUnixTimestamp = freezeUnixTimestamp
+                        for (field in dataObjectStruct.fields) {
+                            if (field.fieldType.isOriginalType) {
+                                addStatement("o.%L = %L%L",
+                                        field.fieldName,
+                                        field.fieldName,
+                                        createConvertToDataObjectFieldStatementCodeBlock(field))
+                            } else {
+                                //message.header = header?.convertToMessage()
+                                addStatement("o.%L = %L?.convertToDataObject()", field.fieldName,
+                                        field.fieldName)
+                            }
                         }
+                        //    return o
+                        addStatement("return o")
+                        builder.addFunction(build())
                     }
-                    //    return o
-                    addStatement("return o")
-                    builder.addFunction(build())
-                }
         }
     }
 
     //创建Message转DO的字段赋值语句
-    private fun createConvertToDataObjectFieldStatementCodeBlock(field: DataFieldStruct) = buildCodeBlock {
-        //message.firstLoginTime = firstLoginTime ?: 0
-        when (field.fieldType.fieldType) {
-            //o.status = status.mapTo(ArrayList(status.size)) { it.convertToDataObject() }
-            "kotlin.collections.MutableList" -> createConvertToFieldListCodeBlock(field)
-            //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
-            //TODO 处理内部泛型
-            "kotlin.collections.MutableMap" -> createConvertToFieldMapCodeBlock(field)
-            else -> ""
-        }
-    }
+    private fun createConvertToDataObjectFieldStatementCodeBlock(field: DataFieldStruct) =
+            buildCodeBlock {
+                //message.firstLoginTime = firstLoginTime ?: 0
+                when (field.fieldType.fieldType) {
+                    //o.status = status.mapTo(ArrayList(status.size)) { it.convertToDataObject() }
+                    "kotlin.collections.MutableList" -> createConvertToFieldListCodeBlock(field)
+                    //message.statusMap = statusMap.convertMap({ it.key }, { it.value?.convertToMessage() })
+                    //TODO 处理内部泛型
+                    "kotlin.collections.MutableMap" -> createConvertToFieldMapCodeBlock(field)
+                    else -> ""
+                }
+            }
 
     //创建message.list = xxxx的语句
     private fun CodeBlock.Builder.createConvertToFieldListCodeBlock(
-        field: DataFieldStruct
+            field: DataFieldStruct
     ) {
         if (field.fieldType is DataFieldParameterType) {
             val firstParameterType = field.fieldType.parameterTypes.firstOrNull()
             if (firstParameterType != null) {
                 if (!firstParameterType.isOriginalType) {
                     add(".mapTo(ArrayList(%L.size)) { it.%M() }",
-                        field.fieldName,
-                        MemberName(
-                            firstParameterType
-                                .fieldTypePackage
-                                .substringBeforeLast("."), "convertToDataObject"))
+                            field.fieldName,
+                            MemberName(
+                                    firstParameterType
+                                            .fieldTypePackage
+                                            .substringBeforeLast("."), "convertToDataObject"))
                 } else {
                     //系统类型时
                     when (firstParameterType.fieldType) {
@@ -312,7 +328,7 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
 
     //创建message.map = xxxx的语句
     private fun CodeBlock.Builder.createConvertToFieldMapCodeBlock(
-        field: DataFieldStruct
+            field: DataFieldStruct
     ) {
         //map must has 2 ParameterType
         //map?.convertMap需要增加可空判断，不然原生java协议过来的时候有可能为null
@@ -349,12 +365,12 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     private fun createEnumClasses(builder: TypeSpec.Builder) {
         for (enumStruct in dataObjectFileStruct.enums) {
             TypeSpec.interfaceBuilder(enumStruct.genMessageTypeSimpleName)
-                .addType(TypeSpec.companionObjectBuilder().apply {
-                    createEnumFields(this, enumStruct)
-                }.build())
-                .apply {
-                    builder.addType(build())
-                }
+                    .addType(TypeSpec.companionObjectBuilder().apply {
+                        createEnumFields(this, enumStruct)
+                    }.build())
+                    .apply {
+                        builder.addType(build())
+                    }
         }
     }
 
@@ -362,10 +378,10 @@ class ProtoDataObjectWriter(private val dataObjectFileStruct: DataObjectFileStru
     private fun createEnumFields(builder: TypeSpec.Builder, enumStruct: EnumStruct) {
         for ((name, value) in enumStruct.enumFields) {
             PropertySpec.builder(name, Int::class)
-                .initializer("%L", value)
-                .apply {
-                    builder.addProperty(build())
-                }
+                    .initializer("%L", value)
+                    .apply {
+                        builder.addProperty(build())
+                    }
         }
     }
 
