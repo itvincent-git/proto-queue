@@ -58,7 +58,9 @@ class DescFileTypesReader(private val descFilePath: String) {
         }
     }
 
-    private fun readFileDescriptor(fdp: DescriptorProtos.FileDescriptorProto): DataObjectFileStruct {
+    private fun readFileDescriptor(
+        fdp: DescriptorProtos.FileDescriptorProto
+    ): DataObjectFileStruct {
         val packageName = fdp.readPackageName()
         val outClassName = fdp.readOutClassName()
         val messageTypes = fdp.messageTypeList.map {
@@ -96,6 +98,7 @@ class DescFileTypesReader(private val descFilePath: String) {
             "TYPE_UINT64" -> "kotlin.Long"
             "TYPE_MESSAGE" -> ""
             "TYPE_ENUM" -> "kotlin.Int"
+            "TYPE_BYTES" -> "kotlin.ByteArray"
             else -> throw RuntimeException("${fdp.type.name} now unSupport")
         }
         var isOriginalType = firstType.isNotEmpty()

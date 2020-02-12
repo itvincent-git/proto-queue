@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package wh.svc.chatroom;
+option objc_class_prefix = "PTB";
+option java_package = "com.woohoo.app.common.protocol";
+
+
+// 客户端 -> yyp+pb+pb -> 旧service通道 -> 服务端
+
+// 以飞刀游戏flying_knife_game.proto为例，客户端如果想使用旧service通道调发起游戏接口，
+// 则上行请求包装一个 OldServiceReq， content字段为StartGameReq， serviceName值为SvcFlyingKnifeGameService，functionName为startGame
+// 下行响应为OldServiceRes，serviceName值为SvcFlyingKnifeGameService，functionName为startGame，content字段为StartGameRes
+// 之后所有人会收到OldServiceNotifyInfo，serviceName为SvcFlyingKnifeGameNotifyService，functionName为startGameNotify，content字段为StartGameNotifyInfo
+
+// 参考开发规范： http://xhdoc.yypm.com/Server/%E6%B5%B7%E5%A4%96/%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3/%E6%8E%A5%E5%8F%A3%E8%A7%84%E8%8C%83.html
+// 上行请求
+message OldServiceReq {
+    uint64 seqId = 1;
+    string appName = 2;
+    string appVersionDes = 3; // 1.0.1
+    int64 appVersion = 4; // 10001
+    string locale = 5; // 国家
+    string language = 6;
+    string deviceId = 7; // 设备id
+    string clientType = 8;
+    string deviceType = 9;
+    string netType = 10;
+    string channel = 11;
+    string traceId = 12;
+    string contentType = 13; // 固定填"pb"
+    string accept = 14; // 可选，接受何种回包
+    string serviceName = 15; // 对应业务proto文件的serviceName
+    string functionName = 16; // 对应业务proto文件的functionName
+    bytes content = 17; // 具体的业务pb字节流
+}
+enum OldServiceResType {
+    RESPONSE = 0; // 下行回包
+    BROADCAST = 1; // 广播
+    UNICAST = 2; // 单播
+}
+// 下行回包或单广播内容（接口应客户端要求）
+message OldServiceResInfo {
+    OldServiceResType type = 1;
+    OldServiceRes res = 2; // type为RESPONSE时有值
+    OldServiceNotifyInfo notifyInfo = 3; // type为BROADCAST或UNICAST时有值
+
+}
+message OldServiceRes {
+    uint64 seqId = 1;
+    string contentType = 2; // 业务数据编码类型，当前只有pb
+    string serviceName = 3; // 对应业务proto文件的serviceName
+    string functionName = 4; // 对应业务proto文件的functionName
+    bytes content = 5; // 具体的业务pb字节流
+}
+
+message OldServiceNotifyInfo {
+    uint64 seqId = 1;
+    string contentType = 2; // 业务数据编码类型，当前只有pb
+    string serviceName = 3; // 对应业务proto文件的serviceName
+    string functionName = 4; // 对应业务proto文件的functionName
+    bytes content = 5; // 具体的业务pb字节流
+}
