@@ -2,7 +2,7 @@ syntax = "proto3";
 
 // 你演我猜游戏
 
-package wh.svc.chatroom;
+package wh.svc.partyroom.performguess;
 option objc_class_prefix = "PTB";
 
 import "wh_svc_common.proto";
@@ -12,7 +12,11 @@ service SvcPerformAndGuessService {
     // 让参与者恢复这场游戏： 进入房间 => 查询房间当前状态 => 房间处于“你演我猜”状态  => 我在麦上(在麦表示有参与，不在麦则表示没参与)  => 查询当前游戏信息 => 成功获取  => 恢复
     rpc getCurrentPerformInfo (GetCurrentPerformInfoReq) returns (GetCurrentPerformInfoRes);
     // 表演者选词，将触发performingNotify
-    rpc performPickWord (PerformPickWordReq) returns (PerformPickWordRes);
+    rpc performerPickWord (PerformerPickWordReq) returns (PerformerPickWordRes);
+    // 表演者结束表演（60秒表演结束后主动告诉下服务端。）
+    // 服务端会延长一些时间给到表演者，作为一个超时兜底，如果表演者不主动上报表演结束动作的话，可能会倒计时0秒后仍旧等待几秒才会真正结束，主动上报结束动作可以避免这个问题
+    // 将触发下一轮表演者开始表演。 performerPickingWordNotify
+    rpc performingDone (PerformingDoneReq) returns (PerformingDoneRes);
     // 参与者回答正确，将触发participantScoreChangeNotify
     rpc participantAnswerRight (ParticipantAnswerRightReq) returns (ParticipantAnswerRightRes);
 }
@@ -39,11 +43,14 @@ option java_package = "com.woohoo.app.common.protocol";
 option optimize_for = LITE_RUNTIME;
 message GetCurrentPerformInfoReq {
     common.RoomVid roomVid = 1;
+    string roundId = 2; // 可选字段。 game center的roundId。（其实就是performId）
 }
 message GetCurrentPerformInfoRes {
-    PerformBaseInfo baseInfo = 1;
-    PickingWordTurn pickingWord = 2; // 如果此字段有值，表示当前处于选词阶段
-    PerformingTurn performingTurn = 3; // 如果此字段有值，表示当前处于表演阶段
+    common.ResponseHeader header = 1;
+    PerformBaseInfo baseInfo = 2;
+    int64 seqId = 3; // 序号（用于与Notify共用一个乱序处理逻辑，seqId越大说明通知发生越晚）
+    PickingWordTurn pickingWord = 4; // 如果此字段有值，表示当前处于选词阶段
+    PerformingTurn performingTurn = 5; // 如果此字段有值，表示当前处于表演阶段
 }
 
 message PerformerPickingWordNotifyInfo {
@@ -60,34 +67,36 @@ message PerformingNotifyInfo {
 
 message PerformingTurn {
     string performerShowWord = 1; // 表演之看到的展示词
-    repeated string keyWords = 2; // 回答命中词列表。
-    repeated PerformingWordTips tips = 3; // 提示语定义
+    repeated PerformingWord performingWord = 3; // 关键词定义
     int32 remainSecs = 4; // 表演剩余秒数
+    int32 turnSecs = 5; // 本次表演总秒数
 }
 
 message PerformBaseInfo {
-    string performId = 1; // 本次游戏id。对应game center的roundId
+    string roundId = 1;
     int64 performerUid = 2; // 当前表演者uid
     int32 index = 3; // 当前为本次游戏，第几次表演
 }
 
 message PickingWordTurn {
-    string selectedWordId = 1; // 表演者当前选中什么词， 对应PickingWord#wordId
+    int64 selectedWordId = 1; // 表演者当前选中什么词， 对应PickingWord#wordId
     repeated PickingWord pickingWords = 2; // 选词列表，客户端假分页，客户端每页大小
     int32 remainSecs = 3; // 选词剩余秒数
+    int32 turnSecs = 4; // 本次表演总秒数
 }
 
 message PickingWord {
-    string wordId = 1;
+    int64 wordId = 1;
     string showWord = 2; // 显示语
 }
 
-message PerformingWordTips {
+message PerformingWord {
     string language = 1; // 语言码，小写
-    repeated PerformingWordTipsDetail tips = 2; // 提示语
+    repeated string keyWords = 2; // 回答命中词列表。
+    repeated PerformingWordTips tips = 3; // 提示语
 }
 
-message PerformingWordTipsDetail {
+message PerformingWordTips {
     int32 atRemainSecs = 1; // 剩余多少秒时展示此tips
     string tips = 2; // 提示语
 }
@@ -95,34 +104,60 @@ message PerformingWordTipsDetail {
 message ParticipantScoreChangeNotifyInfo {
     common.NotifyHeader header = 1;
     PerformBaseInfo baseInfo = 2;
-    int64 uid = 3;
-    int64 increment = 4; // 分数变动，扣分则为负数
-    int64 currentScore = 5; // 当前最新分数（变动后分数）
+    repeated ParticipantScoreChange scoreChangeList = 3; // 目标用户回答正确，加减分(含+0分)，或在某次表演结束时，可能有部分人还没回答，需要扣分，可能会一次性下发多个uid分数变动。  一次表演一个人只会有收到一次加减分广播
+    repeated ParticipantScoreChange turnScoreChange = 4; // 本轮加减分情况，表演结束时收到的分数变化广播会携带此字段，如果此字段数组长度大于0，公屏展示加减分情况
+}
+
+message ParticipantScoreChange {
+    int64 uid = 1;
+    int64 increment = 2; // 分数变动，扣分则为负数
+    int32 rank = 3; // 回答者名次，表演者没有名次
 }
 message RoundOverNotifyInfo {
     common.NotifyHeader header = 1;
     PerformBaseInfo baseInfo = 2;
-    map<int64, int64> userScore = 3; // 用户得分情况。key-uid, value = score
+    repeated PerformUserScore scoreList = 3; // 用户得分情况
 }
+
+message PerformUserScore {
+    int64 uid = 1;
+    int64 score = 2;
+}
+
 message PerformOverNotifyInfo {
     common.NotifyHeader header = 1;
     PerformBaseInfo baseInfo = 2;
-    map<int64, int64> userScore = 3; // 用户得分情况。key-uid, value = score
+    TerminateCode terminateCode = 3;
+    repeated PerformUserScore scoreList = 4; // 用户得分情况
 }
 
-message PerformPickWordReq {
-    string performId = 1; // 本次游戏id。对应game center的roundId
-    string wordId = 2; // 选了哪个词
+enum TerminateCode {
+    TerminateCodeNormal = 0; // 正常结束
+    OwnerLeaveChat = 1; // 房主离开麦位（目前由离房触发）
+    TooFewParticipants = 2; // 参与者过少（小于2人）
 }
-message PerformPickWordRes {
 
+message PerformerPickWordReq {
+    string roundId = 1; // 本次游戏id。对应game center的roundId
+    int64 wordId = 2; // 选了哪个词
+}
+message PerformerPickWordRes {
+    common.ResponseHeader header = 1;
 }
 message ParticipantAnswerRightReq {
-    string performId = 1; // 本次游戏id。对应game center的roundId
+    string roundId = 1; // 本次游戏id。对应game center的roundId
     int64 performerUid = 2; // 当前表演者uid
     int32 index = 4; // 回传PerformBaseInfo#index
-    string keyWords = 5; // 回答的内容
+    string keyWord = 5; // 回答的内容
 }
 message ParticipantAnswerRightRes {
+    common.ResponseHeader header = 1;
+}
 
+message PerformingDoneReq {
+    string roundId = 1; // 本次游戏id。对应game center的roundId
+    int32 index = 2;
+}
+message PerformingDoneRes {
+    common.ResponseHeader header = 1;
 }

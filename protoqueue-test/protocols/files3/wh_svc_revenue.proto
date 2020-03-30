@@ -1,0 +1,60 @@
+syntax = "proto3";
+// 营收相关服务
+package wh.svc.revenue;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcRevenueService {
+    // 查询接受金币榜单 - 周榜
+    rpc getCoinRecvWeekBoard (GetCoinRecvWeekBoardReq) returns (GetCoinRecvWeekBoardRes);
+
+    // 批量查询财富值和魅力值
+    rpc batchGetWealthAndCharm (BatchGetWealthAndCharmReq) returns (BatchGetWealthAndCharmRes);
+}
+
+service SvcRevenueNotifyService {
+    // 财富值等级变更单播
+    rpc wealthLevelChangeNotify (LevelChangeNotifyInfo) returns (common.Empty);
+    // 魅力值等级变更单播
+    rpc charmLevelChangeNotify (LevelChangeNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message RankItem {
+    int64 uid = 1;
+    int64 score = 2; // 具体排行榜的值，收金币榜单里表示金币数量
+    int32 rank = 3; // 排名，从1开始
+}
+message GetCoinRecvWeekBoardReq {
+    int64 uid = 1;
+    int64 lastId = 2; // 用于分页，使用上一次查询服务端返回的lastId, 没有则传0
+    int64 limit = 3;
+}
+message GetCoinRecvWeekBoardRes {
+    common.ResponseHeader header = 1;
+    repeated RankItem items = 2;
+    int64 lastId = 3;
+    bool end = 4; // 是否查完所有数据
+}
+
+message BatchGetWealthAndCharmReq {
+    repeated int64 uidList = 1;
+}
+
+message BatchGetWealthAndCharmRes {
+    common.ResponseHeader header = 1;
+    map<int64, common.WealthAndCharm> wealthAndCharmMap = 2;
+}
+
+message LevelChangeNotifyInfo {
+    string currLevelName = 1; // 当前等级名
+    int64 currValue = 2; // 当前财富值或者魅力值
+    repeated LevelChangeAward currAwardList = 3; // 当前等级奖励
+}
+
+message LevelChangeAward {
+    string name = 1;
+    string icon = 2;
+}

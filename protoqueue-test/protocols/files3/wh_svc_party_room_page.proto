@@ -10,6 +10,8 @@ service SvcPartyRoomPageService {
     rpc relatedRecommendList (RelatedRecommendReq) returns (RelatedRecommendRes);
     // 获取首页列表
     rpc homePageList (HomePageListReq) returns (HomePageListRes);
+    //  1v1匹配中获取房间推荐，如果一个可以推荐的房间都没有，返回ErrNotExists
+    rpc getRecommendRoomInChatMatch (GetRecommendRoomInChatMatchReq) returns (GetRecommendRoomInChatMatchRes);
 }
 
 option java_package = "com.woohoo.app.common.protocol";
@@ -36,4 +38,13 @@ message HomePageListRes {
     common.ResponseHeader header = 1;
     repeated common.PartyRoomInfo roomInfos = 2;
     string nextCursor = 3; // 下一个游标，如果下一个游标无值，或""，表示已达到底部
+    map<int64,int64> roomIds = 4; // owner -> roomId
+}
+
+message GetRecommendRoomInChatMatchReq {
+}
+message GetRecommendRoomInChatMatchRes {
+    common.ResponseHeader header = 1; // 如果一个房间都没有，返回ErrNotExists
+    common.PartyRoomInfo roomInfo = 2;
+    int64 roomId = 3;
 }

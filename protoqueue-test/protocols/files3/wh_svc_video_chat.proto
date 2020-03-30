@@ -10,6 +10,8 @@ service SvcVideoChatService {
     rpc getMaskList (GetMaskListReq) returns (GetMaskListRes);
     // 佩戴面具
     rpc wearMask (WearMaskReq) returns (WearMaskRes);
+    // 解锁面具，错误码：ErrCurrencyBalanceInsufficient-余额不足，ErrCurrencyRepeatConsume-重复解锁
+    rpc unlockMask (UnlockMaskReq) returns (UnlockMaskRes);
 
     // 获取互动表情列表
     rpc getEmojiList (GetEmojiListReq) returns (GetEmojiListRes);
@@ -76,11 +78,15 @@ service SvcVideoChatNotifyService {
 option java_package = "com.woohoo.app.common.protocol";
 option optimize_for = LITE_RUNTIME;
 message GetMaskListReq {
+    bool containLockedMask = 1; // 新版置为true，可以返回被锁的面具
+    int64 ifModifiedSince = 2; //  面具配置更新时间（值取GetMaskListRes#lastModified），如果没有时，不需要传
 }
 
 message GetMaskListRes {
     common.ResponseHeader header = 1;
     repeated Mask maskList = 2;
+    int64 lastModified = 3; // 下次查询时将本值设置到 ifModifiedSince  。  如果lastModified值跟ifModifiedSince相同，则不会返回列表，noChange为true
+    bool noChange = 4; // 如果noChange为true，不会返回面具列表
 }
 
 message WearMaskReq {
@@ -91,8 +97,19 @@ message WearMaskRes {
     common.ResponseHeader header = 1;
 }
 
+message UnlockMaskReq {
+    string maskId = 1;
+    int64 updateTimestamp = 2; // 面具更新的毫秒时间戳
+    common.CurrencyCost currencyCost = 3; // 扣费货币信息
+}
+
+message UnlockMaskRes {
+    common.ResponseHeader header = 1;
+}
+
 message GetEmojiListReq {
     int64 lastModifyTime = 1; // 列表最近一次更新时间，单位毫秒，首次获取可以不传
+    bool containFrameEmoji = 2; // 新版置为true，可以返回产生随机结果的表情
 }
 
 message GetEmojiListRes {
@@ -109,6 +126,7 @@ message UseEmojiReq {
 
 message UseEmojiRes {
     common.ResponseHeader header = 1;
+    int32 randomResult = 2; // resourceType为Frame时产生的随机结果
 }
 
 message CdTime {
@@ -246,6 +264,9 @@ message Mask {
     repeated Material wearMaterialList = 4; // 佩戴面具时-素材列表
     repeated Material takeoffMaterialList = 5; // 摘下面具时-素材列表
     repeated Material pureMaterialList = 6; // 摘下面具后-素材列表
+    bool locked = 7; // 该面具是否被锁
+    common.CurrencyCost currencyCost = 8; // 解锁需要的货币价值
+    int64 updateTimestamp = 9; // 面具更新的毫秒时间戳
 }
 enum MaskStatus {
     Unknown = 0;
@@ -270,6 +291,7 @@ enum ChatSource {
 enum ResourceType {
     UnknownResourceType = 0;
     SVGA = 1;
+    Frame = 2; // 帧包，用于可产生随机结果的表情
 }
 
 enum ClapStatus {
@@ -304,7 +326,8 @@ message Emoji {
     string name = 2; // 表情名
     string picUrl = 3; // 缩略图地址
     ResourceType resourceType = 4; // 资源类型
-    string resourceUrl = 5; // 资源地址
+    string resourceUrl = 5; // 视频模式资源地址
+    string audioResourceUrl = 6; // 音频模式资源地址
 }
 message PlayingInfo {
     PlayType playType = 1;
@@ -316,6 +339,7 @@ message PeerUseEmojiNotifyInfo {
     string emojiId = 2;
     int64 sendUid = 3;
     common.RoomVid roomVid = 4; // chatId有传才有回，roomVid固定回，可用于区分房型
+    int32 randomResult = 5; // resourceType为Frame时产生的随机结果
 }
 
 message ReadyJoinChatNotifyInfo {

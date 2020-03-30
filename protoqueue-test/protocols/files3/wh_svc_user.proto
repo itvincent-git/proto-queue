@@ -61,7 +61,7 @@ message UserLoginRes {
     bool isFirstLogin = 3;
     UserInfo userInfo = 4;
     UserFreezeInfo freezeInfo = 5; // 如果用户已封禁，此字段不为空
-    int64 serverTimestamp = 6;  // 服务器当前毫秒时间戳
+    int64 serverTimestamp = 6; // 服务器当前毫秒时间戳
 }
 message UpdateUserInfoReq {
     UserInfo userInfo = 1;
@@ -69,6 +69,15 @@ message UpdateUserInfoReq {
 message UpdateUserInfoRes {
     common.ResponseHeader header = 1;
     UserInfo userInfo = 2;
+}
+
+enum MaritalStatus {
+    MaritalStatusUnknown = 0; // 如果返回的婚恋状态是未知(值为0)，则UI展示文本为保密
+    Secret = 1; // 保密。
+    Single = 2; // 单身
+    Divorced = 3; // 离异
+    InLove = 4; // 恋爱中
+    Married = 5; // 已婚
 }
 
 message UserInfo {
@@ -82,7 +91,10 @@ message UserInfo {
     string voiceUrl = 8; // 个人录音
     string city = 9; // 所在城市，火星传空
     string country = 10; // 所在国家，填国家码，全大写，火星则填 MARS
-    Constellation constellation = 11; //星座
+    common.Constellation constellation = 11; //星座
+    string industry = 12; // 行业
+    string job = 13; // 职业，对应的行业-职业映射表客户端本地存储，如果industry-job未能映射出结果，则使用“其他”职业
+    MaritalStatus maritalStatus = 14; // 婚恋状态
 }
 message SavePhotoListReq {
     repeated string photoList = 1;
@@ -133,7 +145,7 @@ message UserUnBindAccountRes {
 
 message GetUserAccountReq {
     repeated common.UserAccountType queryAccountType = 1; // 要查询的账号
-    UserAccount loginAccount = 2;   // 用户当前自己登陆的账号
+    UserAccount loginAccount = 2; // 用户当前自己登陆的账号
 }
 message GetUserAccountRes {
     common.ResponseHeader header = 1;
@@ -145,22 +157,6 @@ message GetUserInfoListForTestReq {
 message GetUserInfoListForTestRes {
     common.ResponseHeader header = 1;
     repeated UserInfo userInfoList = 2;
-}
-
-enum Constellation {
-    ConstellationUnknown = 0;
-    Aquarius = 1; //水瓶座(1/20-2/18)
-    Pisces = 2; //雙魚座(2/19-3/20)
-    Aries = 3; //牧羊座(3/21-4/20)
-    Taurus = 4; //金牛座(4/21-5/20)
-    Gemini = 5; //雙子座(5/21-6/21)
-    Cancer = 6; //巨蟹座(6/22-7/22)
-    Leo = 7; //獅子座(7/23-8/22)
-    Virgo = 8; //處女座(8/23-9/22)
-    Libra = 9; //天秤座(9/23-10/23)
-    Scorpio = 10; //天蠍座(10/24-11/22)
-    Sagittarius = 11; //射手座(11/23-12/21)
-    Capricorn = 12; //摩羯座(12/22-1/20)
 }
 
 message ShareUserReq {

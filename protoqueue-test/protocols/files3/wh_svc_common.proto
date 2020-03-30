@@ -31,6 +31,8 @@ enum ResponseCode {
     ErrNotExists = 10;          // 内容不存在
     ErrExists = 11;             // 内容已存在
     ErrExceedLimit = 12;        // 超出限制
+    ErrIllegalOperation = 13;   // 操作非法（请求不合时宜等）
+    ErrConfigChanged = 14    ;   // 配置已发生变更
 
 
     // 用户服务错误码  [1000,1099]
@@ -40,7 +42,7 @@ enum ResponseCode {
     ErrRelationGreetSendMax = 1100; // 发送打招呼次数达到上限
     ErrRelationGreetToOneMax = 1101; // 对同一人打招呼达到上限
 
-    // 多人房错误码 [1200, 1201]
+    // 多人房错误码 [1200, 1299]
     ErrPartyRoomLimitedByKicked = 1200; // 操作因为被踢出房或踢下麦等限制
     ErrPartyRoomAlreadyParticipated = 1201; // 用户已经在麦上了
     ErrPartyRoomExceedMaxParticipantCount = 1202; // 麦上用户超过限制
@@ -50,8 +52,20 @@ enum ResponseCode {
     ErrPartyRoomNotManager = 1026; // 用户不是房间管理员
     ErrPartyRoomNotInRoom = 1027; // 用户不在房间内
     ErrPartyRoomInRoom = 1028; // 用户已在房间内
+    ErrPartyRoomGamePlaying = 1029 ;//游戏中
+    ErrPartyRoomPasswordNotCorrect = 1030; // 房间密码错误
 
+    // 多人房游戏中心 [1300, 1399]
+    ErrPartyRoomGameCenterGameStatusInvalid  = 1301; // 游戏状态无效（例如用户接受邀请的时候游戏状态已经发生变化）
+    ErrPartyRoomGameCenterRoundNotMatch = 1302;   // 游戏不匹配（例如用户接受邀请的时候游戏已经发生变化）
+    ErrPartyRoomGameCenterGameTimeout = 1303;    // 游戏超时（例如用户接受邀请的时候时间已经过了）
+    ErrPartyRoomGameCenterGameNotExists = 1304;  // 游戏不存在
+    ErrPartyRoomGameCenterGameMaintaining = 1305;    // 维护中
+    ErrPartyRoomGameCenterGamePlayersNotEnough = 1306;    // 游戏人数不足
 
+    // 货币体系错误码 [1400,1499]
+    ErrCurrencyBalanceInsufficient = 1401; // 余额不足
+    ErrCurrencyRepeatConsume = 1402; // 重复消费
 }
 
 enum Sex {
@@ -101,4 +115,54 @@ message PartyRoomInfo {
     string topic = 3;
     repeated int64 participants = 4; // 当前麦上用户
     int64 userCount = 5; // 在房人数
+}
+
+enum CurrencyType {
+    CurrencyUnknown = 0;
+    Free = 1; // 免费
+    GoldCoin = 2; // 金币
+}
+
+message CurrencyCost {
+    CurrencyType type = 1;
+    int64 cost = 2;
+}
+
+enum Constellation {
+    ConstellationUnknown = 0;
+    Aquarius = 1; //水瓶座(1/20-2/18)
+    Pisces = 2; //雙魚座(2/19-3/20)
+    Aries = 3; //牧羊座(3/21-4/20)
+    Taurus = 4; //金牛座(4/21-5/20)
+    Gemini = 5; //雙子座(5/21-6/21)
+    Cancer = 6; //巨蟹座(6/22-7/22)
+    Leo = 7; //獅子座(7/23-8/22)
+    Virgo = 8; //處女座(8/23-9/22)
+    Libra = 9; //天秤座(9/23-10/23)
+    Scorpio = 10; //天蠍座(10/24-11/22)
+    Sagittarius = 11; //射手座(11/23-12/21)
+    Capricorn = 12; //摩羯座(12/22-1/20)
+}
+
+
+enum PrivilegeType {
+    PrivilegeTypeUnknown = 0;
+    AvatarBox = 1; // 头像框
+    NickTailLight = 2; // 发言尾灯
+    JoinRoomEffects = 3; // 进房特效
+}
+
+message PrivilegeId {
+    PrivilegeType typeId = 1; //特权id（分类id）
+    int32 subId = 2; // 特权子ID
+}
+
+// 用户特权
+message UserPrivilege {
+    repeated PrivilegeId idList = 1;
+}
+
+message WealthAndCharm {
+    int64 wealth = 1;
+    int64 charm = 2;
 }

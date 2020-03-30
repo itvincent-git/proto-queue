@@ -18,6 +18,8 @@ service SvcRelationService {
     rpc getRelationCount (GetRelationCountReq) returns (GetRelationCountRes);
     // 检查与目标用户关系
     rpc checkRelation (CheckRelationReq) returns (CheckRelationRes);
+    // 批量检查与目标用户的关系，返回map，表示每个用户是否和查询者有指定的关系
+    rpc batchCheckRelation (BatchCheckRelationReq) returns (BatchCheckRelationRes);
     // 拉黑或取消拉黑
     rpc changeBlackList (ChangeBlackListReq) returns (ChangeBlackListRes);
     // 获取黑名单列表
@@ -177,6 +179,16 @@ message CheckRelationRes {
     bool fans = 3; // 是否为targetUid的粉丝
     bool friend = 4; // 是否互为好友
     bool blackList = 5; // 是否拉黑了targetUid
+}
+
+message BatchCheckRelationReq {
+    repeated int64 uidList = 1; // 被查询用户列表
+    RelationType relationType = 2;
+}
+message BatchCheckRelationRes {
+    common.ResponseHeader header = 1;
+    RelationType relationType = 2;
+    map<int64, bool> relations = 3; // uid 是否和查询者有relationType的关系
 }
 
 message GreetReq {

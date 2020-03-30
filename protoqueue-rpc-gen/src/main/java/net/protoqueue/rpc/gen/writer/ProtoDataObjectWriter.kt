@@ -135,10 +135,20 @@ class ProtoDataObjectWriter(
                     if (field.fieldType.isOriginalType) {
                         addCode(createFieldStatementCodeBlock(field))
                     } else {
+                        // oneof情况下
+                        // this.avatarBox?.let {
+                        // message.avatarBox = it.convertToMessage()
+                        // }
+
                         //message.header = header?.convertToMessage()
-                        addStatement("message.%L = this.%L?.convertToMessage()",
-                            field.fieldName,
-                            field.fieldName)
+                        if (field.fieldType.hasOneOfIndex) {
+                            addStatement("this.%L?.let { message.%L = it.convertToMessage() }", field.fieldName,
+                                field.fieldName)
+                        } else {
+                            addStatement("message.%L = this.%L?.convertToMessage()",
+                                field.fieldName,
+                                field.fieldName)
+                        }
                     }
                 }
                 //return message
@@ -151,23 +161,18 @@ class ProtoDataObjectWriter(
     private fun createFieldStatementCodeBlock(field: DataFieldStruct) = buildCodeBlock {
         when (field.fieldType.fieldType) {
             //message.firstLoginTime = firstLoginTime ?: 0。基本类型java不允许有null类型
-            "kotlin.Int" -> addStatement("message.%L = this.%L%L", field.fieldName,
-                field.fieldName, " ?: 0")
-            "kotlin.Boolean" -> addStatement("message.%L = this.%L%L", field.fieldName,
-                field.fieldName, " ?: false")
-            "kotlin.Double" -> addStatement("message.%L = this.%L%L", field.fieldName,
-                field.fieldName, " ?: 0.0")
-            "kotlin.Float" -> addStatement("message.%L = this.%L%L", field.fieldName,
-                field.fieldName, " ?: 0.0f")
-            "kotlin.Long" -> addStatement("message.%L = this.%L%L", field.fieldName,
-                field.fieldName, " ?: 0L")
+            "kotlin.Int" -> addOriginalMessageStatement(field, " ?: 0")
+            "kotlin.Boolean" -> addOriginalMessageStatement(field, " ?: false")
+            "kotlin.Double" -> addOriginalMessageStatement(field, " ?: 0.0")
+            "kotlin.Float" -> addOriginalMessageStatement(field, " ?: 0.0f")
+            "kotlin.Long" -> addOriginalMessageStatement(field, " ?: 0L")
             //this.title?.let { message.title = it } String会判断是否为null，如果为null，生成的pb.java会抛NullPointerException
             "kotlin.String" -> {
                 if (field.fieldType.nullable) {
                     addStatement("this.%L?.let { message.%L = it }", field.fieldName,
                         field.fieldName)
                 } else {
-                    addStatement("message.%L = this.%L", field.fieldName, field.fieldName)
+                    addOriginalMessageStatement(field, "")
                 }
             }
             //message.accountList = accountList.map { it.convertToMessage() }.toTypedArray()
@@ -181,6 +186,14 @@ class ProtoDataObjectWriter(
                 field.fieldName, createFieldStatementMapBlock(field))
             else -> {
             }
+        }
+    }
+
+    private fun CodeBlock.Builder.addOriginalMessageStatement(field: DataFieldStruct, elsePhase: String) {
+        if (field.fieldType.hasOneOfIndex) {
+            addStatement("this.%L?.let { message.%L = it }", field.fieldName, field.fieldName)
+        } else {
+            addStatement("message.%L = this.%L%L", field.fieldName, field.fieldName, elsePhase)
         }
     }
 

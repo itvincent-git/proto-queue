@@ -8,10 +8,8 @@ import "wh_svc_common.proto";
 service SvcChatRoomService{
     // 创建音视频Token    
     rpc createMediaToken(CreateMediaTokenReq) returns (CreateMediaTokenRes);
-
-    // 发送公屏消息
+    // 发送公屏CodeMessage消息
     rpc sendPublicScreenCodeMessage(SendPublicScreenCodeMessageReq) returns (SendPublicScreenCodeMessageRes);
-    
     // 获取快捷发言文案
     rpc getQuickTextList(GetQuickTextListReq) returns (GetQuickTextListRes);
 }
@@ -19,11 +17,12 @@ service SvcChatRoomService{
 
 // 房间Nofify服务（客户端实现）
 service SvcChatRoomNotifyService{  
-    // 公屏通知消息
-    rpc onPublicScreenMessageNotify (PublicScreenMessageNotify) returns (common.Empty);
-
     // 公屏CodeMessage通知
     rpc onPublicScreenCodeMessageNotify(PublicScreenCodeMessageNotify) returns (common.Empty);
+    // 公屏富文本消息(客户端可以暂时不接等有实际需求的时候再接)
+    rpc onPublicScreenRichMessageNotify(PublicScreenRichMessageNotify) returns (common.Empty);
+    // 公屏普通文本消息通知(客户端可以暂时不接等有实际需求的时候再接)
+    rpc onPublicScreenTextMessageNotify(PublicScreenTextMessageNotify) returns (common.Empty);
 }
 
 option java_package = "com.woohoo.app.common.protocol";
@@ -49,6 +48,7 @@ message CreateMediaTokenRes{
 message CodeMessage{
     string biz = 1; // 业务
     string code = 2; // 消息码
+    map<string,string> params = 3; //参数
 }
 
 message SendPublicScreenCodeMessageReq {
@@ -71,18 +71,24 @@ message GetQuickTextListRes {
     repeated string textList = 2;
 }
 
-// 公屏通知
-message PublicScreenMessageNotify{
-    int64 roomId = 1; // 房间Id
-    int64 sender = 2; // 发送者
-    bool system = 3;  // 系统通知   
-    map<string,string> content = 4;  // 公屏内容(采用富文本的形式)
-}
 
-// 发送公屏CodeMessage
 message PublicScreenCodeMessageNotify {
     int64 roomId  = 1; 
     int64 sender = 2;
     bool system = 3;
     CodeMessage message = 4;
+}
+
+message PublicScreenRichMessageNotify {
+    int64 roomId  = 1; 
+    int64 sender = 2;
+    bool system = 3;
+    string richMessage = 4;
+}
+
+message PublicScreenTextMessageNotify {
+    int64 roomId  = 1; 
+    int64 sender = 2;
+    bool system = 3;
+    string textMessage = 4;
 }

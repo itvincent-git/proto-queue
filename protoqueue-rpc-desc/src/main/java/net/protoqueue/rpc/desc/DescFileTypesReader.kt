@@ -107,9 +107,9 @@ class DescFileTypesReader(private val descFilePath: String) {
             //数组
             if (fdp.label == DescriptorProtos.FieldDescriptorProto.Label.LABEL_REPEATED) {
                 return DataFieldParameterType.get("kotlin.collections.MutableList", nullable, true,
-                    DataFieldType.get(firstType, false, isOriginalType))
+                    fdp.hasOneofIndex(), DataFieldType.get(firstType, false, isOriginalType, false))
             }
-            return DataFieldType.get(firstType, nullable, isOriginalType)
+            return DataFieldType.get(firstType, nullable, isOriginalType, fdp.hasOneofIndex())
         }
         //map
         return nestedMap[fdp.typeName.split(".").last()]
@@ -121,8 +121,9 @@ class DescFileTypesReader(private val descFilePath: String) {
         this.nestedTypeList.filter { it.options.mapEntry }.forEach {
             val keyType = convertType(it.fieldList.find { it.name == "key" }!!, emptyMap())
             val valType = convertType(it.fieldList.find { it.name == "value" }!!, emptyMap())
+            //map不会是oneof类型
             map[it.name] = DataFieldParameterType.get("kotlin.collections.MutableMap",
-                false, true, keyType, valType)
+                false, true, false, keyType, valType)
         }
         return map
     }

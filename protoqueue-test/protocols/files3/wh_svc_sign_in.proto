@@ -1,0 +1,42 @@
+syntax = "proto3";
+// 多人房游戏中心
+package wh.svc.sign;
+option objc_class_prefix = "PBPartyRoomGameCenter";
+
+import "wh_svc_common.proto";
+
+service SvcSignInService {
+    // 用户签到。可能的错误码如下。
+    // ErrExists，用户已经签到过
+    // ErrMaintenance，功能维护中
+    // ErrExceedLimit， 设备受限
+    // ErrSystem, 系统异常
+    // ErrUnauthorized， 未登陆
+    rpc signIn (SignInReq) returns (SignInRes);
+    // 签到第2版，允许额外赠送礼物
+    rpc signInV2 (SignInReq) returns (SignInRes);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message SignInReq {
+}
+
+message SignItem {
+    int32 day = 1;
+    bool obtained = 2; // 是否已获得
+    int32 goldCoins = 3; // 奖励的金币数
+    repeated AwardProd prods = 4; // 奖励的礼物， 多个礼物情况下，如果只支持一个礼物，取第1个
+}
+
+message SignInRes {
+    common.ResponseHeader header = 1;
+    int32 currentDay = 2; // 当前为签到第几天
+    repeated SignItem signItems = 3;
+}
+
+// 奖励礼物
+message AwardProd {
+    int32 propId = 1; // 营收礼物id
+    int32 count = 2; // 数量.  是否下放礼物图片待定
+}

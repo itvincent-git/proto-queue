@@ -1,0 +1,64 @@
+syntax = "proto3";
+// 用户特权
+package wh.svc.privilege;
+option objc_class_prefix = "PTB";
+
+import "wh_svc_common.proto";
+
+service SvcPrivilegeService {
+    // 获取特权配置
+    rpc getPrivilegeConfigList (GetPrivilegeConfigListReq) returns (GetPrivilegeConfigListRes);
+    // 批量返回用户使用中特权列表，最多不超过50个
+    // ErrInvalidParameter， uid列表为0或超过50个
+    rpc batchGetUserPrivilege (BatchGetUserPrivilegeReq) returns (BatchGetUserPrivilegeRes);
+}
+
+service SvcPrivilegeNotifyService {
+    // 用户特权变化（新增特权或删除或特权失效）
+    rpc privilegeChangeNotify (PrivilegeChangeNotifyInfo) returns (common.Empty);
+}
+
+option java_package = "com.woohoo.app.common.protocol";
+option optimize_for = LITE_RUNTIME;
+message GetPrivilegeConfigListReq {
+    int64 ifModifiedSince = 1; //  配置更新时间（值取GetPrivilegeConfigListRes#lastModified），如果没有时，不需要传
+}
+
+message GetPrivilegeConfigListRes {
+    common.ResponseHeader header = 1;
+    int64 lastModified = 2; // 下次查询时将本值设置到 ifModifiedSince  。  如果lastModified值跟ifModifiedSince相同，则不会返回列表，noChange为true
+    bool noChange = 3; // 如果noChange为true，不会返回面具列表
+    repeated PrivilegeConfig configs = 4;
+}
+
+message AvatarBoxContent {
+    string url = 1; // 特效图
+}
+message NickTailLightContent {
+    string url = 1; // 特效图
+}
+message JoinRoomEffectsContent {
+    string url = 1; // 特效图，svga
+}
+
+message PrivilegeConfig {
+    common.PrivilegeId id = 1;
+    oneof content {
+        AvatarBoxContent avatarBox = 2;
+        NickTailLightContent nickTailLight = 3;
+        JoinRoomEffectsContent joinRoomEffects = 4;
+    }
+}
+
+message BatchGetUserPrivilegeReq {
+    repeated int64 uidList = 1;
+}
+message BatchGetUserPrivilegeRes {
+    common.ResponseHeader header = 1;
+    map<int64, common.UserPrivilege> privilegeMap = 2; // key - uid, value - UserPrivilege
+}
+
+message PrivilegeChangeNotifyInfo {
+    common.NotifyHeader header = 1;
+    map<int64, common.UserPrivilege> privilegeMap = 2; // key - uid , value - UserPrivilege 用户全量已有特权
+}

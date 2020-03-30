@@ -15,6 +15,13 @@ service SvcApiService {
     rpc getPendingCommand (GetPendingCommandReq) returns (GetPendingCommandRes);
     // 命令处理结果回调
     rpc commandCallback (CommandCallbackReq) returns (CommandCallbackRes);
+    // 获取feedback配置
+    rpc getFeedbackConfig (GetFeedbackConfigReq) returns (GetFeedbackConfigRes);
+    // 拉取语言包配置
+    rpc getLangConfig (GetLangConfigReq) returns (GetLangConfigRes);
+
+    // 获取banner列表
+    rpc getBannerList (GetBannerListReq) returns (GetBannerListRes);
 }
 
 // 由客户端实现
@@ -78,6 +85,19 @@ message CommandCallbackRes {
     common.ResponseHeader header = 1;
 }
 
+message GetLangConfigReq {
+    string biz = 1; // 必填
+    int64 dataVersion = 2;
+}
+
+message GetLangConfigRes {
+    common.ResponseHeader header = 1;
+    bool modified = 2;
+    int64 currVersion = 3;
+    map<string, string> contents = 4; //  key -> content, 如果modified = false，不会填content
+}
+
+
 enum CmdType {
     CmdUnknown = 0;
     LogPull = 1; // 日志拉取
@@ -88,4 +108,41 @@ enum PrivacySettingType {
     RecommendToFbFriend = 1;
     RecommendToGFriend = 2;
     RecommendToNear = 3;
+}
+
+message FeedbackItem {
+    string id = 1;
+    string text = 2;
+    repeated FeedbackItem subItemList = 3;
+}
+
+
+message GetFeedbackConfigReq {
+
+}
+
+message GetFeedbackConfigRes {
+    common.ResponseHeader header = 1;
+    repeated FeedbackItem configs = 2;
+}
+
+message GetBannerListReq {
+    BannerPosition position = 1;
+}
+
+message GetBannerListRes {
+    common.ResponseHeader header = 1;
+    repeated Banner bannerList = 2;
+}
+
+message Banner {
+    string id = 1;
+    string title = 2;
+    string imgUrl = 3;
+    string jumpSchema = 4;
+}
+
+enum BannerPosition {
+    PositionUnknown = 0;
+    PartyRoomPage = 1;
 }

@@ -73,9 +73,13 @@ data class DataFieldStruct(private val originFieldName: String, val fieldType: D
 
 /**
  * 字段数据类型结构
+ * @param fieldType 字段的数据类型
+ * @param nullable 是否可为空
+ * @param isOriginalType 是否基本类型
+ * @param hasOneOfIndex 是否使用了oneof {} 来描述的字段
  */
 open class DataFieldType protected constructor(
-    val fieldType: String, val nullable: Boolean, val isOriginalType: Boolean
+    val fieldType: String, val nullable: Boolean, val isOriginalType: Boolean, val hasOneOfIndex: Boolean
 ) {
     val fieldTypePackage: String = fieldType.substringBeforeLast(".")
     val fieldTypeSimpleName: String = fieldType.substringAfterLast(".")
@@ -87,7 +91,8 @@ open class DataFieldType protected constructor(
         ClassName(fieldTypePackage, fieldTypeSimpleName).copy(nullable = nullable)
 
     override fun toString(): String {
-        return "DataFieldType(fieldType='$fieldType', nullable=$nullable, isOriginalType=$isOriginalType"
+        return "DataFieldType(fieldType='$fieldType', nullable=$nullable, isOriginalType=$isOriginalType, " +
+            "hasOneOfIndex=$hasOneOfIndex)"
     }
 
     companion object {
@@ -95,8 +100,8 @@ open class DataFieldType protected constructor(
         /**
          * @param isOriginalType 是否系统支持的类型，例如Int, String, List
          */
-        fun get(fieldType: String, nullable: Boolean, isOriginalType: Boolean): DataFieldType {
-            return DataFieldType(fieldType, nullable, isOriginalType)
+        fun get(fieldType: String, nullable: Boolean, isOriginalType: Boolean, isOneOfIndex: Boolean): DataFieldType {
+            return DataFieldType(fieldType, nullable, isOriginalType, isOneOfIndex)
         }
     }
 }
@@ -105,9 +110,9 @@ open class DataFieldType protected constructor(
  * 带泛型的字段数据类型结构
  */
 class DataFieldParameterType private constructor(
-    fieldType: String, nullable: Boolean, isOriginalType: Boolean
+    fieldType: String, nullable: Boolean, isOriginalType: Boolean, isOneOfIndex: Boolean
 ) :
-    DataFieldType(fieldType, nullable, isOriginalType) {
+    DataFieldType(fieldType, nullable, isOriginalType, isOneOfIndex) {
     val parameterTypes = mutableListOf<DataFieldType>()
 
     fun addParameterTypes(vararg types: DataFieldType) = apply {
@@ -121,11 +126,11 @@ class DataFieldParameterType private constructor(
     companion object {
 
         fun get(
-            fieldType: String, nullable: Boolean, isOriginalType: Boolean,
+            fieldType: String, nullable: Boolean, isOriginalType: Boolean, isOneOfIndex: Boolean,
             vararg types: DataFieldType
         ):
             DataFieldParameterType {
-            return DataFieldParameterType(fieldType, nullable, isOriginalType).addParameterTypes(
+            return DataFieldParameterType(fieldType, nullable, isOriginalType, isOneOfIndex).addParameterTypes(
                 *types)
         }
     }

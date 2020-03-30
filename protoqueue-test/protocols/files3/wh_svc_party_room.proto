@@ -72,11 +72,33 @@ service SvcPartyRoomService {
     // 查询用户在房间状态
     rpc getUserInRoomStatus (GetUserInRoomStatusReq) returns (GetUserInRoomStatusRes);
 
+    // 查询用户所在房间，附带房间信息
+    rpc getUserCurrRoomWithInfo (GetUserCurrRoomWithInfoReq) returns (GetUserCurrRoomWithInfoRes);
+
     // 摘面具
     rpc takeOffMaskTips (TakeOffMaskTipsReq) returns (TakeOffMaskTipsRes);
 
     // 查询房间信息
     rpc getRoomInfo (GetRoomInfoReq) returns (GetRoomInfoRes);
+
+    // 禁麦/解除禁麦
+    rpc modifyBanMicStatus (ModifyBanMicStatusReq) returns (ModifyBanMicStatusRes);
+
+    // 邀请好友
+    rpc inviteFriend (InviteFriendReq) returns (InvitedFriendRes);
+
+    // 回复好友邀请
+    rpc replyFriendInvitation (ReplyFriendInvitationReq) returns (ReplyFriendInvitationRes);
+
+    // 更新房间信息
+    rpc updateRoomInfo (UpdateRoomInfoReq) returns (UpdateRoomInfoRes);
+    // 查询进房所用token
+    rpc getMediaToken (GetMediaTokenReq) returns (GetMediaTokenRes);
+
+    // 设置房间管理员，设置成功后触发onChatManagerChangeNotify
+    // ErrExceedLimit - 超过管理员最大数量
+    // ErrUnauthorized - 无权操作
+    rpc setChatManager (SetChatManagerReq) returns (SetChatManagerRes);
 }
 
 service SvcPartyRoomNotifyService {
@@ -103,13 +125,40 @@ service SvcPartyRoomNotifyService {
 
     // 用户摘面具（广播）
     rpc takeOffMaskTipsNotify (TakeOffMaskTipsNotify) returns (common.Empty);
+
+    // 被好友邀请通知 (单播)
+    rpc friendInvitationNotify (FriendInvitationNotify) returns (common.Empty);
+
+    // 好友回复邀请通知（单播）
+    rpc friendReplyInvitationNotify (FriendReplyInvitationNotify) returns (common.Empty);
+
+    // 进房广播
+    rpc onJoinRoomNotify (OnJoinRoomNotify) returns (common.Empty);
+
+    // 禁麦通知（单播）
+    rpc banMicNotify (BanMicNotify) returns (common.Empty);
+
+    // 房间信息变化广播，名称、主题等信息
+    rpc roomInfoChangeNotify (RoomInfoChangeNotify) returns (common.Empty);
+
+    // 房间标题或公告更新或违规了，用于客户端toast使用
+    rpc roomInfoChangeForToastNotify (RoomInfoChangeForToastNotify) returns (common.Empty);
 }
 
 option java_package = "com.woohoo.app.common.protocol";
 option optimize_for = LITE_RUNTIME;
+message RoomInfo {
+    common.RoomVid roomVid = 1;
+    string title = 2;
+    string topic = 3; // 主题内容 url
+    bool lock = 4;
+    string introduction = 5;
+}
+
 message CreateAndJoinRoomReq {
     string title = 1;
     string topicId = 2;
+    bool firstJoin = 3;
 }
 
 message CreateAndJoinRoomRes {
@@ -119,15 +168,20 @@ message CreateAndJoinRoomRes {
     string token = 4;
     int32 hbInterval = 5; // 心跳间隔，单位秒，0表k示不发心跳
     string session = 6; // 一个session表示一次进房，需要在退房的时候带上
-    int64 manager = 7; // 管理员
+    int64 manager = 7 [deprecated = true]; // 管理员，弃用。
     int64 owner = 8; // 房主
     string title = 9;
     string topic = 10; //主题内容
+    bool lock = 11; // 房间是否加锁
+    string password = 12;
+    string introduction = 13; // 公告
 }
 
 message JoinRoomReq {
     common.RoomVid roomVid = 1;
     ChatMode ownerChatMode = 2; // 仅进自己的房需要传此参数
+    bool firstJoin = 3; // 是否为首次进房
+    string password = 4;
 }
 
 message JoinRoomRes {
@@ -137,10 +191,13 @@ message JoinRoomRes {
     string token = 4;
     int32 hbInterval = 5; // 心跳间隔，单位秒，0表k示不发心跳
     string session = 6; // 一个session表示一次进房，需要在退房的时候带上
-    int64 manager = 7; // 管理员
+    int64 manager = 7 [deprecated = true]; // 管理员，弃用
     int64 owner = 8; // 房主
     string title = 9;
     string topic = 10; //主题内容
+    bool lock = 11; // 房间是否加锁
+    string password = 12;
+    string introduction = 13; // 公告
 }
 
 message LeaveRoomReq {
@@ -198,7 +255,7 @@ enum ChatModeStatus {
 message ChatParticipant {
     int64 uid = 1;
     ChatMode chatMode = 2;
-
+    bool banMic = 3;
 }
 
 message GetChatParticipantsReq {
@@ -316,6 +373,16 @@ message GetUserInRoomStatusRes {
     map<int64, common.RoomVid> uid2RoomVids = 2;
 }
 
+message GetUserCurrRoomWithInfoReq {
+    repeated int64 uids = 1;
+    bool needRoomId = 2;
+}
+message GetUserCurrRoomWithInfoRes {
+    common.ResponseHeader header = 1;
+    map<int64, RoomInfo> uid2RoomInfos = 2; // 此协议下，RoomInfo的introduction字段不会下发
+    map<int64, int64> roomIds = 3;
+}
+
 message TakeOffMaskTipsReq {
     common.RoomVid roomVid = 1;
 }
@@ -330,6 +397,58 @@ message GetRoomInfoRes {
     common.ResponseHeader header = 1;
     string title = 2;
     string topic = 3; // url
+    bool lock = 4;
+    string password = 5; // 仅为房主时返回,房间密码
+}
+
+message ModifyBanMicStatusReq {
+    common.RoomVid roomVid = 1;
+    int64 targetUid = 2;
+    bool banMic = 3;
+
+}
+message ModifyBanMicStatusRes {
+    common.ResponseHeader header = 1;
+}
+
+message InviteFriendReq {
+    common.RoomVid roomVid = 1; // 邀请者所在房
+    int64 inviteeUid = 2; // 被邀请者
+}
+
+message InvitedFriendRes {
+    common.ResponseHeader header = 1;
+}
+
+message ReplyFriendInvitationReq {
+    common.RoomVid roomVid = 1; // 邀请者所在房
+    int64 inviterUid = 2; // 邀请者
+    bool accept = 3;
+}
+
+message ReplyFriendInvitationRes {
+    common.ResponseHeader header = 1;
+}
+
+message UpdateRoomInfoReq {
+    common.RoomVid roomVid = 1;
+    string title = 2;
+    bool lock = 3;
+    string password = 4;
+    string introduction = 5;
+}
+message UpdateRoomInfoRes {
+    common.ResponseHeader header = 1;
+    RoomInfo roomInfo = 2;
+}
+
+message GetMediaTokenReq {
+
+}
+message GetMediaTokenRes {
+    common.ResponseHeader header = 1;
+    string token = 2;
+    int64 remainValidSecs = 3; // 剩余有效时间，秒
 }
 
 message ApplyJoinChatNotify {
@@ -382,4 +501,93 @@ message TakeOffMaskTipsNotify {
     common.NotifyHeader header = 1;
     common.RoomVid roomVid = 2;
     int64 uid = 3;
+}
+
+message FriendInvitationNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2; // 邀请者所在房
+    int64 inviterUid = 3; // 邀请者
+    bool roomLock = 4;
+    int64 roomId = 5;
+}
+
+message FriendReplyInvitationNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2; // 邀请者所在房
+    int64 inviteeUid = 3; // 被邀请者
+    bool accept = 4;
+}
+
+message OnJoinRoomNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2; // 邀请者所在房
+    int64 uid = 3;
+    bool firstJoin = 4;
+    UserInfo userInfo = 5; //进房者用户信息
+    common.WealthAndCharm wealthAndCharm = 6; // 魅力值、财富值
+    common.UserPrivilege userPrivilege = 7; // 用户特权
+}
+
+message UserInfo {
+    int64 uid = 1;
+    int64 vid = 2;
+    string nick = 3;
+    string avatar = 4; // 头像
+    common.Sex sex = 5;
+    int64 birthday = 6; // 生日，十进制，个十两位代表日，百千两位代表月，万位以上代表年。举例： 20120324
+    string city = 7; // 所在城市，火星传空
+    common.Constellation constellation = 8; //星座
+}
+
+message BanMicNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2;
+    bool banMic = 3;
+}
+
+// 房间信息变化广播
+message RoomInfoChangeNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2;
+    RoomInfo roomInfo = 3; // 其他用户视角下的房间信息
+    RoomInfo ownerViewRoomInfo = 6; // 房主视角下的房间信息
+
+
+    string ownerViewTitle = 4 [deprecated = true]; // 房主视角的房名,房主永远能看到最新的房名。 弃用，改用 ownerViewRoomInfo
+    RoomInfoChangeReason reason = 5 [deprecated = true]; // 弃用， toast房间标题、房间公告更新，使用RoomInfoChangeForToastNotify
+}
+
+
+enum RoomInfoPropertyName {
+    RoomInfoPropertyNameUnknown = 0;
+    Title = 1;
+    Introduction = 2;
+}
+
+enum RoomInfoChangeReason {
+    ReasonUnknown = 0;
+    UserUpdate = 1; // 用户更新
+    // AuditPassed = 2; // 审核通过，不需要广播
+    AuditIllegal = 3; // 审核违规
+}
+// 房间信息变化广播（仅为客户端toast使用）
+message RoomInfoChangeForToastNotify {
+    common.NotifyHeader header = 1;
+    common.RoomVid roomVid = 2;
+    int64 operatorUid = 3; // 操作人
+    RoomInfoChangeReason reason = 4; // xxx更新了房间公告。 房间标题违规通知
+    RoomInfoPropertyName propertyName = 5; // 房间哪个字段变化了
+    oneof content {
+        string title = 6; // 房间标题
+        string introduction = 7; // 公告
+    }
+}
+
+message SetChatManagerReq {
+    common.RoomVid roomVid = 1;
+    int64 managerUid = 2; // 管理员uid
+}
+
+message SetChatManagerRes {
+    common.ResponseHeader header = 1;
 }
