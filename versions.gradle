@@ -29,6 +29,7 @@ versions.athena_gradle = '2.2.3'
 versions.gradle_download_task = '3.2.0'
 versions.javapoet = '1.10.0'
 versions.auto_common = '0.10'
+versions.kotlinpoet = '1.5.0'
 
 ext.versions = versions
 
@@ -77,6 +78,6 @@ deps.athena_gradle = "tv.athena:api-gradle-plugin:$versions.athena_gradle"
 deps.gradle_download_task = "de.undercouch:gradle-download-task:$versions.gradle_download_task"
 deps.javapoet = "com.squareup:javapoet:$versions.javapoet"
 deps.autocommon = "com.google.auto:auto-common:$versions.auto_common"
-
+deps.kotlinpoet = "com.squareup:kotlinpoet:$versions.kotlinpoet"
 ext.deps = deps
 
