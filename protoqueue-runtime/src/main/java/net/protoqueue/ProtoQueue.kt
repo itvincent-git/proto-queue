@@ -14,7 +14,6 @@ abstract class ProtoQueue<P, C> {
     protected var mContextMap: MutableMap<C, ProtoContext<P, C>> = ConcurrentHashMap()
     protected var mHandler: Handler = ProtoHandler()
 
-
     fun init(protoSender: ProtoSender) {
         mProtoSender = protoSender
     }
@@ -27,9 +26,11 @@ abstract class ProtoQueue<P, C> {
      * @return
      */
     @Deprecated(message = "use enqueue lambda below", replaceWith = ReplaceWith("enqueue receiver: (P) -> Unit"))
-    protected fun enqueue(proto: P,
-                          receiveUri: Int,
-                          receiver: ProtoReceiver<P>): ProtoDisposable {
+    protected fun enqueue(
+        proto: P,
+        receiveUri: Int,
+        receiver: ProtoReceiver<P>
+    ): ProtoDisposable {
         return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), { receiver.onProto(it) }, null)
     }
 
@@ -40,9 +41,11 @@ abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调(高阶函数）推荐
      * @return
      */
-    protected fun enqueue(proto: P,
-                          receiveUri: Int,
-                          receiver: (P) -> Unit): ProtoDisposable {
+    protected fun enqueue(
+        proto: P,
+        receiveUri: Int,
+        receiver: (P) -> Unit
+    ): ProtoDisposable {
         return enqueueInternal(proto, receiveUri, getTopSid(), getSubSid(), receiver, null)
     }
 
@@ -55,12 +58,14 @@ abstract class ProtoQueue<P, C> {
      * @param receiver 接收协议回调
      * @return
      */
-    internal fun enqueueInternal(proto: P,
-                                 receiveUri: Int,
-                                 topSid: Long,
-                                 subSid: Long,
-                                 receiver: (P) -> Unit,
-                                 parameter: QueueParameter<P, C>?): ProtoDisposable {
+    internal fun enqueueInternal(
+        proto: P,
+        receiveUri: Int,
+        topSid: Long,
+        subSid: Long,
+        receiver: (P) -> Unit,
+        parameter: QueueParameter<P, C>?
+    ): ProtoDisposable {
 
         var data: ByteArray? = null
         var protoContext: C? = null
@@ -83,7 +88,7 @@ abstract class ProtoQueue<P, C> {
         }
 
         val contextPayload = ProtoContext(data, receiver, getOwnAppId(), protoContext,
-                receiveUri, topSid, subSid, parameter)
+            receiveUri, topSid, subSid, parameter)
 
         if (data != null && protoContext != null) {
             mContextMap[protoContext] = contextPayload
@@ -107,9 +112,11 @@ abstract class ProtoQueue<P, C> {
      * @param receiver
      * @return
      */
-    protected fun newQueueParameter(proto: P,
-                                    receiveUri: Int,
-                                    receiver: ProtoReceiver<P>): QueueParameter<P, C> {
+    protected fun newQueueParameter(
+        proto: P,
+        receiveUri: Int,
+        receiver: ProtoReceiver<P>
+    ): QueueParameter<P, C> {
         return QueueParameter(this, proto, receiveUri) { receiver.onProto(it) }
     }
 
@@ -120,9 +127,11 @@ abstract class ProtoQueue<P, C> {
      * @param receiver 高阶函数版，推荐
      * @return
      */
-    protected fun newQueueParameter(proto: P,
-                                    receiveUri: Int,
-                                    receiver: (P) -> Unit): QueueParameter<P, C> {
+    protected fun newQueueParameter(
+        proto: P,
+        receiveUri: Int,
+        receiver: (P) -> Unit
+    ): QueueParameter<P, C> {
         return QueueParameter(this, proto, receiveUri, receiver)
     }
 
@@ -143,7 +152,6 @@ abstract class ProtoQueue<P, C> {
         } catch (t: Throwable) {
             onProtoException(t)
         }
-
     }
 
     private fun handleTimeout(msg: Message) {
@@ -167,7 +175,6 @@ abstract class ProtoQueue<P, C> {
             } catch (t: Throwable) {
                 onProtoException(t)
             }
-
         }
     }
 
@@ -221,6 +228,13 @@ abstract class ProtoQueue<P, C> {
      */
     protected abstract fun getReceiveUri(proto: P): Int
 
+    /**
+     * 自动生成不需要实现
+     * @param proto
+     * @return
+     */
+    protected abstract fun setUri(proto: P, uri: Int)
+
     //=============== 以下需要子类实现 ===========
     /**
      * 本协议的appid
@@ -256,5 +270,4 @@ abstract class ProtoQueue<P, C> {
      * @param proto
      */
     protected abstract fun onProtoPreProcess(proto: P)
-
 }

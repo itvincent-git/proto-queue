@@ -3,6 +3,7 @@ package net.protoqueue.processor
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
+import net.protoqueue.dsl.ProtoQueueDsl
 import net.protoqueue.util.Util
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
@@ -34,11 +35,14 @@ class ProtoQueueClassProcessor internal constructor(
 
         val allMembers = Util.getAllMembers(compileContext.processingEnvironment, classElement)
         val overrideMethods = allMembers
-            .filter({ element -> element.modifiers.contains(Modifier.ABSTRACT) && element.kind == ElementKind.METHOD })
+            .filter { element -> element.modifiers.contains(Modifier.ABSTRACT) && element.kind == ElementKind.METHOD }
             .map {
                 Util.asExecutable(it)
             }
             .map { it.toString() to it }.toMap()
+
+        val dsl = allMembers.filter { it.getAnnotation(ProtoQueueDsl::class.java) != null }
+            .firstOrNull()
 
         var data = ProtoQueueClassData(classElement,
             protoContextLiteral.filter { it != '\"' },
