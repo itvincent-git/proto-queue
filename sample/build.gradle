@@ -4,43 +4,37 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion _compileSdkVersion
+    compileSdkVersion build_versions.target_sdk
     defaultConfig {
         applicationId "net.protoqueue.sample"
-        minSdkVersion _minSdkVersion
-        targetSdkVersion _targetSdkVersion
+        minSdkVersion build_versions.min_sdk
+        targetSdkVersion build_versions.target_sdk
         versionCode 1
         versionName "1.0"
-//        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-
-    /* release sign from properties, just use for test in local */
-    /*Properties props = new Properties()
-    props.load(new FileInputStream(file("../../../keystore.properties")))
-    signingConfigs {
-        release {
-            storeFile file(props["keystore"])
-            storePassword props["keystore.password"]
-            keyAlias props["keyalias"]
-            keyPassword props["keypassword"]
-        }
-    }*/
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            //signingConfig signingConfigs.release
         }
+    }
+    packagingOptions {
+        pickFirst 'META-INF/proguard/coroutines.pro'
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.android.support:appcompat-v7:$support_version"
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_android_version"
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.coroutines
+    implementation deps.support.constraint_layout
+    implementation deps.support.recyclerview
+    implementation deps.support.design
+    implementation ("$deps.slog.slog_file") {
+        exclude group: 'org.jetbrains.kotlin'
+        exclude group: 'org.jetbrains.kotlinx'
+    }
     implementation project(':protoqueue-runtime')
     kapt project(':protoqueue-compiler')
 }

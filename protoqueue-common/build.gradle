@@ -1,39 +1,31 @@
 apply plugin: 'java-library'
-//apply plugin: 'maven'
 apply plugin: 'kotlin'
-group = 'com.github.itvincent-git'
+
+ext {
+    artifact_id = 'protoqueue-common'
+}
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_android_version"
+    implementation deps.kotlin.stdlib
+    implementation deps.kotlin.coroutines
 }
 
-//apply plugin: 'com.novoda.bintray-release'//添加
-apply plugin: 'maven-publish'
+apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'signing'
 apply plugin: 'net.researchgate.release'
 release {
     failOnUnversionedFiles = false
+    failOnCommitNeeded = false
     failOnUpdateNeeded = false
+    failOnPublishNeeded = false
+    failOnSnapshotDependencies = false
     buildTasks = ['publish'] ////定义发布时该执行哪个task
     versionPropertyFile = '../gradle.properties'
 }
-
-//version="$release_version"
-//println "version=====$version"
-//println "deafault version=====$project.version"
-//publish {
-//    userOrg = "$user_org"//bintray.com用户名
-//    groupId = "$group_id"//jcenter上的路径
-//    artifactId = 'protoqueue-common'//项目名称
-//    publishVersion = "$release_version"//版本号
-//    desc = 'common dependency'//描述，不重要
-//    website = "$url"//网站
-//}
 
 def isReleaseBuild() {
     return version.contains("SNAPSHOT") == false
@@ -65,7 +57,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId "$group_id"
-            artifactId 'protoqueue-common'
+            artifactId "$artifact_id"
             version "$release_version"
             from components.java
             artifact sourceJar {
