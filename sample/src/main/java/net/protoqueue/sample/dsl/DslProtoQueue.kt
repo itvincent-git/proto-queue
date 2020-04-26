@@ -36,21 +36,7 @@ abstract class DslProtoQueue : BaseProtoQueue<DSLProto, Int>() {
 
     @ProtoQueueRPC(requestUri = DSLCommon.kRequestUri, responseUri = DSLCommon.kResponseUri,
         requestProperty = "req", responseProperty = "res")
-    fun rpcOne(): RPC<DSLRequest, DSLResponse> {
-        return object : RPC<DSLRequest, DSLResponse> {
-            override suspend fun request(req: DSLRequest): Response<DSLResponse?> {
-                val proto = DSLProto()
-                proto.req = req
-                setUri(proto, DSLCommon.kRequestUri)
-                val ret = enqueueAwaitOrNull(proto, DSLCommon.kResponseUri)
-                return Response(ret?.res, Extension())
-            }
-
-            override suspend fun registerResponse(res: DSLResponse) {
-                TODO("Not yet implemented")
-            }
-        }
-    }
+    abstract fun rpcOne(): RPC<DSLRequest, DSLResponse>
 
     companion object {
         @JvmStatic

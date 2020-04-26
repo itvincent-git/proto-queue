@@ -20,10 +20,10 @@ public @interface ProtoQueueClass {
     String protoContextLiteral();
 
     /**
-     * 生成buildProto的语句
+     * 生成buildProto的语句，默认例如FtsUserProto.parseFrom
      * @return
      */
-    String buildProtoLiteral() default "parseFrom($L)";
+    String buildProtoLiteral() default "return %T.parseFrom(%L)";
 
     /**
      * 生成toByteArray的语句

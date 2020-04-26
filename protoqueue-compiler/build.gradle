@@ -11,7 +11,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':protoqueue-common')
-    implementation deps.javapoet
+    //implementation deps.javapoet
     implementation deps.autocommon
     implementation deps.kotlin.stdlib
     implementation deps.kotlin.coroutines

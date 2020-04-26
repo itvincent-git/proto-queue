@@ -5,8 +5,9 @@ import com.google.common.collect.SetMultimap
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.util.Util
 import net.protoqueue.annotation.ProtoQueueClass
-import net.protoqueue.compiler.writer.ProtoQueueBaseWriter
-import net.protoqueue.compiler.writer.ProtoQueueClassWriter
+//import net.protoqueue.compiler.writer.ProtoQueueBaseWriter
+//import net.protoqueue.compiler.writer.ProtoQueueClassWriter
+import net.protoqueue.compiler.writer.ProtoQueueRPCWriter
 import java.util.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
@@ -44,13 +45,14 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
             classSet.map { element ->
                 ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process()
             }
-            .forEach {
-                try {
-                    ProtoQueueClassWriter(it).write(processingEnv)
-                } catch (e: Throwable) {
-                    portContext!!.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
+                .forEach {
+                    try {
+                        //ProtoQueueClassWriter(it).write(processingEnv)
+                        ProtoQueueRPCWriter(it).write(processingEnv)
+                    } catch (e: Throwable) {
+                        portContext!!.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
+                    }
                 }
-            }
 
             return HashSet()
         }

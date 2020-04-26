@@ -1,3 +1,7 @@
+apply {
+    from "$rootDir/common.gradle"
+    to gradle
+}
 include ':sample',
         ':protoqueue-runtime',
         ':protoqueue-common',

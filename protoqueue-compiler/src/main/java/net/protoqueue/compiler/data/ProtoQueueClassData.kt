@@ -1,6 +1,8 @@
 package net.protoqueue.compiler.data
 
-import com.squareup.javapoet.ClassName
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.asTypeName
 import javax.lang.model.element.ExecutableElement
 
 import javax.lang.model.element.TypeElement
@@ -26,13 +28,12 @@ class ProtoQueueClassData(
     val getSeqContextMethod: ExecutableElement?,
     val getReceiveUriMethod: ExecutableElement?
 ) {
-    var implTypeName: ClassName
-    var typeName: ClassName
+    val typeName = element.asClassName()
+    val implClassName = typeName.simpleNames.joinToString("_") + "_Impl"
+    val implTypeName = ClassName.bestGuess(typeName.packageName + "." + implClassName)
+    val protoClassTypeName = protoClass.asTypeName()
 
     init {
-        typeName = ClassName.get(element)
-        val implClassName = typeName.simpleNames().joinToString("_") + "_Impl"
-        implTypeName = ClassName.get(typeName.packageName(), implClassName)
     }
 
     override fun toString(): String {
