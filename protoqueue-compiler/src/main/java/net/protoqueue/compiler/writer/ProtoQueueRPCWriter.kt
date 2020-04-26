@@ -8,11 +8,6 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import net.protoqueue.compiler.data.ProtoQueueClassData
-import net.protoqueue.util.TmpVar
-import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
-import javax.lang.model.element.Modifier
 
 /**
  * 生成Protoqueue RPC子类
@@ -34,7 +29,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
 
     private fun addBuildProtoMethod(builder: TypeSpec.Builder) {
         protoQueueClassData.buildProtoMethod?.let {
-            builder.addFunction(FunSpec.builder("buildProto")
+            builder.addFunction(FunSpec.builder(it.simpleName.toString())
                 .addModifiers(KModifier.OVERRIDE)
                 .addParameter(ParameterSpec("data", ByteArray::class.asTypeName()))
                 .returns(protoQueueClassData.protoClassTypeName)
@@ -46,15 +41,16 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addToByteArrayMethod(builder: TypeSpec.Builder) {
-//        builder.addMethod(
-//            MethodSpec.methodBuilder(protoQueueClassData.toByteArrayMethod!!.simpleName.toString())
-//                .returns(TypeName.get(protoQueueClassData.toByteArrayMethod!!.returnType))
-//                .addParameter(ParameterSpec.builder(TypeName.get(protoQueueClassData.protoClass), "proto").build())
-//                .addStatement("return \$L", protoQueueClassData.toByteArrayLiteral)
-//                .addModifiers(Modifier.PROTECTED)
-//                .addAnnotation(Override::class.java)
-//                .build()
-//        )
+        protoQueueClassData.toByteArrayMethod?.let {
+            builder.addFunction(
+                FunSpec.builder(it.simpleName.toString())
+                    .returns(ByteArray::class.asTypeName())
+                    .addParameter(ParameterSpec("proto", protoQueueClassData.protoClass.asTypeName()))
+                    .addStatement(protoQueueClassData.toByteArrayLiteral)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build()
+            )
+        }
     }
 
     private fun addGetProtoContextMethod(builder: TypeSpec.Builder) {
