@@ -5,7 +5,7 @@ package net.protoqueue.rpc
  * Created by zhongyongsheng on 2020/4/21.
  */
 @Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
+@Retention(AnnotationRetention.SOURCE)
 annotation class ProtoQueueRPC(
     val requestUri: Int,
     val responseUri: Int,
