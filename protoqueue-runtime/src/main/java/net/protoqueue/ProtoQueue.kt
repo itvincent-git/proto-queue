@@ -154,15 +154,14 @@ abstract class ProtoQueue<P, C> {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun handleTimeout(msg: Message) {
         val context = msg.obj as C
         val protoContext = mContextMap[context] ?: return
         if (protoContext.protoDisposable.isDisposed) return
 
         val error = ProtoTimeoutError("Wait for response timeout")
-        if (protoContext.parameter?.error != null) {
-            protoContext.parameter?.error?.invoke(error)
-        }
+        protoContext.parameter?.error?.invoke(error)
         mContextMap.remove(context)
     }
 
