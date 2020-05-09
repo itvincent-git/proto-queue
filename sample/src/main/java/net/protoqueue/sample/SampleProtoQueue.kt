@@ -4,14 +4,17 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
-import net.protoqueue.*
+import net.protoqueue.ProtoDisposable
+import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
+import net.protoqueue.enqueueAwaitOrNull
+import net.protoqueue.protoQueueLaunch
 
 /**
  * Created by zhongyongsheng on 2018/4/20.
  */
-@ProtoQueueClass(protoContextLiteral = "seqId")
-abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
+@ProtoQueueClass
+abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Long>() {
     val TAG = "SampleProtoQueue"
     private var job: Job? = null
 
@@ -34,16 +37,16 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Int>() {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         return instance.enqueue(sampleProto, 11,
-                { proto -> Log.i(TAG, "onProto: $proto") })
+            { proto -> Log.i(TAG, "onProto: $proto") })
     }
 
     fun sendSampleProtoByQueueParameter(): ProtoDisposable? {
         val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         return instance.newQueueParameter(sampleProto, 11) { proto -> Log.i(TAG, "onProto: $proto") }
-                .timeout(3000)
-                .error { error -> Log.i(TAG, "onError: $error")}
-                .enqueue()
+            .timeout(3000)
+            .error { error -> Log.i(TAG, "onError: $error") }
+            .enqueue()
     }
 
     fun sendSampleProtoInCoroutine() {

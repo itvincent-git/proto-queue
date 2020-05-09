@@ -1,5 +1,7 @@
 package net.protoqueue.sample.dsl
 
+import net.protoqueue.sample.Header
+
 /**
  * 模拟测试的PB协议
  * Created by zhongyongsheng on 2020/4/21.
@@ -7,6 +9,7 @@ package net.protoqueue.sample.dsl
 class DSLProto {
     var req: DSLRequest? = null
     var res: DSLResponse? = null
+    var header: Header? = null
 
     @JvmField
     var uri = 0

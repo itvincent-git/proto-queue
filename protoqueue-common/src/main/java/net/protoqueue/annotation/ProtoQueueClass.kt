@@ -11,7 +11,7 @@ annotation class ProtoQueueClass(
      * seq上下文在proto里定义的名称
      * @return
      */
-    val protoContextLiteral: String = "return %T.header.getSeqid()",
+    val protoContextLiteral: String = "return %L.header.seqid",
     /**
      * 生成buildProto的语句，默认例如FtsUserProto.parseFrom
      * @return

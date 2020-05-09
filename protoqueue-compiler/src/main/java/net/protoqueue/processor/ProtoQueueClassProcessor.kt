@@ -3,7 +3,6 @@ package net.protoqueue.processor
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
-import net.protoqueue.dsl.ProtoQueueDsl
 import net.protoqueue.util.Util
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
@@ -13,8 +12,8 @@ import javax.lang.model.element.TypeElement
  * 解析@ProtoQueueClass标注的类
  * Created by zhongyongsheng on 2018/4/14.
  */
-class ProtoQueueClassProcessor internal constructor(
-    internal var compileContext: CompilerContext, internal var classElement: TypeElement
+class ProtoQueueClassProcessor(
+    private var classElement: TypeElement
 ) {
 
 
@@ -30,19 +29,16 @@ class ProtoQueueClassProcessor internal constructor(
         val typeArguments = declaredType.typeArguments
 
         if (typeArguments.size < 2) {
-            compileContext.log.error(classElement, "must defined the type arguments <P,C>")
+            CompilerContext.log.error(classElement, "must defined the type arguments <P,C>")
         }
 
-        val allMembers = Util.getAllMembers(compileContext.processingEnvironment, classElement)
+        val allMembers = Util.getAllMembers(CompilerContext.processingEnvironment, classElement)
         val overrideMethods = allMembers
             .filter { element -> element.modifiers.contains(Modifier.ABSTRACT) && element.kind == ElementKind.METHOD }
             .map {
                 Util.asExecutable(it)
             }
             .map { it.toString() to it }.toMap()
-
-        val dsl = allMembers.filter { it.getAnnotation(ProtoQueueDsl::class.java) != null }
-            .firstOrNull()
 
         var data = ProtoQueueClassData(classElement,
             protoContextLiteral.filter { it != '\"' },
@@ -58,7 +54,7 @@ class ProtoQueueClassProcessor internal constructor(
             overrideMethods["incrementAndGetSeqContext()"],
             overrideMethods["getSeqContext()"],
             overrideMethods["getReceiveUri(P)"])
-        compileContext.log.debug("ProtoQueue process %s:%s", classElement.toString(), data)
+        CompilerContext.log.debug("ProtoQueue process %s:%s", classElement.toString(), data)
         return data
     }
 }

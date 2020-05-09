@@ -4,19 +4,16 @@ import android.util.Log
 import kotlinx.coroutines.Job
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
-import net.protoqueue.enqueueAwaitOrNull
-import net.protoqueue.rpc.Extension
 import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.rpc.RPC
-import net.protoqueue.rpc.Response
 import net.protoqueue.sample.BaseProtoQueue
 
 /**
  * DSL例子
  * Created by zhongyongsheng on 2020/4/17.
  */
-@ProtoQueueClass(protoContextLiteral = "seqId")
-abstract class DslProtoQueue : BaseProtoQueue<DSLProto, Int>() {
+@ProtoQueueClass
+abstract class DslProtoQueue : BaseProtoQueue<DSLProto, Long>() {
     val TAG = "DslProtoQueue"
     private var job: Job? = null
 

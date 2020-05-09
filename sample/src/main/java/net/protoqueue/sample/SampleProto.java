@@ -8,12 +8,12 @@ import java.util.Arrays;
 public class SampleProto {
     public byte[] data;
     public int uri;
-    public int seqId;
+    public Header header;
 
     public SampleProto(byte[] data) {
         this.data = data;
         this.uri = data[0];
-        this.seqId = data[1];
+        this.header = new Header(data[1]);
     }
 
     public static SampleProto parseFrom(byte[] data) {
@@ -29,7 +29,7 @@ public class SampleProto {
         return "SampleProto{" +
                 "data=" + Arrays.toString(data) +
                 ", uri=" + uri +
-                ", seqId=" + seqId +
+                ", seqId=" + this.header.getSeqid() +
                 '}';
     }
 }

@@ -18,8 +18,8 @@ class ProtoQueueClassData(
     val buildProtoLiteral: String,
     val toByteArrayLiteral: String,
     val uriLiteral: String,
-    val protoClass: TypeMirror,
-    val protoContextType: TypeMirror,
+    private val protoClass: TypeMirror,
+    private val protoContextType: TypeMirror,
     val buildProtoMethod: ExecutableElement?,
     val toByteArrayMethod: ExecutableElement?,
     val getProtoContextMethod: ExecutableElement?,
@@ -32,17 +32,19 @@ class ProtoQueueClassData(
     val implClassName = typeName.simpleNames.joinToString("_") + "_Impl"
     val implTypeName = ClassName.bestGuess(typeName.packageName + "." + implClassName)
     val protoClassTypeName = protoClass.asTypeName()
+    val protoContextTypeName = protoContextType.asTypeName()
 
     init {
     }
 
     override fun toString(): String {
         return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', buildProtoLiteral='" +
-            "$buildProtoLiteral', toByteArrayLiteral='$toByteArrayLiteral', uriLiteral='$uriLiteral'" +
-            ", protoClass=$protoClass, protoContextType=$protoContextType, buildProtoMethod=$buildProtoMethod," +
-            " toByteArrayMethod=$toByteArrayMethod, getProtoContextMethod=$getProtoContextMethod, " +
-            "getOwnAppIdMethod=$getOwnAppIdMethod, incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, " +
-            "getSeqContextMethod=$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, " +
-            "implTypeName=$implTypeName, typeName=$typeName)"
+            "$buildProtoLiteral', toByteArrayLiteral='$toByteArrayLiteral', uriLiteral='$uriLiteral" +
+            "', buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod" +
+            ", getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod" +
+            ", incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, getSeqContextMethod=" +
+            "$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, typeName=" +
+            "$typeName, implClassName='$implClassName', implTypeName=$implTypeName, protoClassTypeName=" +
+            "$protoClassTypeName, protoContextTypeName=$protoContextTypeName)"
     }
 }

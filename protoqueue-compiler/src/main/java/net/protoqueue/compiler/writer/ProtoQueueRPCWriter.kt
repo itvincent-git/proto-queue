@@ -7,6 +7,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
+import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
 
 /**
@@ -34,8 +35,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addParameter(ParameterSpec("data", ByteArray::class.asTypeName()))
                 .returns(protoQueueClassData.protoClassTypeName)
                 .addStatement(protoQueueClassData.buildProtoLiteral,
-                    protoQueueClassData.protoClassTypeName,
-                    "data")
+                    protoQueueClassData.protoClassTypeName, "data")
                 .build())
         }
     }
@@ -44,8 +44,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         protoQueueClassData.toByteArrayMethod?.let {
             builder.addFunction(
                 FunSpec.builder(it.simpleName.toString())
-                    .returns(ByteArray::class.asTypeName())
-                    .addParameter(ParameterSpec("proto", protoQueueClassData.protoClass.asTypeName()))
+                    .returns(ByteArray::class)
+                    .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
                     .addStatement(protoQueueClassData.toByteArrayLiteral)
                     .addModifiers(KModifier.OVERRIDE)
                     .build()
@@ -54,15 +54,18 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addGetProtoContextMethod(builder: TypeSpec.Builder) {
-//        builder.addMethod(
-//            MethodSpec.methodBuilder(protoQueueClassData.getProtoContextMethod!!.simpleName.toString())
-//                .returns(TypeName.get(protoQueueClassData.protoContextType))
-//                .addParameter(ParameterSpec.builder(TypeName.get(protoQueueClassData.protoClass), "proto").build())
-//                .addStatement("return \$L", "proto." + protoQueueClassData.protoContextLiteral)
-//                .addModifiers(Modifier.PROTECTED)
-//                .addAnnotation(Override::class.java)
-//                .build()
-//        )
+        val typeName = protoQueueClassData.protoContextTypeName
+        CompilerContext.log.warn("protoContextType %s", typeName)
+        protoQueueClassData.getProtoContextMethod?.let {
+            builder.addFunction(
+                FunSpec.builder(it.simpleName.toString())
+                    .returns(protoQueueClassData.protoContextTypeName)
+                    .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
+                    .addStatement(protoQueueClassData.protoContextLiteral, "proto")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build()
+            )
+        }
     }
 
     private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {
