@@ -3,17 +3,15 @@ package net.protoqueue.compiler.common
 import javax.annotation.processing.ProcessingEnvironment
 
 /**
+ * 保存编译的上下文信息
  * Created by zhongyongsheng on 2018/4/13.
  */
-class CompilerContext(var processingEnvironment: ProcessingEnvironment) {
-    var log: Log
+object CompilerContext {
+    lateinit var log: Log
+    lateinit var processingEnvironment: ProcessingEnvironment
 
-    init {
-        log = Log(processingEnvironment.messager)
-    }
-
-    companion object {
-
-        var defaultIntance: CompilerContext? = null
+    fun init(processingEnvironment: ProcessingEnvironment) {
+        this.processingEnvironment = processingEnvironment
+        this.log = Log(processingEnvironment.messager)
     }
 }
