@@ -5,6 +5,7 @@ import javax.lang.model.element.Element
 import javax.tools.Diagnostic
 
 /**
+ * apt日志
  * Created by zhongyongsheng on 2018/4/14.
  */
 class Log(private val messager: Messager) {
@@ -34,11 +35,10 @@ class Log(private val messager: Messager) {
     }
 
     private fun safeFormat(msg: String, vararg args: Any): String {
-        try {
-            return java.lang.String.format(msg, *args)
+        return try {
+            String.format(msg, *args)
         } catch (e: Exception) {
-            return msg
+            msg
         }
-
     }
 }
