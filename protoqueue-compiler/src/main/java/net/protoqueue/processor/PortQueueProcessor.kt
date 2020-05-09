@@ -2,13 +2,11 @@ package net.protoqueue.processor
 
 import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.SetMultimap
-import net.protoqueue.compiler.common.CompilerContext
-import net.protoqueue.util.Util
 import net.protoqueue.annotation.ProtoQueueClass
-//import net.protoqueue.compiler.writer.ProtoQueueBaseWriter
-//import net.protoqueue.compiler.writer.ProtoQueueClassWriter
+import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.writer.ProtoQueueRPCWriter
-import java.util.*
+import net.protoqueue.util.Util
+import java.util.HashSet
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 
@@ -17,22 +15,16 @@ import javax.lang.model.element.Element
  * Created by zhongyongsheng on 2018/4/13.
  */
 class PortQueueProcessor : BasicAnnotationProcessor() {
-    internal var portContext: CompilerContext? = null
     override fun initSteps(): Iterable<BasicAnnotationProcessor.ProcessingStep> {
-        portContext = CompilerContext(processingEnv)
-        CompilerContext.defaultIntance = portContext
-        return Arrays.asList(ProtoQueueProcessingStep(portContext!!))
+        CompilerContext.init(processingEnv)
+        return listOf(ProtoQueueProcessingStep())
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
         return SourceVersion.latest()
     }
 
-    internal inner class ProtoQueueProcessingStep(context: CompilerContext) : ProtoQueueProcessing() {
-
-        init {
-            compilerContext = context
-        }
+    internal inner class ProtoQueueProcessingStep() : ProcessingStep {
 
         override fun annotations(): Set<Class<out Annotation>> {
             val set = HashSet<Class<out Annotation>>()
@@ -43,22 +35,17 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
         override fun process(elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>): Set<Element> {
             val classSet = elementsByAnnotation.get(ProtoQueueClass::class.java)
             classSet.map { element ->
-                ProtoQueueClassProcessor(compilerContext!!, Util.toTypeElement(element)).process()
+                ProtoQueueClassProcessor(Util.toTypeElement(element)).process()
             }
                 .forEach {
                     try {
-                        //ProtoQueueClassWriter(it).write(processingEnv)
                         ProtoQueueRPCWriter(it).write(processingEnv)
                     } catch (e: Throwable) {
-                        portContext!!.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
+                        CompilerContext.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
                     }
                 }
 
-            return HashSet()
+            return emptySet()
         }
-    }
-
-    internal abstract inner class ProtoQueueProcessing : BasicAnnotationProcessor.ProcessingStep {
-        var compilerContext: CompilerContext? = null
     }
 }
