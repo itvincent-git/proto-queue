@@ -9,6 +9,9 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
+import net.protoqueue.util.TmpVar
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * 生成Protoqueue RPC子类
@@ -69,35 +72,30 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {
-//        val tmpVar = TmpVar()
-//        var seqClass: ClassName?
-//
-//        when (protoQueueClassData.protoContextType.toString()) {
-//            "java.lang.Integer" -> seqClass = ClassName.get(AtomicInteger::class.java)
-//            "java.lang.Long" -> seqClass = ClassName.get(AtomicLong::class.java)
-//            else -> seqClass = ClassName.get(AtomicInteger::class.java)
-//        }
-//
-//        val name = seqClass!!.simpleName().decapitalize()
-//        val fieldName = tmpVar.getTmpVar("_$name")
-//        val field = FieldSpec.builder(seqClass,
-//            fieldName,
-//            Modifier.PRIVATE)
-//            .initializer("new \$T()", seqClass)
-//            .build()
-//        builder.addField(field)
-//        addSeqMethod(field, builder)
+        val tmpVar = TmpVar()
+        val seqClass = when (protoQueueClassData.protoContextTypeName.toString()) {
+            "java.lang.Integer" -> AtomicInteger::class.asTypeName()
+            "java.lang.Long" -> AtomicLong::class.asTypeName()
+            else -> AtomicInteger::class.asTypeName()
+        }
+
+        val name = seqClass.simpleName.decapitalize()
+        val fieldName = tmpVar.getTmpVar("_$name")
+        val field = PropertySpec.builder(fieldName, seqClass, KModifier.PRIVATE)
+            .initializer("%T()", seqClass)
+            .build()
+        builder.addProperty(field)
+        addSeqMethod(field, builder)
     }
 
     private fun addSeqMethod(field: PropertySpec, builder: TypeSpec.Builder) {
-//        builder.addMethod(
-//            MethodSpec.methodBuilder(protoQueueClassData.incrementAndGetSeqContextMethod!!.simpleName.toString())
-//                .returns(TypeName.get(protoQueueClassData.protoContextType))
-//                .addStatement("return \$N.incrementAndGet()", field)
-//                .addModifiers(Modifier.PUBLIC)
-//                .addAnnotation(Override::class.java)
-//                .build()
-//        )
+        builder.addFunction(
+            FunSpec.builder(protoQueueClassData.incrementAndGetSeqContextMethod!!.simpleName.toString())
+                .returns(protoQueueClassData.protoContextTypeName)
+                .addModifiers(KModifier.OVERRIDE)
+                .addStatement("return %N.incrementAndGet()", field)
+                .build()
+        )
 //
 //        builder.addMethod(
 //            MethodSpec.methodBuilder(protoQueueClassData.getSeqContextMethod!!.simpleName.toString())
