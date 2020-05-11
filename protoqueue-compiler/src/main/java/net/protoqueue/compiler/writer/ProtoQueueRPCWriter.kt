@@ -110,7 +110,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         //protected override fun getReceiveUri(proto: SampleProto): Int = proto.uri
         builder.addFunction(
             FunSpec.builder("getReceiveUri")
-                .returns(protoQueueClassData.getReceiveUriMethod!!.returnType.asTypeName())
+                .returns(INT)
                 .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
                 .addStatement("return proto.%L", protoQueueClassData.uriLiteral)
                 .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
@@ -123,8 +123,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         //  proto.uri = uri
         //}
         builder.addFunction(
-            FunSpec.builder("addSetUriMethod")
-                .returns(protoQueueClassData.setUriMethod!!.returnType.asTypeName())
+            FunSpec.builder("setUri")
                 .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
                 .addParameter(ParameterSpec.builder("uri", INT).build())
                 .addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)

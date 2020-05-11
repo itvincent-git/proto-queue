@@ -48,15 +48,7 @@ class ProtoQueueClassProcessor(
             toByteArrayLiteral.filter { it != '\"' },
             uriLiteral.filter { it != '\"' },
             typeArguments[0],
-            typeArguments[1],
-            overrideMethods["buildProto(byte[])"],
-            overrideMethods["toByteArray(P)"],
-            overrideMethods["getProtoContext(P)"],
-            overrideMethods["getOwnAppId()"],
-            overrideMethods["incrementAndGetSeqContext()"],
-            overrideMethods["getSeqContext()"],
-            overrideMethods["getReceiveUri(P)"],
-            overrideMethods["setUri(P,int)"])
+            typeArguments[1])
         CompilerContext.log.debug("ProtoQueue process %s/%s", classElement.toString(), data)
         return data
     }

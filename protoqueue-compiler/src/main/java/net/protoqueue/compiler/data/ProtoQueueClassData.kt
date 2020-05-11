@@ -4,7 +4,6 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import net.protoqueue.util.toKotlinPrimitiveType
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 
@@ -19,15 +18,7 @@ class ProtoQueueClassData(
     val toByteArrayLiteral: String,
     val uriLiteral: String,
     private val protoClass: TypeMirror,
-    private val protoContextType: TypeMirror,
-    val buildProtoMethod: ExecutableElement?,
-    val toByteArrayMethod: ExecutableElement?,
-    val getProtoContextMethod: ExecutableElement?,
-    val getOwnAppIdMethod: ExecutableElement?,
-    val incrementAndGetSeqContextMethod: ExecutableElement?,
-    val getSeqContextMethod: ExecutableElement?,
-    val getReceiveUriMethod: ExecutableElement?,
-    val setUriMethod: ExecutableElement?
+    private val protoContextType: TypeMirror
 ) {
     val typeName = element.asClassName()
     val implClassName = typeName.simpleNames.joinToString("_") + "_Impl"
@@ -44,10 +35,7 @@ class ProtoQueueClassData(
     override fun toString(): String {
         return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', buildProtoLiteral='" +
             "$buildProtoLiteral', toByteArrayLiteral='$toByteArrayLiteral', uriLiteral='$uriLiteral" +
-            "', buildProtoMethod=$buildProtoMethod, toByteArrayMethod=$toByteArrayMethod" +
-            ", getProtoContextMethod=$getProtoContextMethod, getOwnAppIdMethod=$getOwnAppIdMethod" +
-            ", incrementAndGetSeqContextMethod=$incrementAndGetSeqContextMethod, getSeqContextMethod=" +
-            "$getSeqContextMethod, getReceiveUriMethod=$getReceiveUriMethod, typeName=" +
+            "', typeName=" +
             "$typeName, implClassName='$implClassName', implTypeName=$implTypeName, protoClassTypeName=" +
             "$protoClassTypeName, protoContextTypeName=$protoContextTypeName)"
     }
