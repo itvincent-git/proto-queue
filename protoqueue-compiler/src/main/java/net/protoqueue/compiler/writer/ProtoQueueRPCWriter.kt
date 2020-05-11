@@ -33,7 +33,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addBuildProtoMethod(builder: TypeSpec.Builder) {
         protoQueueClassData.buildProtoMethod?.let {
             builder.addFunction(FunSpec.builder(it.simpleName.toString())
-                .addModifiers(KModifier.OVERRIDE)
+                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
                 .addParameter(ParameterSpec("data", ByteArray::class.asTypeName()))
                 .returns(protoQueueClassData.protoClassTypeName)
                 .addStatement(protoQueueClassData.buildProtoLiteral,
@@ -49,7 +49,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     .returns(ByteArray::class)
                     .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
                     .addStatement(protoQueueClassData.toByteArrayLiteral)
-                    .addModifiers(KModifier.OVERRIDE)
+                    .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
                     .build()
             )
         }
@@ -62,7 +62,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     .returns(protoQueueClassData.protoContextKotlinTypeName)
                     .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
                     .addStatement(protoQueueClassData.protoContextLiteral, "proto")
-                    .addModifiers(KModifier.OVERRIDE)
+                    .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
                     .build()
             )
         }
@@ -93,27 +93,17 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addStatement("return %N.incrementAndGet()", field)
                 .build()
         )
-//
-//        builder.addMethod(
-//            MethodSpec.methodBuilder(protoQueueClassData.getSeqContextMethod!!.simpleName.toString())
-//                .returns(TypeName.get(protoQueueClassData.protoContextType))
-//                .addStatement("return \$N.get()", field)
-//                .addModifiers(Modifier.PUBLIC)
-//                .addAnnotation(Override::class.java)
-//                .build()
-//        )
     }
 
     private fun addGetReceiveUriMethod(builder: TypeSpec.Builder) {
-//        builder.addMethod(
-//            MethodSpec.methodBuilder(protoQueueClassData.getReceiveUriMethod!!.simpleName.toString())
-//                .returns(TypeName.get(protoQueueClassData.getReceiveUriMethod!!.returnType))
-//                .addParameter(ParameterSpec.builder(TypeName.get(protoQueueClassData.protoClass), "proto").build())
-//                .addStatement("return proto.\$L", protoQueueClassData.uriLiteral)
-//                .addModifiers(Modifier.PROTECTED)
-//                .addAnnotation(Override::class.java)
-//                .build()
-//        )
+        builder.addFunction(
+            FunSpec.builder(protoQueueClassData.getReceiveUriMethod!!.simpleName.toString())
+                .returns(protoQueueClassData.getReceiveUriMethod!!.returnType.asTypeName())
+                .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
+                .addStatement("return proto.%L", protoQueueClassData.uriLiteral)
+                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
+                .build()
+        )
     }
 //
 //    //private val serviceName = "SvcUserService"
