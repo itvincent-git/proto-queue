@@ -36,7 +36,7 @@ class Log(private val messager: Messager) {
 
     private fun safeFormat(msg: String, vararg args: Any): String {
         return try {
-            String.format(msg, *args) + "\r\n"
+            String.format(msg, *args) + "\r\n" //加上日志才会能换行
         } catch (e: Exception) {
             msg
         }
