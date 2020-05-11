@@ -36,7 +36,7 @@ class Log(private val messager: Messager) {
 
     private fun safeFormat(msg: String, vararg args: Any): String {
         return try {
-            String.format(msg, *args)
+            String.format(msg, *args) + "\r\n"
         } catch (e: Exception) {
             msg
         }
