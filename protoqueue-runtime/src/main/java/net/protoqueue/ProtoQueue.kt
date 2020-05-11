@@ -218,7 +218,7 @@ abstract class ProtoQueue<P, C> {
      * @param proto
      * @return
      */
-    protected abstract fun getProtoContext(proto: P): C
+    protected abstract fun getProtoContext(proto: P): C?
 
     /**
      * 自动生成不需要实现

@@ -34,44 +34,38 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
 
     private fun addBuildProtoMethod(builder: TypeSpec.Builder) {
         //protected override fun buildProto(data: ByteArray): SampleProto = SampleProto.parseFrom(data)
-        protoQueueClassData.buildProtoMethod?.let {
-            builder.addFunction(FunSpec.builder(it.simpleName.toString())
-                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
-                .addParameter(ParameterSpec("data", ByteArray::class.asTypeName()))
-                .returns(protoQueueClassData.protoClassTypeName)
-                .addStatement(protoQueueClassData.buildProtoLiteral,
-                    protoQueueClassData.protoClassTypeName, "data")
-                .build())
-        }
+        builder.addFunction(FunSpec.builder("buildProto")
+            .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
+            .addParameter(ParameterSpec("data", ByteArray::class.asTypeName()))
+            .returns(protoQueueClassData.protoClassTypeName)
+            .addStatement(protoQueueClassData.buildProtoLiteral,
+                protoQueueClassData.protoClassTypeName, "data")
+            .build())
     }
 
     private fun addToByteArrayMethod(builder: TypeSpec.Builder) {
         //protected override fun toByteArray(proto: SampleProto): ByteArray =
         //            com.google.protobuf.nano.MessageNano.toByteArray(proto)
-        protoQueueClassData.toByteArrayMethod?.let {
-            builder.addFunction(
-                FunSpec.builder(it.simpleName.toString())
-                    .returns(ByteArray::class)
-                    .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
-                    .addStatement(protoQueueClassData.toByteArrayLiteral)
-                    .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
-                    .build()
-            )
-        }
+        builder.addFunction(
+            FunSpec.builder("toByteArray")
+                .returns(ByteArray::class)
+                .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
+                .addStatement(protoQueueClassData.toByteArrayLiteral)
+                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
+                .build()
+        )
     }
 
     private fun addGetProtoContextMethod(builder: TypeSpec.Builder) {
-        //protected override fun getProtoContext(proto: SampleProto): Long = proto.header.seqid
-        protoQueueClassData.getProtoContextMethod?.let {
-            builder.addFunction(
-                FunSpec.builder(it.simpleName.toString())
-                    .returns(protoQueueClassData.protoContextKotlinTypeName)
-                    .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
-                    .addStatement(protoQueueClassData.protoContextLiteral, "proto")
-                    .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
-                    .build()
-            )
-        }
+        //protected override fun getProtoContext(proto: SampleProto): Long = proto?.header?.seqid
+        builder.addFunction(
+            FunSpec.builder("getProtoContext")
+                .returns(protoQueueClassData.protoContextKotlinTypeName.copy(nullable = true))
+                .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
+                .addStatement(protoQueueClassData.protoContextLiteral, "proto")
+                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
+                .build()
+        )
     }
 
     private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {
@@ -95,7 +89,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addSeqMethod(field: PropertySpec, builder: TypeSpec.Builder) {
         //override fun incrementAndGetSeqContext(): Long = _atomicLong.incrementAndGet()
         builder.addFunction(
-            FunSpec.builder(protoQueueClassData.incrementAndGetSeqContextMethod!!.simpleName.toString())
+            FunSpec.builder("incrementAndGetSeqContext")
                 .returns(protoQueueClassData.protoContextKotlinTypeName)
                 .addModifiers(KModifier.OVERRIDE)
                 .addStatement("return %N.incrementAndGet()", field)
@@ -104,7 +98,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
 
         //override fun getSeqContext(): Long = _atomicLong.get()
         builder.addFunction(
-            FunSpec.builder(protoQueueClassData.getSeqContextMethod!!.simpleName.toString())
+            FunSpec.builder("getSeqContext")
                 .returns(protoQueueClassData.protoContextKotlinTypeName)
                 .addStatement("return %N.get()", field)
                 .addModifiers(KModifier.OVERRIDE)
@@ -115,7 +109,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addGetReceiveUriMethod(builder: TypeSpec.Builder) {
         //protected override fun getReceiveUri(proto: SampleProto): Int = proto.uri
         builder.addFunction(
-            FunSpec.builder(protoQueueClassData.getReceiveUriMethod!!.simpleName.toString())
+            FunSpec.builder("getReceiveUri")
                 .returns(protoQueueClassData.getReceiveUriMethod!!.returnType.asTypeName())
                 .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
                 .addStatement("return proto.%L", protoQueueClassData.uriLiteral)
@@ -129,7 +123,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         //  proto.uri = uri
         //}
         builder.addFunction(
-            FunSpec.builder(protoQueueClassData.setUriMethod!!.simpleName.toString())
+            FunSpec.builder("addSetUriMethod")
                 .returns(protoQueueClassData.setUriMethod!!.returnType.asTypeName())
                 .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
                 .addParameter(ParameterSpec.builder("uri", INT).build())
