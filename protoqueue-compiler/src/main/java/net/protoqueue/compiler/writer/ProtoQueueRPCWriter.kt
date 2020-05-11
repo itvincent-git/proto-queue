@@ -7,7 +7,6 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
-import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
 import net.protoqueue.util.TmpVar
 import java.util.concurrent.atomic.AtomicInteger
@@ -57,12 +56,10 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addGetProtoContextMethod(builder: TypeSpec.Builder) {
-        val typeName = protoQueueClassData.protoContextTypeName
-        CompilerContext.log.warn("protoContextType %s", typeName)
         protoQueueClassData.getProtoContextMethod?.let {
             builder.addFunction(
                 FunSpec.builder(it.simpleName.toString())
-                    .returns(protoQueueClassData.protoContextTypeName)
+                    .returns(protoQueueClassData.protoContextKotlinTypeName)
                     .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
                     .addStatement(protoQueueClassData.protoContextLiteral, "proto")
                     .addModifiers(KModifier.OVERRIDE)
@@ -91,7 +88,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addSeqMethod(field: PropertySpec, builder: TypeSpec.Builder) {
         builder.addFunction(
             FunSpec.builder(protoQueueClassData.incrementAndGetSeqContextMethod!!.simpleName.toString())
-                .returns(protoQueueClassData.protoContextTypeName)
+                .returns(protoQueueClassData.protoContextKotlinTypeName)
                 .addModifiers(KModifier.OVERRIDE)
                 .addStatement("return %N.incrementAndGet()", field)
                 .build()

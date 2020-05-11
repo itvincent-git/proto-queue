@@ -3,8 +3,8 @@ package net.protoqueue.compiler.data
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
+import net.protoqueue.util.toKotlinPrimitiveType
 import javax.lang.model.element.ExecutableElement
-
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 
@@ -33,9 +33,12 @@ class ProtoQueueClassData(
     val implTypeName = ClassName.bestGuess(typeName.packageName + "." + implClassName)
     val protoClassTypeName = protoClass.asTypeName()
     val protoContextTypeName = protoContextType.asTypeName()
+    val protoContextKotlinTypeName = protoContextType.asTypeName().toKotlinPrimitiveType()
 
-    init {
-    }
+//    init {
+//        CompilerContext.log.debug("protoContextKotlinTypeName:${protoContextKotlinTypeName}")
+//        CompilerContext.log.debug("${java.lang.Long::class.java.name}")
+//    }
 
     override fun toString(): String {
         return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', buildProtoLiteral='" +
