@@ -40,6 +40,8 @@ class ProtoQueueClassProcessor(
             }
             .map { it.toString() to it }.toMap()
 
+        CompilerContext.log.debug("overrideMethods $overrideMethods")
+
         var data = ProtoQueueClassData(classElement,
             protoContextLiteral.filter { it != '\"' },
             buildProtoLiteral.filter { it != '\"' },
@@ -53,8 +55,9 @@ class ProtoQueueClassProcessor(
             overrideMethods["getOwnAppId()"],
             overrideMethods["incrementAndGetSeqContext()"],
             overrideMethods["getSeqContext()"],
-            overrideMethods["getReceiveUri(P)"])
-        CompilerContext.log.debug("ProtoQueue process %s:%s", classElement.toString(), data)
+            overrideMethods["getReceiveUri(P)"],
+            overrideMethods["setUri(P,int)"])
+        CompilerContext.log.debug("ProtoQueue process %s/%s", classElement.toString(), data)
         return data
     }
 }

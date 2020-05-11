@@ -26,7 +26,8 @@ class ProtoQueueClassData(
     val getOwnAppIdMethod: ExecutableElement?,
     val incrementAndGetSeqContextMethod: ExecutableElement?,
     val getSeqContextMethod: ExecutableElement?,
-    val getReceiveUriMethod: ExecutableElement?
+    val getReceiveUriMethod: ExecutableElement?,
+    val setUriMethod: ExecutableElement?
 ) {
     val typeName = element.asClassName()
     val implClassName = typeName.simpleNames.joinToString("_") + "_Impl"

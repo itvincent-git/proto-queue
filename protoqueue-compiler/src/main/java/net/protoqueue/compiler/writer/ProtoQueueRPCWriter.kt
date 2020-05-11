@@ -1,6 +1,7 @@
 package net.protoqueue.compiler.writer
 
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
@@ -27,10 +28,12 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         addGetProtoContextMethod(builder)
         addSeqFieldAndMethod(builder)
         addGetReceiveUriMethod(builder)
+        addSetUriMethod(builder)
         return builder
     }
 
     private fun addBuildProtoMethod(builder: TypeSpec.Builder) {
+        //protected override fun buildProto(data: ByteArray): SampleProto = SampleProto.parseFrom(data)
         protoQueueClassData.buildProtoMethod?.let {
             builder.addFunction(FunSpec.builder(it.simpleName.toString())
                 .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
@@ -43,6 +46,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addToByteArrayMethod(builder: TypeSpec.Builder) {
+        //protected override fun toByteArray(proto: SampleProto): ByteArray =
+        //            com.google.protobuf.nano.MessageNano.toByteArray(proto)
         protoQueueClassData.toByteArrayMethod?.let {
             builder.addFunction(
                 FunSpec.builder(it.simpleName.toString())
@@ -56,6 +61,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addGetProtoContextMethod(builder: TypeSpec.Builder) {
+        //protected override fun getProtoContext(proto: SampleProto): Long = proto.header.seqid
         protoQueueClassData.getProtoContextMethod?.let {
             builder.addFunction(
                 FunSpec.builder(it.simpleName.toString())
@@ -69,6 +75,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addSeqFieldAndMethod(builder: TypeSpec.Builder) {
+        //private val _atomicLong: AtomicLong = AtomicLong()
         val tmpVar = TmpVar()
         val seqClass = when (protoQueueClassData.protoContextTypeName.toString()) {
             "java.lang.Integer" -> AtomicInteger::class.asTypeName()
@@ -86,6 +93,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     private fun addSeqMethod(field: PropertySpec, builder: TypeSpec.Builder) {
+        //override fun incrementAndGetSeqContext(): Long = _atomicLong.incrementAndGet()
         builder.addFunction(
             FunSpec.builder(protoQueueClassData.incrementAndGetSeqContextMethod!!.simpleName.toString())
                 .returns(protoQueueClassData.protoContextKotlinTypeName)
@@ -93,9 +101,19 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addStatement("return %N.incrementAndGet()", field)
                 .build()
         )
+
+        //override fun getSeqContext(): Long = _atomicLong.get()
+        builder.addFunction(
+            FunSpec.builder(protoQueueClassData.getSeqContextMethod!!.simpleName.toString())
+                .returns(protoQueueClassData.protoContextKotlinTypeName)
+                .addStatement("return %N.get()", field)
+                .addModifiers(KModifier.OVERRIDE)
+                .build()
+        )
     }
 
     private fun addGetReceiveUriMethod(builder: TypeSpec.Builder) {
+        //protected override fun getReceiveUri(proto: SampleProto): Int = proto.uri
         builder.addFunction(
             FunSpec.builder(protoQueueClassData.getReceiveUriMethod!!.simpleName.toString())
                 .returns(protoQueueClassData.getReceiveUriMethod!!.returnType.asTypeName())
@@ -105,14 +123,21 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .build()
         )
     }
-//
-//    //private val serviceName = "SvcUserService"
-//    override fun createFileProperty(): PropertySpec.Builder {
-//        return PropertySpec.builder("serviceName", String::class, KModifier.PRIVATE,
-//            KModifier.CONST)
-//            .initializer("%S", protoQueueClassData.serviceName)
-//    }
 
+    private fun addSetUriMethod(builder: TypeSpec.Builder) {
+        //override fun setUri(proto: SampleProto, uri: Int) {
+        //  proto.uri = uri
+        //}
+        builder.addFunction(
+            FunSpec.builder(protoQueueClassData.setUriMethod!!.simpleName.toString())
+                .returns(protoQueueClassData.setUriMethod!!.returnType.asTypeName())
+                .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
+                .addParameter(ParameterSpec.builder("uri", INT).build())
+                .addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)
+                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
+                .build()
+        )
+    }
 
     companion object {
         val suspendCancellableCoroutine =

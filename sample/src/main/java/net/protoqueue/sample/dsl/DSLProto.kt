@@ -25,7 +25,7 @@ class DSLProto {
     companion object {
 
         @JvmStatic
-        fun parseFrom(data: ByteArray?): DSLProto? {
+        fun parseFrom(data: ByteArray): DSLProto {
             return DSLProto().also { it.data = data }
         }
     }
