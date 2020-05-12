@@ -113,7 +113,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .returns(INT)
                 .addParameter(ParameterSpec.builder("proto", protoQueueClassData.protoClassTypeName).build())
                 .addStatement("return proto.%L", protoQueueClassData.uriLiteral)
-                .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
+                .addModifiers(KModifier.OVERRIDE)
                 .build()
         )
     }

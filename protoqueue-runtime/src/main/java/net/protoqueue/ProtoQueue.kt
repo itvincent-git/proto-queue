@@ -3,6 +3,7 @@ package net.protoqueue
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import net.protoqueue.rpc.ResponseRegister
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -13,6 +14,7 @@ abstract class ProtoQueue<P, C> {
     protected var mProtoSender: ProtoSender? = null
     protected var mContextMap: MutableMap<C, ProtoContext<P, C>> = ConcurrentHashMap()
     protected var mHandler: Handler = ProtoHandler()
+    protected val mResponseRegister = ResponseRegister<P, C>(this)
 
     fun init(protoSender: ProtoSender) {
         mProtoSender = protoSender
@@ -225,7 +227,7 @@ abstract class ProtoQueue<P, C> {
      * @param proto
      * @return
      */
-    protected abstract fun getReceiveUri(proto: P): Int
+    abstract fun getReceiveUri(proto: P): Int
 
     /**
      * 自动生成不需要实现
