@@ -35,6 +35,9 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin'
         exclude group: 'org.jetbrains.kotlinx'
     }
+    implementation (deps.stripe.coroutine) {
+        exclude group: 'net.slog'
+    }
     implementation project(':protoqueue-runtime')
     kapt project(':protoqueue-compiler')
 }
