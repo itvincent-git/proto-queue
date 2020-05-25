@@ -31,11 +31,11 @@ dependencies {
     implementation deps.support.constraint_layout
     implementation deps.support.recyclerview
     implementation deps.support.design
-    implementation ("$deps.slog.slog_file") {
+    implementation("$deps.slog.slog_file") {
         exclude group: 'org.jetbrains.kotlin'
         exclude group: 'org.jetbrains.kotlinx'
     }
-    implementation (deps.stripe.coroutine) {
+    implementation(deps.stripe.coroutine) {
         exclude group: 'net.slog'
     }
     implementation project(':protoqueue-runtime')
