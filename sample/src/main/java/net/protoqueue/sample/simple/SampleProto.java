@@ -1,4 +1,6 @@
-package net.protoqueue.sample;
+package net.protoqueue.sample.simple;
+
+import net.protoqueue.sample.Header;
 
 import java.util.Arrays;
 

@@ -6,7 +6,7 @@ import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.rpc.RPC
-import net.protoqueue.sample.BaseProtoQueue
+import net.protoqueue.sample.simple.BaseProtoQueue
 
 /**
  * DSL例子

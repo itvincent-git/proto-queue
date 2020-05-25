@@ -1,25 +1,55 @@
 package net.protoqueue.sample
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
-import android.view.View
-import kotlinx.android.synthetic.main.activity_main.*
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_main.rv_activities
 
 class MainActivity : AppCompatActivity() {
-    var core = SampleProtoCore()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        send_report.setOnClickListener { core.sendGameListReq() }
+        ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
 
-        send_report_with_parameter.setOnClickListener { core.sendGameListReqByQueueParameter() }
+        val activities = packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+            .activities.filter { !it.name.contains(this@MainActivity.localClassName) }
+        rv_activities.layoutManager = LinearLayoutManager(this)
+        rv_activities.adapter = object : RecyclerView.Adapter<ActivitiesViewHolder?>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActivitiesViewHolder {
+                val linearLayout = LinearLayout(parent.context)
+                linearLayout.minimumHeight = 100
+                linearLayout.addView(TextView(parent.context).apply {
+                    id = R.id.tv
+                })
+                return ActivitiesViewHolder(linearLayout)
+            }
 
-        mock_receive.setOnClickListener { core.mockOnReceive() }
+            override fun getItemCount(): Int {
+                return activities.size
+            }
 
-        dispose_receive.setOnClickListener { core.dispose() }
+            override fun onBindViewHolder(holder: ActivitiesViewHolder, position: Int) {
+                holder.textView.text = activities[position].name.substringAfterLast(".")
+                holder.linearLayout.setOnClickListener {
+                    startActivity(
+                        Intent(this@MainActivity, Class.forName(activities[position].name)))
+                }
+            }
+        }
+    }
 
-        send_report_in_coroutine.setOnClickListener { core.sendGameListReqInCoroutine() }
+    class ActivitiesViewHolder(val linearLayout: LinearLayout) : RecyclerView.ViewHolder(linearLayout) {
+        val textView: TextView = linearLayout.findViewById(R.id.tv)
     }
 }

@@ -1,6 +1,6 @@
 package com.google.protobuf.nano;
 
-import net.protoqueue.sample.SampleProto;
+import net.protoqueue.sample.simple.SampleProto;
 import net.protoqueue.sample.dsl.DSLProto;
 
 /**

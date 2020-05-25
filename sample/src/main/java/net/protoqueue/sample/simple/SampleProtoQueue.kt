@@ -1,4 +1,4 @@
-package net.protoqueue.sample
+package net.protoqueue.sample.simple
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -34,14 +34,16 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Long>() {
     }
 
     fun sendSampleProto(): ProtoDisposable? {
-        val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
+        val sampleProto = SampleProto(
+            byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         return instance.enqueue(sampleProto, 11,
             { proto -> Log.i(TAG, "onProto: $proto") })
     }
 
     fun sendSampleProtoByQueueParameter(): ProtoDisposable? {
-        val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
+        val sampleProto = SampleProto(
+            byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         return instance.newQueueParameter(sampleProto, 11) { proto -> Log.i(TAG, "onProto: $proto") }
             .timeout(3000)
@@ -50,7 +52,8 @@ abstract class SampleProtoQueue : BaseProtoQueue<SampleProto, Long>() {
     }
 
     fun sendSampleProtoInCoroutine() {
-        val sampleProto = SampleProto(byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
+        val sampleProto = SampleProto(
+            byteArrayOf(10, instance.incrementAndGetSeqContext().toByte(), 100))
 
         //enqueueAwait
         /*job = protoQueueLaunch {

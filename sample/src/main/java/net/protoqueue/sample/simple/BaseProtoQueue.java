@@ -1,4 +1,4 @@
-package net.protoqueue.sample;
+package net.protoqueue.sample.simple;
 
 import android.util.Log;
 

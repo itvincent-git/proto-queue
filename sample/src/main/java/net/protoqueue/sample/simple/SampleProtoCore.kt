@@ -1,4 +1,4 @@
-package net.protoqueue.sample
+package net.protoqueue.sample.simple
 
 import net.protoqueue.ProtoDisposable
 
@@ -23,7 +23,8 @@ class SampleProtoCore {
     }
 
     fun mockOnReceive() {
-        val sampleProto = SampleProto(byteArrayOf(11, sampleProtoQueue.getSeqContext().toByte(), 100))
+        val sampleProto = SampleProto(
+            byteArrayOf(11, sampleProtoQueue.getSeqContext().toByte(), 100))
         sampleProtoQueue.onReceiveData(appId, sampleProto.toByteArray())
     }
 
