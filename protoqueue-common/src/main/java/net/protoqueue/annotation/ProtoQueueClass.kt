@@ -26,5 +26,9 @@ annotation class ProtoQueueClass(
      * uri在proto里定义的名称
      * @return
      */
-    val uriLiteral: String = "uri"
+    val uriLiteral: String = "uri",
+
+    val resCodeLiteral: String = "%T.header?.resCode",
+
+    val resMessage: String = "%T.header?.resMsg"
 )
