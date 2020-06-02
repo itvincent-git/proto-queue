@@ -17,26 +17,22 @@ class ProtoQueueClassData(
     val buildProtoLiteral: String,
     val toByteArrayLiteral: String,
     val uriLiteral: String,
-    private val protoClass: TypeMirror,
-    private val protoContextType: TypeMirror
+    protoClass: TypeMirror,
+    protoContextType: TypeMirror,
+    val rpcDatas: List<ProtoQueueRPCData>
 ) {
     val typeName = element.asClassName()
     val implClassName = typeName.simpleNames.joinToString("_") + "_Impl"
-    val implTypeName = ClassName.bestGuess(typeName.packageName + "." + implClassName)
+    val implTypeName = ClassName(typeName.packageName, implClassName)
     val protoClassTypeName = protoClass.asTypeName()
     val protoContextTypeName = protoContextType.asTypeName()
     val protoContextKotlinTypeName = protoContextType.asTypeName().toKotlinPrimitiveType()
-
-//    init {
-//        CompilerContext.log.debug("protoContextKotlinTypeName:${protoContextKotlinTypeName}")
-//        CompilerContext.log.debug("${java.lang.Long::class.java.name}")
-//    }
 
     override fun toString(): String {
         return "ProtoQueueClassData(protoContextLiteral='$protoContextLiteral', buildProtoLiteral='" +
             "$buildProtoLiteral', toByteArrayLiteral='$toByteArrayLiteral', uriLiteral='$uriLiteral" +
             "', typeName=" +
             "$typeName, implClassName='$implClassName', implTypeName=$implTypeName, protoClassTypeName=" +
-            "$protoClassTypeName, protoContextTypeName=$protoContextTypeName)"
+            "$protoClassTypeName, protoContextTypeName=$protoContextTypeName, rpcDatas=$rpcDatas)"
     }
 }

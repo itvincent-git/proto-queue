@@ -3,6 +3,8 @@ package net.protoqueue.processor
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
+import net.protoqueue.compiler.data.ProtoQueueRPCData
+import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.util.Util
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
@@ -34,13 +36,16 @@ class ProtoQueueClassProcessor(
 
         val allMembers = Util.getAllMembers(CompilerContext.processingEnvironment, classElement)
         val overrideMethods = allMembers
-            .filter { element -> element.modifiers.contains(Modifier.ABSTRACT) && element.kind == ElementKind.METHOD }
-            .map {
-                Util.asExecutable(it)
-            }
+            .filter { it.modifiers.contains(Modifier.ABSTRACT) && it.kind == ElementKind.METHOD }
+            .map { Util.asExecutable(it) }
             .map { it.toString() to it }.toMap()
 
         CompilerContext.log.debug("overrideMethods $overrideMethods")
+
+        val rpcDatas = allMembers.filter { it.modifiers.contains(Modifier.ABSTRACT) && it.kind == ElementKind.METHOD }
+            .filter { it.getAnnotation(ProtoQueueRPC::class.java) != null }
+            .map { Util.asExecutable(it) }
+            .map { ProtoQueueRPCData.parse(it) }
 
         var data = ProtoQueueClassData(classElement,
             protoContextLiteral.filter { it != '\"' },
@@ -48,7 +53,8 @@ class ProtoQueueClassProcessor(
             toByteArrayLiteral.filter { it != '\"' },
             uriLiteral.filter { it != '\"' },
             typeArguments[0],
-            typeArguments[1])
+            typeArguments[1],
+            rpcDatas)
         CompilerContext.log.debug("ProtoQueue process %s/%s", classElement.toString(), data)
         return data
     }

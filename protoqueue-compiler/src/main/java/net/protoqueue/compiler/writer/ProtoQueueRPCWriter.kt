@@ -29,6 +29,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         addSeqFieldAndMethod(builder)
         addGetReceiveUriMethod(builder)
         addSetUriMethod(builder)
+        rpcWriter(builder)
         return builder
     }
 
@@ -130,6 +131,33 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
                 .build()
         )
+    }
+
+    /**
+     * override fun rpcOne(): RPC<DSLRequest, DSLResponse> {
+    return object : RPC<DSLRequest, DSLResponse> {
+    override suspend fun request(req: DSLRequest, parameter: RequestParameter?): Response<DSLResponse?> {
+    val proto = DSLProto()
+    proto.req = req
+    val resProto = enqueueAwaitOrNull(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
+    val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
+    return Response(resProto?.res, resParameter)
+    }
+
+    override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
+    mResponseRegister.addRegister(DSLCommon.kResponseUri) {
+    val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
+    block(it.res, responseParameter)
+    }
+    }
+    }
+    }
+     */
+    private fun rpcWriter(builder: TypeSpec.Builder) {
+        for (rpc in protoQueueClassData.rpcDatas) {
+            builder.addFunction(FunSpec.overriding(rpc.executableElement)
+                .build())
+        }
     }
 
     companion object {
