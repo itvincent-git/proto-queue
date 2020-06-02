@@ -1,14 +1,19 @@
 package net.protoqueue.compiler.writer
 
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import net.protoqueue.compiler.data.ProtoQueueClassData
+import net.protoqueue.compiler.data.ProtoQueueRPCData
+import net.protoqueue.rpc.RequestParameter
+import net.protoqueue.rpc.Response
 import net.protoqueue.util.TmpVar
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -135,29 +140,52 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
 
     /**
      * override fun rpcOne(): RPC<DSLRequest, DSLResponse> {
-    return object : RPC<DSLRequest, DSLResponse> {
-    override suspend fun request(req: DSLRequest, parameter: RequestParameter?): Response<DSLResponse?> {
-    val proto = DSLProto()
-    proto.req = req
-    val resProto = enqueueAwaitOrNull(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
-    val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
-    return Response(resProto?.res, resParameter)
-    }
-
-    override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
-    mResponseRegister.addRegister(DSLCommon.kResponseUri) {
-    val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
-    block(it.res, responseParameter)
-    }
-    }
-    }
-    }
+     *   return object : RPC<DSLRequest, DSLResponse> {
+     *       override suspend fun request(req: DSLRequest, parameter: RequestParameter?): Response<DSLResponse?> {
+     *           val proto = DSLProto()
+     *           proto.req = req
+     *           val resProto = enqueueAwaitOrNull(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
+     *           val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
+     *           return Response(resProto?.res, resParameter)
+     *       }
+     *
+     *       override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
+     *           mResponseRegister.addRegister(DSLCommon.kResponseUri) {
+     *           val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
+     *               block(it.res, responseParameter)
+     *           }
+     *       }
+     *   }
+     * }
      */
     private fun rpcWriter(builder: TypeSpec.Builder) {
         for (rpc in protoQueueClassData.rpcDatas) {
+            val rpcClass = ClassName("net.protoqueue.rpc", "RPC")
+                .parameterizedBy(rpc.requestProtoClassTypeName, rpc.responseProtoClassTypeName)
+            val rpcObject = TypeSpec.anonymousClassBuilder().superclass(rpcClass)
+                .primaryConstructor(null)
+                .apply {
+                    addRpcRequestFunction(this, rpc)
+                }
+                .build()
             builder.addFunction(FunSpec.overriding(rpc.executableElement)
+//                .addStatement("return object : RPC<%T, %T> {", rpc.requestProtoClassTypeName, rpc.responseProtoClassTypeName)
+//                .addStatement("}")
+                .addStatement("return %L", rpcObject)
                 .build())
         }
+    }
+
+    private fun addRpcRequestFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
+        builder.addFunction(
+            FunSpec.builder("request")
+                .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName).build())
+                .addParameter(ParameterSpec.builder("parameter", RequestParameter::class).build())
+                .returns(Response::class.asTypeName().parameterizedBy(rpcData.responseProtoClassTypeName))
+                //.addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)
+                .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .build()
+        )
     }
 
     companion object {
