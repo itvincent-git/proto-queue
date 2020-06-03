@@ -28,6 +28,11 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
         Log.i(TAG, "onNotificationData: $proto")
     }
 
+    override fun onProtoPreProcess(proto: TestProtos.DslProto) {
+        proto.header = TestProtos.PHeader()
+        proto.header.seqid = incrementAndGetSeqContext()
+    }
+
 //    @ProtoQueueDsl
 //    val serviceConfig = service {
 //        rpc(name = "DSL", request = DSLRequest::class.java, response = DSLResponse::class.java,

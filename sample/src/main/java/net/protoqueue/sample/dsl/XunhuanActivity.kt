@@ -24,6 +24,7 @@ class XunhuanActivity : AppCompatActivity() {
                 val request = TestProtos.PRequest().apply {
                     uid = 10001
                 }
+                log.info("rpcOne request:$request")
                 val response = DslProtoQueue.instance.rpcOne().request(request)
                 log.info("rpcOne response:${response.result}")
             }
@@ -31,7 +32,7 @@ class XunhuanActivity : AppCompatActivity() {
 
         mock_receive.setOnClickListener {
             val proto = TestProtos.DslProto().apply {
-                val res = TestProtos.PResponse().apply {
+                response = TestProtos.PResponse().apply {
                     uid = 10001
                     name = "jack"
                     header = TestProtos.PHeader().apply {
@@ -41,7 +42,6 @@ class XunhuanActivity : AppCompatActivity() {
                         result.resMsg = "success"
                     }
                 }
-
             }
             DslProtoQueue.instance.onReceiveData(10000, MessageNano.toByteArray(proto))
         }
