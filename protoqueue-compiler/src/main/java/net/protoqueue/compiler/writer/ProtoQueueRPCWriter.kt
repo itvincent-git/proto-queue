@@ -37,7 +37,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         addSeqFieldAndMethod(builder)
         addGetReceiveUriMethod(builder)
         addSetUriMethod(builder)
-        rpcWriter(builder)
+        addRPCFunctions(builder)
         return builder
     }
 
@@ -161,25 +161,23 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
      *   }
      * }
      */
-    private fun rpcWriter(builder: TypeSpec.Builder) {
+    private fun addRPCFunctions(builder: TypeSpec.Builder) {
         for (rpc in protoQueueClassData.rpcDatas) {
             val rpcClass = ClassName("net.protoqueue.rpc", "RPC")
                 .parameterizedBy(rpc.requestProtoClassTypeName, rpc.responseProtoClassTypeName)
             val rpcObject = TypeSpec.anonymousClassBuilder().addSuperinterface(rpcClass)
                 .apply {
-                    addRpcRequestFunction(this, rpc)
+                    addRPCRequestFunction(this, rpc)
                     addRpcResponseFunction(this, rpc)
                 }
                 .build()
             builder.addFunction(FunSpec.overriding(rpc.executableElement)
-//                .addStatement("return object : RPC<%T, %T> {", rpc.requestProtoClassTypeName, rpc.responseProtoClassTypeName)
-//                .addStatement("}")
                 .addStatement("return %L", rpcObject)
                 .build())
         }
     }
 
-    private fun addRpcRequestFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
+    private fun addRPCRequestFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         builder.addFunction(
             FunSpec.builder("request")
                 .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName)
@@ -189,8 +187,16 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addParameter(
                     ParameterSpec.builder("parameter", RequestParameter::class.asTypeName()
                         .toNullableType()).build())
-                //.addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
+                .addStatement("proto.%L = req", rpcData.requestProperty)
+                .addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: 10000)",
+                    enqueueAwaitOrNull, rpcData.responseUri)
+                .addStatement(
+                    "val resParameter = %T(${protoQueueClassData.resCodeLiteral}, " +
+                        "${protoQueueClassData.resMessageLiteral})",
+                    ResponseParameter::class.asTypeName(), "resProto", "resProto")
+                .addStatement("return %T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
                 .build()
         )
     }
@@ -210,7 +216,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     companion object {
-        val suspendCancellableCoroutine =
-            MemberName("kotlinx.coroutines", "suspendCancellableCoroutine")
+        val enqueueAwaitOrNull =
+            MemberName("net.protoqueue", "enqueueAwaitOrNull")
     }
 }

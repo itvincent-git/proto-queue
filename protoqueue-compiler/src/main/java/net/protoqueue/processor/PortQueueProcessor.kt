@@ -5,7 +5,7 @@ import com.google.common.collect.SetMultimap
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.writer.ProtoQueueRPCWriter
-import net.protoqueue.util.Util
+import net.protoqueue.util.toTypeElement
 import java.util.HashSet
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
@@ -35,7 +35,7 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
         override fun process(elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>): Set<Element> {
             val classSet = elementsByAnnotation.get(ProtoQueueClass::class.java)
             classSet.map { element ->
-                ProtoQueueClassProcessor(Util.toTypeElement(element)).process()
+                ProtoQueueClassProcessor(element.toTypeElement()).process()
             }
                 .forEach {
                     try {

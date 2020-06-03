@@ -28,7 +28,13 @@ annotation class ProtoQueueClass(
      */
     val uriLiteral: String = "uri",
 
-    val resCodeLiteral: String = "%T.header?.resCode",
+    /**
+     * rpc方法中使用到的resCode代码
+     */
+    val resCodeLiteral: String = "%L?.header?.resCode",
 
-    val resMessage: String = "%T.header?.resMsg"
+    /**
+     * rpc方法中使用的resMessage代码
+     */
+    val resMessageLiteral: String = "%L?.header?.resMsg"
 )
