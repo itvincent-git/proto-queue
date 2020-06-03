@@ -49,7 +49,7 @@ class ProtoQueueClassProcessor(
             .map { it.asExecutable() }
             .map { it.toString() to it }.toMap()
 
-        CompilerContext.log.debug("overrideMethods $overrideMethods")
+        //CompilerContext.log.debug("overrideMethods $overrideMethods")
 
         val rpcDatas = allMembers.filter { it.modifiers.contains(Modifier.ABSTRACT) && it.kind == ElementKind.METHOD }
             .filter { it.getAnnotation(ProtoQueueRPC::class.java) != null }

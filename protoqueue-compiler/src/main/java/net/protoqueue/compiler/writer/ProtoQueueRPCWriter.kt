@@ -154,8 +154,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
      *
      *       override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
      *           mResponseRegister.addRegister(DSLCommon.kResponseUri) {
-     *           val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
-     *               block(it.res, responseParameter)
+     *              val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
+     *              block(it.res, responseParameter)
      *           }
      *       }
      *   }
@@ -209,14 +209,18 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         builder.addFunction(
             FunSpec.builder("registerResponse")
                 .addParameter(ParameterSpec.builder("block", blockTypeName).build())
-                //.addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)
+                .beginControlFlow("mResponseRegister.addRegister(%L) {", rpcData.responseUri)
+                .addStatement("val responseParameter = %T(${protoQueueClassData.resCodeLiteral}, " +
+                    "${protoQueueClassData.resMessageLiteral})",
+                    ResponseParameter::class.asTypeName(), "it", "it")
+                .addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
+                .endControlFlow()
                 .addModifiers(KModifier.OVERRIDE)
                 .build()
         )
     }
 
     companion object {
-        val enqueueAwaitOrNull =
-            MemberName("net.protoqueue", "enqueueAwaitOrNull")
+        val enqueueAwaitOrNull = MemberName("net.protoqueue", "enqueueAwaitOrNull")
     }
 }

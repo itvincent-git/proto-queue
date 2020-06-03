@@ -15,7 +15,7 @@ public class SampleProto {
     public SampleProto(byte[] data) {
         this.data = data;
         this.uri = data[0];
-        this.header = new Header(data[1]);
+        this.header = new Header(data[1], 0L, "");
     }
 
     public static SampleProto parseFrom(byte[] data) {
