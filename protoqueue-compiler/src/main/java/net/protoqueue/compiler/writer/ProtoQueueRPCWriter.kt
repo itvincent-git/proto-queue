@@ -4,6 +4,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -14,7 +15,9 @@ import net.protoqueue.compiler.data.ProtoQueueClassData
 import net.protoqueue.compiler.data.ProtoQueueRPCData
 import net.protoqueue.rpc.RequestParameter
 import net.protoqueue.rpc.Response
+import net.protoqueue.rpc.ResponseParameter
 import net.protoqueue.util.TmpVar
+import net.protoqueue.util.toNullableType
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
@@ -66,7 +69,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         //protected override fun getProtoContext(proto: SampleProto): Long = proto?.header?.seqid
         builder.addFunction(
             FunSpec.builder("getProtoContext")
-                .returns(protoQueueClassData.protoContextKotlinTypeName.copy(nullable = true))
+                .returns(protoQueueClassData.protoContextKotlinTypeName.toNullableType())
                 .addParameter(ParameterSpec("proto", protoQueueClassData.protoClassTypeName))
                 .addStatement(protoQueueClassData.protoContextLiteral, "proto")
                 .addModifiers(KModifier.PROTECTED, KModifier.OVERRIDE)
@@ -162,10 +165,10 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         for (rpc in protoQueueClassData.rpcDatas) {
             val rpcClass = ClassName("net.protoqueue.rpc", "RPC")
                 .parameterizedBy(rpc.requestProtoClassTypeName, rpc.responseProtoClassTypeName)
-            val rpcObject = TypeSpec.anonymousClassBuilder().superclass(rpcClass)
-                .primaryConstructor(null)
+            val rpcObject = TypeSpec.anonymousClassBuilder().addSuperinterface(rpcClass)
                 .apply {
                     addRpcRequestFunction(this, rpc)
+                    addRpcResponseFunction(this, rpc)
                 }
                 .build()
             builder.addFunction(FunSpec.overriding(rpc.executableElement)
@@ -179,11 +182,29 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addRpcRequestFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         builder.addFunction(
             FunSpec.builder("request")
-                .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName).build())
-                .addParameter(ParameterSpec.builder("parameter", RequestParameter::class).build())
-                .returns(Response::class.asTypeName().parameterizedBy(rpcData.responseProtoClassTypeName))
+                .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName)
+                    .build())
+                .returns(Response::class.asTypeName().parameterizedBy(
+                    rpcData.responseProtoClassTypeName.toNullableType()))
+                .addParameter(
+                    ParameterSpec.builder("parameter", RequestParameter::class.asTypeName()
+                        .toNullableType()).build())
                 //.addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .build()
+        )
+    }
+
+    private fun addRpcResponseFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
+        val blockTypeName = LambdaTypeName.get(null,
+            listOf(ParameterSpec.builder("", rpcData.responseProtoClassTypeName.toNullableType()).build(),
+                ParameterSpec.builder("", ResponseParameter::class.asTypeName().toNullableType()).build()),
+            Unit::class.asTypeName())
+        builder.addFunction(
+            FunSpec.builder("registerResponse")
+                .addParameter(ParameterSpec.builder("block", blockTypeName).build())
+                //.addStatement("proto.%L = uri", protoQueueClassData.uriLiteral)
+                .addModifiers(KModifier.OVERRIDE)
                 .build()
         )
     }

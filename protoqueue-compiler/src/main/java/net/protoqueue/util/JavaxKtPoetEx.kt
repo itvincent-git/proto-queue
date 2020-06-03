@@ -194,3 +194,8 @@ fun TypeMirror.isString(): Boolean {
 internal fun createClassName(packageName: String, simpleName: String): ClassName {
     return ClassName(packageName, simpleName)
 }
+
+/**
+ * 返回可空的类型
+ */
+fun TypeName.toNullableType() = copy(nullable = true)
