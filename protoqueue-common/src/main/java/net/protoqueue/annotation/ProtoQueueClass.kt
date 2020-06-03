@@ -31,10 +31,10 @@ annotation class ProtoQueueClass(
     /**
      * rpc方法中使用到的resCode代码
      */
-    val resCodeLiteral: String = "%L?.header?.resCode",
+    val resCodeLiteral: String = "%L?.header?.result?.code",
 
     /**
      * rpc方法中使用的resMessage代码
      */
-    val resMessageLiteral: String = "%L?.header?.resMsg"
+    val resMessageLiteral: String = "%L?.header?.result?.resMsg"
 )

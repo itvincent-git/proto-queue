@@ -13,4 +13,4 @@ class RequestParameter(val timeout: Int = 10000)
 /**
  * 返回参数
  */
-class ResponseParameter(val resCode: Long?, val resMsg: String?)
+class ResponseParameter(val resCode: Int?, val resMsg: String?)

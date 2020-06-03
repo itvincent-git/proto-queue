@@ -7,7 +7,17 @@
     tools:context=".dsl.XunhuanActivity">
 
     <Button
-        android:id="@+id/btn_0"
+    android:id="@+id/rpc_one_request"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAllCaps="false"
+    android:text="rpcOne request"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/mock_receive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAllCaps="false"
@@ -15,4 +25,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

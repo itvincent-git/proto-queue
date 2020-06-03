@@ -1,0 +1,41 @@
+syntax = "proto3";
+package test;
+option java_package = "net.protoqueue.sample.proto";
+option java_outer_classname = "TestProtos";
+
+message DslProto {
+    PacketType uri = 1;
+    PHeader header = 2;
+    PRequest request = 3;
+    PResponse response = 4;
+}
+
+enum PacketType {
+    kRequestUri = 0;
+    kResponseUri = 1;
+}
+
+message PHeader {
+    uint64 uid = 1;
+    uint64 seqid = 2;
+    Result result = 4;
+}
+
+message Result {
+    ResultType code = 1;
+    string res_msg = 2;
+}
+
+enum ResultType {
+    kResultTypeOk = 0;
+    kResultTypeError = 1;
+}
+
+message PRequest {
+    uint64 uid = 1;
+}
+
+message PResponse {
+    uint64 uid = 1;
+    string name = 2;
+}

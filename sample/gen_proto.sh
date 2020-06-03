@@ -1,0 +1,1 @@
+./protoc-3.0.0-osx-x86_64/bin/protoc -I proto --javanano_out=src/main/java proto/test.proto

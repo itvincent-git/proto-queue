@@ -6,6 +6,9 @@ import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.rpc.RPC
+import net.protoqueue.sample.proto.nano.TestProtos
+import net.protoqueue.sample.proto.nano.TestProtos.kRequestUri
+import net.protoqueue.sample.proto.nano.TestProtos.kResponseUri
 import net.protoqueue.sample.simple.BaseProtoQueue
 
 /**
@@ -13,7 +16,7 @@ import net.protoqueue.sample.simple.BaseProtoQueue
  * Created by zhongyongsheng on 2020/4/17.
  */
 @ProtoQueueClass
-abstract class DslProtoQueue : BaseProtoQueue<DSLProto, Long>() {
+abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
     val TAG = "DslProtoQueue"
     private var job: Job? = null
 
@@ -21,7 +24,7 @@ abstract class DslProtoQueue : BaseProtoQueue<DSLProto, Long>() {
         return 10000
     }
 
-    override fun onNotificationData(proto: DSLProto) {
+    override fun onNotificationData(proto: TestProtos.DslProto) {
         Log.i(TAG, "onNotificationData: $proto")
     }
 
@@ -31,9 +34,9 @@ abstract class DslProtoQueue : BaseProtoQueue<DSLProto, Long>() {
 //            requestUri = DSLCommon.kRequestUri, responseUri = DSLCommon.kResponseUri)
 //    }
 
-    @ProtoQueueRPC(requestUri = DSLCommon.kRequestUri, responseUri = DSLCommon.kResponseUri,
-        requestProperty = "req", responseProperty = "res")
-    abstract fun rpcOne(): RPC<DSLRequest, DSLResponse>
+    @ProtoQueueRPC(requestUri = kRequestUri, responseUri = kResponseUri,
+        requestProperty = "request", responseProperty = "response")
+    abstract fun rpcOne(): RPC<TestProtos.PRequest, TestProtos.PResponse>
 
     companion object {
         @JvmStatic
