@@ -37,9 +37,9 @@ class XunhuanActivity : AppCompatActivity() {
                 userResponse = TestProtos.PUserResponse().apply {
                     uid = 10001
                     name = "jack"
+                    uri = kUserResponseUri
                     header = TestProtos.PHeader().apply {
-                        uri = kUserResponseUri
-                        seqid = DslProtoQueue.instance.getSeqContext() + 1L
+                        seqid = DslProtoQueue.instance.getSeqContext()
                         result = TestProtos.Result()
                         result.code = 0
                         result.resMsg = "success"
