@@ -1,13 +1,14 @@
 package net.protoqueue.rpc
 
 import net.protoqueue.ProtoQueue
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 回包的回调注册器
  * Created by zhongyongsheng on 2020/5/11.
  */
 class ResponseRegister<PROTO, C>(private val protoQueue: ProtoQueue<PROTO, C>) {
-    private val registerMap = mutableMapOf<Int, MutableList<(PROTO) -> Unit>>()
+    private val registerMap = ConcurrentHashMap<Int, MutableList<(PROTO) -> Unit>>()
 
     fun addRegister(uri: Int, block: (PROTO) -> Unit) {
         registerMap[uri]?.let {
