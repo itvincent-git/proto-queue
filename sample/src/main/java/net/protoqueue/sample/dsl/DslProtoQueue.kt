@@ -4,11 +4,13 @@ import android.util.Log
 import kotlinx.coroutines.Job
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
+import net.protoqueue.rpc.NoRequest
 import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.rpc.RPC
 import net.protoqueue.sample.proto.nano.TestProtos
-import net.protoqueue.sample.proto.nano.TestProtos.kRequestUri
-import net.protoqueue.sample.proto.nano.TestProtos.kResponseUri
+import net.protoqueue.sample.proto.nano.TestProtos.kGlobalBroadcast
+import net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri
+import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
 import net.protoqueue.sample.simple.BaseProtoQueue
 
 /**
@@ -39,9 +41,12 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
 //            requestUri = DSLCommon.kRequestUri, responseUri = DSLCommon.kResponseUri)
 //    }
 
-    @ProtoQueueRPC(requestUri = kRequestUri, responseUri = kResponseUri,
-        requestProperty = "request", responseProperty = "response")
-    abstract fun rpcOne(): RPC<TestProtos.PRequest, TestProtos.PResponse>
+    @ProtoQueueRPC(requestUri = kUserRequestUri, responseUri = kUserResponseUri,
+        requestProperty = "userRequest", responseProperty = "userResponse")
+    abstract fun user(): RPC<TestProtos.PUserRequest, TestProtos.PUserResponse>
+
+    @ProtoQueueRPC(responseUri = kGlobalBroadcast, responseProperty = "broadcast")
+    abstract fun globalBroadcast(): RPC<NoRequest, TestProtos.PGlobalBroadcast>
 
     companion object {
         @JvmStatic

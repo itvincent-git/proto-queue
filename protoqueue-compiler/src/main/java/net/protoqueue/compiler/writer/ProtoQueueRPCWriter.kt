@@ -11,6 +11,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
+import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
 import net.protoqueue.compiler.data.ProtoQueueRPCData
 import net.protoqueue.rpc.RequestParameter
@@ -188,15 +189,30 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     ParameterSpec.builder("parameter", RequestParameter::class.asTypeName()
                         .toNullableType()).build())
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                .addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
-                .addStatement("proto.%L = req", rpcData.requestProperty)
-                .addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: 10000)",
-                    enqueueAwaitOrNull, rpcData.responseUri)
-                .addStatement(
-                    "val resParameter = %T(${protoQueueClassData.resCodeLiteral}, " +
-                        "${protoQueueClassData.resMessageLiteral})",
-                    ResponseParameter::class.asTypeName(), "resProto", "resProto")
-                .addStatement("return %T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
+                .apply {
+                    if (rpcData.requestProtoClassTypeName.toString() == "net.protoqueue.rpc.NoRequest") {
+                        addStatement("throw IllegalAccessException(%S)",
+                            "Cannot invoke request when use [NoRequest] as request type")
+                        return@apply
+                    }
+                    if (rpcData.requestUri == Int.MIN_VALUE) {
+                        CompilerContext.log.error("ProtoQueueRPC.requestUri must set value")
+                        return@apply
+                    }
+                    if (rpcData.requestProperty.isEmpty()) {
+                        CompilerContext.log.error("ProtoQueueRPC.requestProperty must set value")
+                        return@apply
+                    }
+                    addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
+                    addStatement("proto.%L = req", rpcData.requestProperty)
+                    addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: 10000)",
+                        enqueueAwaitOrNull, rpcData.responseUri)
+                    addStatement(
+                        "val resParameter = %T(${protoQueueClassData.resCodeLiteral}, " +
+                            "${protoQueueClassData.resMessageLiteral})",
+                        ResponseParameter::class.asTypeName(), "resProto", "resProto")
+                    addStatement("return %T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
+                }
                 .build()
         )
     }

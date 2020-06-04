@@ -7,8 +7,23 @@ package net.protoqueue.rpc
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class ProtoQueueRPC(
-    val requestUri: Int,
+    /**
+     * 请求的uri，例如kUserRequestUri
+     */
+    val requestUri: Int = Int.MIN_VALUE,
+
+    /**
+     * 响应的uri，例如kUserResponseUri
+     */
     val responseUri: Int,
-    val requestProperty: String,
+
+    /**
+     * 请求类在外层Proto中访问属性名，例如userRequest，这里是生成的java文件中的驼峰式名称，不是.proto文件中带_的名称
+     */
+    val requestProperty: String = "",
+
+    /**
+     * 响应类在外层Proto中访问属性名，例如userRequest，这里是生成的java文件中的驼峰式名称，不是.proto文件中带_的名称
+     */
     val responseProperty: String
 )

@@ -6,8 +6,11 @@ package net.protoqueue.sample.proto.nano;
 public interface TestProtos {
 
   // enum PacketType
-  public static final int kRequestUri = 0;
-  public static final int kResponseUri = 1;
+  public static final int kUserRequestUri = 0;
+  public static final int kUserResponseUri = 1;
+  public static final int kLevelRequestUri = 2;
+  public static final int kLevelResponseUri = 3;
+  public static final int kGlobalBroadcast = 4;
 
   // enum ResultType
   public static final int kResultTypeOk = 0;
@@ -36,21 +39,33 @@ public interface TestProtos {
     // optional .test.PHeader header = 2;
     public net.protoqueue.sample.proto.nano.TestProtos.PHeader header;
 
-    // optional .test.PRequest request = 3;
-    public net.protoqueue.sample.proto.nano.TestProtos.PRequest request;
+    // optional .test.PUserRequest user_request = 3;
+    public net.protoqueue.sample.proto.nano.TestProtos.PUserRequest userRequest;
 
-    // optional .test.PResponse response = 4;
-    public net.protoqueue.sample.proto.nano.TestProtos.PResponse response;
+    // optional .test.PUserResponse user_response = 4;
+    public net.protoqueue.sample.proto.nano.TestProtos.PUserResponse userResponse;
+
+    // optional .test.PLevelRequest level_request = 5;
+    public net.protoqueue.sample.proto.nano.TestProtos.PLevelRequest levelRequest;
+
+    // optional .test.PLevelResponse level_response = 6;
+    public net.protoqueue.sample.proto.nano.TestProtos.PLevelResponse levelResponse;
+
+    // optional .test.PGlobalBroadcast broadcast = 7;
+    public net.protoqueue.sample.proto.nano.TestProtos.PGlobalBroadcast broadcast;
 
     public DslProto() {
       clear();
     }
 
     public DslProto clear() {
-      uri = net.protoqueue.sample.proto.nano.TestProtos.kRequestUri;
+      uri = net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri;
       header = null;
-      request = null;
-      response = null;
+      userRequest = null;
+      userResponse = null;
+      levelRequest = null;
+      levelResponse = null;
+      broadcast = null;
       cachedSize = -1;
       return this;
     }
@@ -58,17 +73,26 @@ public interface TestProtos {
     @Override
     public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
         throws java.io.IOException {
-      if (this.uri != net.protoqueue.sample.proto.nano.TestProtos.kRequestUri) {
+      if (this.uri != net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri) {
         output.writeInt32(1, this.uri);
       }
       if (this.header != null) {
         output.writeMessage(2, this.header);
       }
-      if (this.request != null) {
-        output.writeMessage(3, this.request);
+      if (this.userRequest != null) {
+        output.writeMessage(3, this.userRequest);
       }
-      if (this.response != null) {
-        output.writeMessage(4, this.response);
+      if (this.userResponse != null) {
+        output.writeMessage(4, this.userResponse);
+      }
+      if (this.levelRequest != null) {
+        output.writeMessage(5, this.levelRequest);
+      }
+      if (this.levelResponse != null) {
+        output.writeMessage(6, this.levelResponse);
+      }
+      if (this.broadcast != null) {
+        output.writeMessage(7, this.broadcast);
       }
       super.writeTo(output);
     }
@@ -76,7 +100,7 @@ public interface TestProtos {
     @Override
     protected int computeSerializedSize() {
       int size = super.computeSerializedSize();
-      if (this.uri != net.protoqueue.sample.proto.nano.TestProtos.kRequestUri) {
+      if (this.uri != net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
           .computeInt32Size(1, this.uri);
       }
@@ -84,13 +108,25 @@ public interface TestProtos {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
           .computeMessageSize(2, this.header);
       }
-      if (this.request != null) {
+      if (this.userRequest != null) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
-          .computeMessageSize(3, this.request);
+          .computeMessageSize(3, this.userRequest);
       }
-      if (this.response != null) {
+      if (this.userResponse != null) {
         size += com.google.protobuf.nano.CodedOutputByteBufferNano
-          .computeMessageSize(4, this.response);
+          .computeMessageSize(4, this.userResponse);
+      }
+      if (this.levelRequest != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(5, this.levelRequest);
+      }
+      if (this.levelResponse != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(6, this.levelResponse);
+      }
+      if (this.broadcast != null) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+          .computeMessageSize(7, this.broadcast);
       }
       return size;
     }
@@ -113,8 +149,11 @@ public interface TestProtos {
           case 8: {
             int value = input.readInt32();
             switch (value) {
-              case net.protoqueue.sample.proto.nano.TestProtos.kRequestUri:
-              case net.protoqueue.sample.proto.nano.TestProtos.kResponseUri:
+              case net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri:
+              case net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri:
+              case net.protoqueue.sample.proto.nano.TestProtos.kLevelRequestUri:
+              case net.protoqueue.sample.proto.nano.TestProtos.kLevelResponseUri:
+              case net.protoqueue.sample.proto.nano.TestProtos.kGlobalBroadcast:
                 this.uri = value;
                 break;
             }
@@ -128,17 +167,38 @@ public interface TestProtos {
             break;
           }
           case 26: {
-            if (this.request == null) {
-              this.request = new net.protoqueue.sample.proto.nano.TestProtos.PRequest();
+            if (this.userRequest == null) {
+              this.userRequest = new net.protoqueue.sample.proto.nano.TestProtos.PUserRequest();
             }
-            input.readMessage(this.request);
+            input.readMessage(this.userRequest);
             break;
           }
           case 34: {
-            if (this.response == null) {
-              this.response = new net.protoqueue.sample.proto.nano.TestProtos.PResponse();
+            if (this.userResponse == null) {
+              this.userResponse = new net.protoqueue.sample.proto.nano.TestProtos.PUserResponse();
             }
-            input.readMessage(this.response);
+            input.readMessage(this.userResponse);
+            break;
+          }
+          case 42: {
+            if (this.levelRequest == null) {
+              this.levelRequest = new net.protoqueue.sample.proto.nano.TestProtos.PLevelRequest();
+            }
+            input.readMessage(this.levelRequest);
+            break;
+          }
+          case 50: {
+            if (this.levelResponse == null) {
+              this.levelResponse = new net.protoqueue.sample.proto.nano.TestProtos.PLevelResponse();
+            }
+            input.readMessage(this.levelResponse);
+            break;
+          }
+          case 58: {
+            if (this.broadcast == null) {
+              this.broadcast = new net.protoqueue.sample.proto.nano.TestProtos.PGlobalBroadcast();
+            }
+            input.readMessage(this.broadcast);
             break;
           }
         }
@@ -379,17 +439,17 @@ public interface TestProtos {
     }
   }
 
-  public static final class PRequest extends
+  public static final class PUserRequest extends
       com.google.protobuf.nano.MessageNano {
 
-    private static volatile PRequest[] _emptyArray;
-    public static PRequest[] emptyArray() {
+    private static volatile PUserRequest[] _emptyArray;
+    public static PUserRequest[] emptyArray() {
       // Lazily initializes the empty array
       if (_emptyArray == null) {
         synchronized (
             com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
           if (_emptyArray == null) {
-            _emptyArray = new PRequest[0];
+            _emptyArray = new PUserRequest[0];
           }
         }
       }
@@ -399,11 +459,11 @@ public interface TestProtos {
     // optional uint64 uid = 1;
     public long uid;
 
-    public PRequest() {
+    public PUserRequest() {
       clear();
     }
 
-    public PRequest clear() {
+    public PUserRequest clear() {
       uid = 0L;
       cachedSize = -1;
       return this;
@@ -429,7 +489,7 @@ public interface TestProtos {
     }
 
     @Override
-    public PRequest mergeFrom(
+    public PUserRequest mergeFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
       while (true) {
@@ -451,29 +511,29 @@ public interface TestProtos {
       }
     }
 
-    public static PRequest parseFrom(byte[] data)
+    public static PUserRequest parseFrom(byte[] data)
         throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-      return com.google.protobuf.nano.MessageNano.mergeFrom(new PRequest(), data);
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new PUserRequest(), data);
     }
 
-    public static PRequest parseFrom(
+    public static PUserRequest parseFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
-      return new PRequest().mergeFrom(input);
+      return new PUserRequest().mergeFrom(input);
     }
   }
 
-  public static final class PResponse extends
+  public static final class PUserResponse extends
       com.google.protobuf.nano.MessageNano {
 
-    private static volatile PResponse[] _emptyArray;
-    public static PResponse[] emptyArray() {
+    private static volatile PUserResponse[] _emptyArray;
+    public static PUserResponse[] emptyArray() {
       // Lazily initializes the empty array
       if (_emptyArray == null) {
         synchronized (
             com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
           if (_emptyArray == null) {
-            _emptyArray = new PResponse[0];
+            _emptyArray = new PUserResponse[0];
           }
         }
       }
@@ -486,11 +546,11 @@ public interface TestProtos {
     // optional string name = 2;
     public java.lang.String name;
 
-    public PResponse() {
+    public PUserResponse() {
       clear();
     }
 
-    public PResponse clear() {
+    public PUserResponse clear() {
       uid = 0L;
       name = "";
       cachedSize = -1;
@@ -524,7 +584,7 @@ public interface TestProtos {
     }
 
     @Override
-    public PResponse mergeFrom(
+    public PUserResponse mergeFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
       while (true) {
@@ -550,15 +610,282 @@ public interface TestProtos {
       }
     }
 
-    public static PResponse parseFrom(byte[] data)
+    public static PUserResponse parseFrom(byte[] data)
         throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
-      return com.google.protobuf.nano.MessageNano.mergeFrom(new PResponse(), data);
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new PUserResponse(), data);
     }
 
-    public static PResponse parseFrom(
+    public static PUserResponse parseFrom(
             com.google.protobuf.nano.CodedInputByteBufferNano input)
         throws java.io.IOException {
-      return new PResponse().mergeFrom(input);
+      return new PUserResponse().mergeFrom(input);
+    }
+  }
+
+  public static final class PGlobalBroadcast extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile PGlobalBroadcast[] _emptyArray;
+    public static PGlobalBroadcast[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new PGlobalBroadcast[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // optional string payload = 1;
+    public java.lang.String payload;
+
+    public PGlobalBroadcast() {
+      clear();
+    }
+
+    public PGlobalBroadcast clear() {
+      payload = "";
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (!this.payload.equals("")) {
+        output.writeString(1, this.payload);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (!this.payload.equals("")) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeStringSize(1, this.payload);
+      }
+      return size;
+    }
+
+    @Override
+    public PGlobalBroadcast mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 10: {
+            this.payload = input.readString();
+            break;
+          }
+        }
+      }
+    }
+
+    public static PGlobalBroadcast parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new PGlobalBroadcast(), data);
+    }
+
+    public static PGlobalBroadcast parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new PGlobalBroadcast().mergeFrom(input);
+    }
+  }
+
+  public static final class PLevelRequest extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile PLevelRequest[] _emptyArray;
+    public static PLevelRequest[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new PLevelRequest[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // optional uint64 uid = 1;
+    public long uid;
+
+    public PLevelRequest() {
+      clear();
+    }
+
+    public PLevelRequest clear() {
+      uid = 0L;
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.uid != 0L) {
+        output.writeUInt64(1, this.uid);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.uid != 0L) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeUInt64Size(1, this.uid);
+      }
+      return size;
+    }
+
+    @Override
+    public PLevelRequest mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 8: {
+            this.uid = input.readUInt64();
+            break;
+          }
+        }
+      }
+    }
+
+    public static PLevelRequest parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new PLevelRequest(), data);
+    }
+
+    public static PLevelRequest parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new PLevelRequest().mergeFrom(input);
+    }
+  }
+
+  public static final class PLevelResponse extends
+      com.google.protobuf.nano.MessageNano {
+
+    private static volatile PLevelResponse[] _emptyArray;
+    public static PLevelResponse[] emptyArray() {
+      // Lazily initializes the empty array
+      if (_emptyArray == null) {
+        synchronized (
+            com.google.protobuf.nano.InternalNano.LAZY_INIT_LOCK) {
+          if (_emptyArray == null) {
+            _emptyArray = new PLevelResponse[0];
+          }
+        }
+      }
+      return _emptyArray;
+    }
+
+    // optional uint64 uid = 1;
+    public long uid;
+
+    // optional uint32 level = 2;
+    public int level;
+
+    public PLevelResponse() {
+      clear();
+    }
+
+    public PLevelResponse clear() {
+      uid = 0L;
+      level = 0;
+      cachedSize = -1;
+      return this;
+    }
+
+    @Override
+    public void writeTo(com.google.protobuf.nano.CodedOutputByteBufferNano output)
+        throws java.io.IOException {
+      if (this.uid != 0L) {
+        output.writeUInt64(1, this.uid);
+      }
+      if (this.level != 0) {
+        output.writeUInt32(2, this.level);
+      }
+      super.writeTo(output);
+    }
+
+    @Override
+    protected int computeSerializedSize() {
+      int size = super.computeSerializedSize();
+      if (this.uid != 0L) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeUInt64Size(1, this.uid);
+      }
+      if (this.level != 0) {
+        size += com.google.protobuf.nano.CodedOutputByteBufferNano
+            .computeUInt32Size(2, this.level);
+      }
+      return size;
+    }
+
+    @Override
+    public PLevelResponse mergeFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      while (true) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            return this;
+          default: {
+            if (!com.google.protobuf.nano.WireFormatNano.parseUnknownField(input, tag)) {
+              return this;
+            }
+            break;
+          }
+          case 8: {
+            this.uid = input.readUInt64();
+            break;
+          }
+          case 16: {
+            this.level = input.readUInt32();
+            break;
+          }
+        }
+      }
+    }
+
+    public static PLevelResponse parseFrom(byte[] data)
+        throws com.google.protobuf.nano.InvalidProtocolBufferNanoException {
+      return com.google.protobuf.nano.MessageNano.mergeFrom(new PLevelResponse(), data);
+    }
+
+    public static PLevelResponse parseFrom(
+            com.google.protobuf.nano.CodedInputByteBufferNano input)
+        throws java.io.IOException {
+      return new PLevelResponse().mergeFrom(input);
     }
   }
 }

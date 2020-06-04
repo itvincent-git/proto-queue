@@ -6,13 +6,19 @@ option java_outer_classname = "TestProtos";
 message DslProto {
     PacketType uri = 1;
     PHeader header = 2;
-    PRequest request = 3;
-    PResponse response = 4;
+    PUserRequest user_request = 3;
+    PUserResponse user_response = 4;
+    PLevelRequest level_request = 5;
+    PLevelResponse level_response = 6;
+    PGlobalBroadcast broadcast = 7;
 }
 
 enum PacketType {
-    kRequestUri = 0;
-    kResponseUri = 1;
+    kUserRequestUri = 0;
+    kUserResponseUri = 1;
+    kLevelRequestUri = 2;
+    kLevelResponseUri = 3;
+    kGlobalBroadcast = 4;
 }
 
 message PHeader {
@@ -31,11 +37,24 @@ enum ResultType {
     kResultTypeError = 1;
 }
 
-message PRequest {
+message PUserRequest {
     uint64 uid = 1;
 }
 
-message PResponse {
+message PUserResponse {
     uint64 uid = 1;
     string name = 2;
+}
+
+message PGlobalBroadcast {
+    string payload = 1;
+}
+
+message PLevelRequest {
+    uint64 uid = 1;
+}
+
+message PLevelResponse {
+    uint64 uid = 1;
+    uint32 level = 2;
 }
