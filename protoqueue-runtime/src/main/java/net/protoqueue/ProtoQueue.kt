@@ -149,6 +149,7 @@ abstract class ProtoQueue<P, C> {
                 if (!context.protoDisposable.isDisposed)
                     context.receiver(proto)
             } else {
+                mResponseRegister.onReceive(proto)
                 onNotificationData(proto)
             }
         } catch (t: Throwable) {
