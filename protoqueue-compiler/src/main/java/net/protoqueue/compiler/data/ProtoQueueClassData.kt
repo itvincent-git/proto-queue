@@ -19,8 +19,7 @@ class ProtoQueueClassData(
     val uriLiteral: String,
     protoClass: TypeMirror,
     protoContextType: TypeMirror,
-    val resCodeLiteral: String,
-    val resMessageLiteral: String,
+    val resHeaderLiteral: String,
     val rpcDatas: List<ProtoQueueRPCData>
 ) {
     val typeName = element.asClassName()
@@ -36,6 +35,6 @@ class ProtoQueueClassData(
             "', typeName=" +
             "$typeName, implClassName='$implClassName', implTypeName=$implTypeName, protoClassTypeName=" +
             "$protoClassTypeName, protoContextTypeName=$protoContextTypeName, rpcDatas=$rpcDatas, " +
-            "resCodeLiteral=$resCodeLiteral, resMessageLiteral=$resMessageLiteral)"
+            "resHeaderLiteral=$resHeaderLiteral)"
     }
 }

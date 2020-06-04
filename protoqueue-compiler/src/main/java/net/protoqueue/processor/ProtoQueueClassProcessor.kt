@@ -32,9 +32,7 @@ class ProtoQueueClassProcessor(
         val buildProtoLiteral =
             annotationMirror.getAnnotationValue("buildProtoLiteral").toString().filter { it != '\"' }
         val uriLiteral = annotationMirror.getAnnotationValue("uriLiteral").toString().filter { it != '\"' }
-        val resCodeLiteral = annotationMirror.getAnnotationValue("resCodeLiteral").toString().filter { it != '\"' }
-        val resMessageLiteral =
-            annotationMirror.getAnnotationValue("resMessageLiteral").toString().filter { it != '\"' }
+        val resHeaderLiteral = annotationMirror.getAnnotationValue("resHeaderLiteral").toString().filter { it != '\"' }
         val superClass = classElement.superclass
         val declaredType = superClass.asDeclaredType()
         val typeArguments = declaredType.typeArguments
@@ -63,8 +61,7 @@ class ProtoQueueClassProcessor(
             uriLiteral,
             typeArguments[0],
             typeArguments[1],
-            resCodeLiteral,
-            resMessageLiteral,
+            resHeaderLiteral,
             rpcDatas)
         CompilerContext.log.debug("ProtoQueue process %s/%s", classElement.toString(), data)
         return data

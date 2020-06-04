@@ -14,6 +14,9 @@ import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
 import net.slog.SLoggerFactory
 import net.stripe.lib.lifecycleScope
 
+/**
+ * 寻欢rpc例子
+ */
 class XunhuanActivity : AppCompatActivity() {
     val log = SLoggerFactory.getLogger("Xunhuan")
 
@@ -26,9 +29,11 @@ class XunhuanActivity : AppCompatActivity() {
                 val request = TestProtos.PUserRequest().apply {
                     uid = 10001
                 }
-                log.info("rpcOne request:$request")
+                log.info("user request:$request")
                 val response = DslProtoQueue.instance.user().request(request)
-                log.info("rpcOne response:${response.result}")
+                log.info("user response code:${response.parameter.resultCode} msg:${response.parameter
+                    .resultMsg} body:${response
+                    .body} ")
             }
         }
 

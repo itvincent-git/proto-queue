@@ -1,7 +1,5 @@
 package net.protoqueue.sample.dsl
 
-import android.util.Log
-import kotlinx.coroutines.Job
 import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.rpc.NoRequest
@@ -12,6 +10,7 @@ import net.protoqueue.sample.proto.nano.TestProtos.kGlobalBroadcast
 import net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
 import net.protoqueue.sample.simple.BaseProtoQueue
+import net.slog.SLoggerFactory
 
 /**
  * DSL例子
@@ -19,27 +18,20 @@ import net.protoqueue.sample.simple.BaseProtoQueue
  */
 @ProtoQueueClass
 abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
-    val TAG = "DslProtoQueue"
-    private var job: Job? = null
+    private val log = SLoggerFactory.getLogger("DslProtoQueue")
 
     override fun getOwnAppId(): Int {
         return 10000
     }
 
     override fun onNotificationData(proto: TestProtos.DslProto) {
-        Log.i(TAG, "onNotificationData: $proto")
+        log.info("onNotificationData: $proto")
     }
 
     override fun onProtoPreProcess(proto: TestProtos.DslProto) {
         proto.header = TestProtos.PHeader()
         proto.header.seqid = incrementAndGetSeqContext()
     }
-
-//    @ProtoQueueDsl
-//    val serviceConfig = service {
-//        rpc(name = "DSL", request = DSLRequest::class.java, response = DSLResponse::class.java,
-//            requestUri = DSLCommon.kRequestUri, responseUri = DSLCommon.kResponseUri)
-//    }
 
     @ProtoQueueRPC(requestUri = kUserRequestUri, responseUri = kUserResponseUri,
         requestProperty = "userRequest", responseProperty = "userResponse")
@@ -54,9 +46,5 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
             ProtoQueueBuilder.newBuilder(DslProtoQueue::class.java,
                 mSender).build()
         }
-    }
-
-    fun cancel() {
-        job?.cancel()
     }
 }

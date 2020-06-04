@@ -208,9 +208,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: 10000)",
                         enqueueAwaitOrNull, rpcData.responseUri)
                     addStatement(
-                        "val resParameter = %T(${protoQueueClassData.resCodeLiteral}, " +
-                            "${protoQueueClassData.resMessageLiteral})",
-                        ResponseParameter::class.asTypeName(), "resProto", "resProto")
+                        "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                        ResponseParameter::class.asTypeName(), "resProto")
                     addStatement("return %T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
                 }
                 .build()
@@ -226,9 +225,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
             FunSpec.builder("registerResponse")
                 .addParameter(ParameterSpec.builder("block", blockTypeName).build())
                 .beginControlFlow("mResponseRegister.addRegister(%L) {", rpcData.responseUri)
-                .addStatement("val responseParameter = %T(${protoQueueClassData.resCodeLiteral}, " +
-                    "${protoQueueClassData.resMessageLiteral})",
-                    ResponseParameter::class.asTypeName(), "it", "it")
+                .addStatement("val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                    ResponseParameter::class.asTypeName(), "it")
                 .addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
                 .endControlFlow()
                 .addModifiers(KModifier.OVERRIDE)
