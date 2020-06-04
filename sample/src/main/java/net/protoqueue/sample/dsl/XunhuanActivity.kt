@@ -32,8 +32,7 @@ class XunhuanActivity : AppCompatActivity() {
                 log.info("user request:$request")
                 val response = DslProtoQueue.instance.user().request(request)
                 log.info("user response code:${response.parameter.resultCode} msg:${response.parameter
-                    .resultMsg} body:${response
-                    .body} ")
+                    .resultMsg} body:${response.body} ")
                 if (response.parameter.isSuccess) {
                     log.info("user response success")
                 }
@@ -58,6 +57,8 @@ class XunhuanActivity : AppCompatActivity() {
         }
 
         DslProtoQueue.instance.globalBroadcast().registerResponse { pResponse, responseParameter ->
+            log.info("globalBroadcast response code:${responseParameter.resultCode} msg:${responseParameter
+                .resultMsg}")
             log.info("globalBroadcast onResponse:$pResponse")
         }
         global_broadcast.setOnClickListener {

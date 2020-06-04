@@ -219,7 +219,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addRpcResponseFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         val blockTypeName = LambdaTypeName.get(null,
             listOf(ParameterSpec.builder("", rpcData.responseProtoClassTypeName.toNullableType()).build(),
-                ParameterSpec.builder("", ResponseParameter::class.asTypeName().toNullableType()).build()),
+                ParameterSpec.builder("", ResponseParameter::class.asTypeName()).build()),
             Unit::class.asTypeName())
         builder.addFunction(
             FunSpec.builder("registerResponse")

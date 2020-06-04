@@ -13,5 +13,5 @@ interface RPC<REQ, RES> {
     /**
      * 注册监听广播或单播
      */
-    fun registerResponse(block: (RES?, ResponseParameter?) -> Unit)
+    fun registerResponse(block: (RES?, ResponseParameter) -> Unit)
 }

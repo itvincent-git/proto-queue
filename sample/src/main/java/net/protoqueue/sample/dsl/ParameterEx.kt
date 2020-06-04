@@ -10,7 +10,7 @@ import net.protoqueue.sample.proto.nano.TestProtos
 val ResponseParameter.resultCode: Int
     get() = if (payload is TestProtos.PHeader) {
         (payload as TestProtos.PHeader).result.code
-    } else Int.MIN_VALUE
+    } else -1
 
 val ResponseParameter.resultMsg: String
     get() = if (payload is TestProtos.PHeader) {
