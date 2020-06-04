@@ -164,7 +164,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
      */
     private fun addRPCFunctions(builder: TypeSpec.Builder) {
         for (rpc in protoQueueClassData.rpcDatas) {
-            val rpcClass = ClassName("net.protoqueue.rpc", "RPC")
+            val rpcClass = rpcInterface
                 .parameterizedBy(rpc.requestProtoClassTypeName, rpc.responseProtoClassTypeName)
             val rpcObject = TypeSpec.anonymousClassBuilder().addSuperinterface(rpcClass)
                 .apply {
@@ -205,8 +205,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     }
                     addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
                     addStatement("proto.%L = req", rpcData.requestProperty)
-                    addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: 10000)",
-                        enqueueAwaitOrNull, rpcData.responseUri)
+                    addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: %T.DEFAULT_TIMEOUT)",
+                        enqueueAwaitOrNull, rpcData.responseUri, queueParameter)
                     addStatement(
                         "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
                         ResponseParameter::class.asTypeName(), "resProto")
@@ -236,5 +236,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
 
     companion object {
         val enqueueAwaitOrNull = MemberName("net.protoqueue", "enqueueAwaitOrNull")
+        val queueParameter = ClassName("net.protoqueue", "QueueParameter")
+        val rpcInterface = ClassName("net.protoqueue.rpc", "RPC")
     }
 }

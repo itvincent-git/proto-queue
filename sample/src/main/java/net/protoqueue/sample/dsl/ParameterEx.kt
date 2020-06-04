@@ -16,3 +16,8 @@ val ResponseParameter.resultMsg: String
     get() = if (payload is TestProtos.PHeader) {
         (payload as TestProtos.PHeader).result.resMsg
     } else ""
+
+val ResponseParameter.isSuccess: Boolean
+    get() = if (payload is TestProtos.PHeader) {
+        (payload as TestProtos.PHeader).result.code == 0
+    } else false

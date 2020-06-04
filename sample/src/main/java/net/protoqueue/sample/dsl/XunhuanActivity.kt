@@ -34,6 +34,9 @@ class XunhuanActivity : AppCompatActivity() {
                 log.info("user response code:${response.parameter.resultCode} msg:${response.parameter
                     .resultMsg} body:${response
                     .body} ")
+                if (response.parameter.isSuccess) {
+                    log.info("user response success")
+                }
             }
         }
 
