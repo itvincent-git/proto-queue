@@ -1,8 +1,5 @@
 package net.protoqueue.sample.dsl
 
-import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleObserver
-import android.arch.lifecycle.OnLifecycleEvent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.google.protobuf.nano.MessageNano
@@ -10,7 +7,7 @@ import kotlinx.android.synthetic.main.activity_xunhuan.global_broadcast
 import kotlinx.android.synthetic.main.activity_xunhuan.user_request
 import kotlinx.android.synthetic.main.activity_xunhuan.user_response
 import kotlinx.coroutines.launch
-import net.protoqueue.rpc.ResponseRegisterDisposable
+import net.protoqueue.rpc.rpcRegister
 import net.protoqueue.sample.R
 import net.protoqueue.sample.proto.nano.TestProtos
 import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
@@ -22,7 +19,6 @@ import net.stripe.lib.lifecycleScope
  */
 class XunhuanActivity : AppCompatActivity() {
     val log = SLoggerFactory.getLogger("Xunhuan")
-    private var disposable: ResponseRegisterDisposable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,22 +56,16 @@ class XunhuanActivity : AppCompatActivity() {
             DslProtoQueue.instance.onReceiveData(10000, MessageNano.toByteArray(proto))
         }
 
-        lifecycle.addObserver(object : LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-            fun onDestroy() {
-                log.info("onDestroy")
-                disposable?.dispose()
-            }
-        })
-
-        disposable = DslProtoQueue.instance.globalBroadcast().registerResponse { pResponse, responseParameter ->
-            log.info("globalBroadcast response code:${responseParameter.resultCode} msg:${responseParameter
-                .resultMsg}")
-            log.info("globalBroadcast onResponse:$pResponse")
-        }
-
         global_broadcast.setOnClickListener {
             DslProtoQueue.instance.testBroadcast()
+        }
+
+        rpcRegister {
+            DslProtoQueue.instance.globalBroadcast().onRegister { pGlobalBroadcast, responseParameter ->
+                log.info("globalBroadcast response code:${responseParameter.resultCode} msg:${responseParameter
+                    .resultMsg}")
+                log.info("globalBroadcast onResponse:$pGlobalBroadcast")
+            }
         }
     }
 }

@@ -1,5 +1,9 @@
 package net.protoqueue.rpc
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.OnLifecycleEvent
 import net.protoqueue.ProtoQueue
 import java.util.concurrent.ConcurrentHashMap
 
@@ -45,7 +49,33 @@ class ResponseRegister<PROTO> {
  */
 class ResponseRegisterDisposable(val block: () -> Unit) {
 
+    /**
+     * 取消注册的监听
+     */
     fun dispose() {
         block()
+    }
+}
+
+/**
+ * 对[LifecycleOwner]绑定监听的广播，生命周期到ON_DESTROY时，则会解除监听
+ */
+fun LifecycleOwner.rpcRegister(block: RegisterBuilder.() -> Unit) {
+    val builder = RegisterBuilder(this)
+    block(builder)
+}
+
+/**
+ * 对[LifecycleOwner]绑定监听的广播，生命周期到ON_DESTROY时，则会解除监听
+ */
+class RegisterBuilder(private val lifecycleOwner: LifecycleOwner) {
+    fun <REQ, RES> RPC<REQ, RES>.onRegister(block: (RES?, ResponseParameter) -> Unit) {
+        val disposable = registerResponse(block)
+        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() {
+                disposable.dispose()
+            }
+        })
     }
 }
