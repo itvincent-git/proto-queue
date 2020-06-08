@@ -14,7 +14,7 @@ abstract class ProtoQueue<P, C> {
     protected var mProtoSender: ProtoSender? = null
     protected var mContextMap: MutableMap<C, ProtoContext<P, C>> = ConcurrentHashMap()
     protected var mHandler: Handler = ProtoHandler()
-    protected val mResponseRegister = ResponseRegister<P, C>(this)
+    protected val mResponseRegister = ResponseRegister<P>()
 
     fun init(protoSender: ProtoSender) {
         mProtoSender = protoSender
@@ -149,7 +149,7 @@ abstract class ProtoQueue<P, C> {
                 if (!context.protoDisposable.isDisposed)
                     context.receiver(proto)
             } else {
-                mResponseRegister.onReceive(proto)
+                mResponseRegister.onReceive(proto, this)
                 onNotificationData(proto)
             }
         } catch (t: Throwable) {

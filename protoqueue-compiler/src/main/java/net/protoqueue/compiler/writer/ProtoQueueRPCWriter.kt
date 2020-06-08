@@ -224,7 +224,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         builder.addFunction(
             FunSpec.builder("registerResponse")
                 .addParameter(ParameterSpec.builder("block", blockTypeName).build())
-                .beginControlFlow("mResponseRegister.addRegister(%L) {", rpcData.responseUri)
+                .returns(responseRegisterDisposable)
+                .beginControlFlow("return mResponseRegister.addRegister(%L) {", rpcData.responseUri)
                 .addStatement("val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
                     ResponseParameter::class.asTypeName(), "it")
                 .addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
@@ -238,5 +239,6 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         val enqueueAwaitOrNull = MemberName("net.protoqueue", "enqueueAwaitOrNull")
         val queueParameter = ClassName("net.protoqueue", "QueueParameter")
         val rpcInterface = ClassName("net.protoqueue.rpc", "RPC")
+        val responseRegisterDisposable = ClassName("net.protoqueue.rpc", "ResponseRegisterDisposable")
     }
 }
