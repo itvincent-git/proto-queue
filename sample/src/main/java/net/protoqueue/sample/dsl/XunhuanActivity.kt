@@ -1,5 +1,6 @@
 package net.protoqueue.sample.dsl
 
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.google.protobuf.nano.MessageNano
@@ -23,6 +24,7 @@ class XunhuanActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_xunhuan)
+        val viewModel = ViewModelProviders.of(this).get(XunhuanViewModel::class.java)
 
         user_request.setOnClickListener {
             lifecycleScope.launch {
