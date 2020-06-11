@@ -190,18 +190,21 @@ abstract class ProtoQueue<P, C> {
 
     /**
      * 自动生成不需要实现
+     * 当前的上下文序列号
      * @return
      */
     abstract fun getSeqContext(): C
 
     /**
      * 自动生成不需要实现
+     * 自增并返回上下文序列号
      * @return
      */
     abstract fun incrementAndGetSeqContext(): C
 
     /**
      * 自动生成不需要实现
+     * 生成PROTO对象
      * @param data
      * @return
      * @throws Exception
@@ -211,6 +214,7 @@ abstract class ProtoQueue<P, C> {
 
     /**
      * 自动生成不需要实现
+     * 返回序列化后的ByteArray
      * @param proto
      * @return
      */
@@ -218,6 +222,7 @@ abstract class ProtoQueue<P, C> {
 
     /**
      * 自动生成不需要实现
+     * 取PROTO的上下文序列号
      * @param proto
      * @return
      */
@@ -225,6 +230,7 @@ abstract class ProtoQueue<P, C> {
 
     /**
      * 自动生成不需要实现
+     * 回包的URI
      * @param proto
      * @return
      */
@@ -232,6 +238,7 @@ abstract class ProtoQueue<P, C> {
 
     /**
      * 自动生成不需要实现
+     * 设置URI到PROTO
      * @param proto
      * @return
      */
