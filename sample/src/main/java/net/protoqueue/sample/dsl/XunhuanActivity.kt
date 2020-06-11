@@ -7,6 +7,7 @@ import com.google.protobuf.nano.MessageNano
 import kotlinx.android.synthetic.main.activity_xunhuan.global_broadcast
 import kotlinx.android.synthetic.main.activity_xunhuan.user_request
 import kotlinx.android.synthetic.main.activity_xunhuan.user_response
+import kotlinx.android.synthetic.main.activity_xunhuan.vm_request
 import kotlinx.coroutines.launch
 import net.protoqueue.rpc.rpcRegister
 import net.protoqueue.sample.R
@@ -26,6 +27,7 @@ class XunhuanActivity : AppCompatActivity() {
         setContentView(R.layout.activity_xunhuan)
         val viewModel = ViewModelProviders.of(this).get(XunhuanViewModel::class.java)
 
+        //请求数据
         user_request.setOnClickListener {
             lifecycleScope.launch {
                 val request = TestProtos.PUserRequest().apply {
@@ -41,6 +43,7 @@ class XunhuanActivity : AppCompatActivity() {
             }
         }
 
+        //测试回复数据
         user_response.setOnClickListener {
             val proto = TestProtos.DslProto().apply {
                 userResponse = TestProtos.PUserResponse().apply {
@@ -58,16 +61,22 @@ class XunhuanActivity : AppCompatActivity() {
             DslProtoQueue.instance.onReceiveData(10000, MessageNano.toByteArray(proto))
         }
 
+        //发送测试广播
         global_broadcast.setOnClickListener {
             DslProtoQueue.instance.testBroadcast()
         }
 
+        //注册监听广播
         rpcRegister {
-            DslProtoQueue.instance.globalBroadcast().onRegister { pGlobalBroadcast, responseParameter ->
+            DslProtoQueue.instance.globalBroadcast().onResponse { pGlobalBroadcast, responseParameter ->
                 log.info("globalBroadcast response code:${responseParameter.resultCode} msg:${responseParameter
                     .resultMsg}")
                 log.info("globalBroadcast onResponse:$pGlobalBroadcast")
             }
+        }
+
+        vm_request.setOnClickListener {
+            viewModel.sendRequest()
         }
     }
 }

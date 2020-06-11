@@ -37,10 +37,10 @@
         app:layout_constraintTop_toBottomOf="@+id/user_response" />
 
     <Button
-        android:id="@+id/dispose_register"
+        android:id="@+id/vm_request"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="N/A"
+        android:text="ViewModel Request"
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
