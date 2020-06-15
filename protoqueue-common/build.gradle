@@ -49,8 +49,9 @@ def getRepositoryPassword() {
     return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava ///若包含图片等资源改为allSource
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
 publishing {
@@ -60,8 +61,14 @@ publishing {
             artifactId "$artifact_id"
             version "$release_version"
             from components.java
-            artifact sourceJar {
-                classifier "sources"
+            artifact sourcesJar
+            sourceSets {
+                main {
+                    java {
+                        include '**/*.java'
+                        include '**/*.kt'
+                    }
+                }
             }
         }
     }

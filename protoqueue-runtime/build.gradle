@@ -64,7 +64,7 @@ def getRepositoryPassword() {
     return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
 }
 
-task sourceJar(type: Jar) {
+task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier "sources"
 }
@@ -76,6 +76,15 @@ publishing {
             artifactId "$artifact_id"
             version "$release_version"
             from components.android
+            artifact sourcesJar
+            sourceSets {
+                main {
+                    java {
+                        include '**/*.java'
+                        include '**/*.kt'
+                    }
+                }
+            }
         }
     }
 }
