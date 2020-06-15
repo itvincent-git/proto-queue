@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_xunhuan.global_broadcast
+import kotlinx.android.synthetic.main.activity_xunhuan.timeout_request
 import kotlinx.android.synthetic.main.activity_xunhuan.user_request
 import kotlinx.android.synthetic.main.activity_xunhuan.vm_request
 import kotlinx.coroutines.launch
@@ -37,6 +38,18 @@ class XunhuanActivity : AppCompatActivity() {
                 if (response.parameter.isSuccess) {
                     log.info("user response success")
                 }
+            }
+        }
+
+        timeout_request.setOnClickListener {
+            lifecycleScope.launch {
+                val request = TestProtos.PLevelRequest().apply {
+                    uid = 10001
+                }
+                log.info("PLevelRequest request:$request")
+                val response = DslProtoQueue.instance.level().request(request)
+                log.info("PLevelRequest response code:${response.parameter.resultCode} msg:${response.parameter
+                    .resultMsg} body:${response.body} ")
             }
         }
 

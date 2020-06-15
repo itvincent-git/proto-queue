@@ -12,6 +12,8 @@ import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.rpc.RPC
 import net.protoqueue.sample.proto.nano.TestProtos
 import net.protoqueue.sample.proto.nano.TestProtos.kGlobalBroadcast
+import net.protoqueue.sample.proto.nano.TestProtos.kLevelRequestUri
+import net.protoqueue.sample.proto.nano.TestProtos.kLevelResponseUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
 import net.protoqueue.sample.simple.BaseProtoQueue
@@ -43,6 +45,11 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
     @ProtoQueueRPC(requestUri = kUserRequestUri, responseUri = kUserResponseUri,
         requestProperty = "userRequest", responseProperty = "userResponse")
     abstract fun user(): RPC<TestProtos.PUserRequest, TestProtos.PUserResponse>
+
+    @ProtoQueueRPC(requestUri = kLevelRequestUri, responseUri = kLevelResponseUri,
+        requestProperty = "levelRequest", responseProperty = "levelResponse")
+    abstract fun level(): RPC<TestProtos.PLevelRequest, TestProtos.PLevelResponse>
+
 
     @ProtoQueueRPC(responseUri = kGlobalBroadcast, responseProperty = "broadcast")
     abstract fun globalBroadcast(): RPC<NoRequest, TestProtos.PGlobalBroadcast>
