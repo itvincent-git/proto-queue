@@ -2,9 +2,10 @@ package net.protoqueue
 
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
+import android.os.SystemClock
 import net.protoqueue.rpc.ResponseRegister
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * P代表ProtoBuffer类，C代表上下文的类型（例如seqId是Integer类型）
@@ -12,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 abstract class ProtoQueue<P, C> {
     protected var mProtoSender: ProtoSender? = null
-    protected var mContextMap: MutableMap<C, ProtoContext<P, C>> = ConcurrentHashMap()
-    protected var mHandler: Handler = ProtoHandler()
+    protected var mContextMap: MutableMap<C, ProtoRequest> = ConcurrentHashMap()
+    protected var mHandler: Handler = Handler(Looper.getMainLooper())
     protected val mResponseRegister = ResponseRegister<P>()
 
     fun init(protoSender: ProtoSender) {
@@ -89,22 +90,10 @@ abstract class ProtoQueue<P, C> {
             onProtoException(t)
         }
 
-        val contextPayload = ProtoContext(data, receiver, getOwnAppId(), protoContext,
-            receiveUri, topSid, subSid, parameter)
-
-        if (data != null && protoContext != null) {
-            mContextMap[protoContext] = contextPayload
-            mProtoSender?.onSend(getOwnAppId(), data, topSid, subSid)
-
-            if (parameter != null && parameter.timeout > 0) {
-                val message = mHandler.obtainMessage()
-                message.what = 1
-                message.obj = protoContext
-                mHandler.sendMessageDelayed(message, parameter.timeout.toLong())
-            }
-        }
-
-        return contextPayload.protoDisposable
+        val protoRequest =
+            ProtoRequest(data, receiver, getOwnAppId(), protoContext, receiveUri, topSid, subSid, parameter)
+        protoRequest.send()
+        return protoRequest.protoDisposable
     }
 
     /**
@@ -141,42 +130,23 @@ abstract class ProtoQueue<P, C> {
         try {
             if (getOwnAppId() != appId) return
             val proto = buildProto(data)
-            val protoContext = getProtoContext(proto)
+            val receiveContext = getProtoContext(proto)
 
-            val context = mContextMap[protoContext]
-            if (context != null && getReceiveUri(proto) == context.receiveUri) {
-                mContextMap.remove(protoContext)
-                if (!context.protoDisposable.isDisposed)
-                    context.receiver(proto)
-            } else {
-                mResponseRegister.onReceive(proto, this)
-                onNotificationData(proto)
+            //只有找到正常的回包，被正确处理，才返回；否则交由广播逻辑处理
+            receiveContext?.let {
+                try {
+                    if (mContextMap[it]?.onReceive(it, proto) == true)
+                        return
+                } catch (t: Throwable) {
+                    onProtoException(t)
+                }
             }
+            //注册器的广播处理
+            mResponseRegister.onReceive(proto, this)
+            //全局的广播处理
+            onNotificationData(proto)
         } catch (t: Throwable) {
             onProtoException(t)
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun handleTimeout(msg: Message) {
-        val context = msg.obj as C
-        val protoContext = mContextMap[context] ?: return
-        if (protoContext.protoDisposable.isDisposed) return
-
-        val error = ProtoTimeoutError("Wait for response timeout")
-        protoContext.parameter?.error?.invoke(error)
-        mContextMap.remove(context)
-    }
-
-    internal inner class ProtoHandler : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) {
-            try {
-                when (msg.what) {
-                    1 -> handleTimeout(msg)
-                }
-            } catch (t: Throwable) {
-                onProtoException(t)
-            }
         }
     }
 
@@ -186,6 +156,81 @@ abstract class ProtoQueue<P, C> {
 
     internal fun iGetSubSid(): Long {
         return getSubSid()
+    }
+
+    /**
+     * 一个请求
+     */
+    inner class ProtoRequest(
+        val data: ByteArray?,
+        val receiver: (P) -> Unit,
+        val appId: Int,
+        val context: C?,
+        val receiveUri: Int,
+        val topSid: Long,
+        val subSid: Long,
+        val parameter: QueueParameter<P, C>?
+    ) {
+        val protoDisposable: ProtoDisposable = ProtoDisposableImpl()
+
+        fun send(): ProtoDisposable {
+            val valContext = this.context
+            if (data != null && valContext != null) {
+                mContextMap[valContext] = this
+                try {
+                    mProtoSender?.onSend(appId, data, topSid, subSid)
+                } catch (t: Throwable) {
+                    onProtoException(t)
+                }
+
+                if (parameter != null && parameter.timeout > 0) {
+                    mHandler.postAtTime({
+                        handleTimeout(valContext)
+                    }, valContext, SystemClock.uptimeMillis() + parameter.timeout.toLong())
+                }
+            }
+            return protoDisposable
+        }
+
+        private fun handleTimeout(valContext: C) {
+            mContextMap.remove(valContext)
+            mHandler.removeCallbacksAndMessages(valContext)
+            if (protoDisposable.isDisposed) return
+            try {
+                parameter?.error?.invoke(ProtoTimeoutError("Wait for response timeout"))
+            } catch (t: Throwable) {
+                onProtoException(t)
+            }
+        }
+
+        fun onReceive(receiveContext: C, proto: P): Boolean {
+            if (getReceiveUri(proto) == receiveUri) {
+                mContextMap.remove(receiveContext)
+                mHandler.removeCallbacksAndMessages(receiveContext)
+                if (!protoDisposable.isDisposed)
+                    receiver(proto)
+                return true
+            }
+            return false
+        }
+
+        /**
+         * 取消回包的实现
+         * Created by zhongyongsheng on 2018/9/24.
+         */
+        @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
+        inner class ProtoDisposableImpl : ProtoDisposable {
+            var isDisposed = AtomicBoolean(false)
+
+            override fun dispose() {
+                isDisposed.set(true)
+                mContextMap.remove(context)
+            }
+
+            override fun isDisposed(): Boolean {
+                return isDisposed.get()
+            }
+        }
     }
 
     /**

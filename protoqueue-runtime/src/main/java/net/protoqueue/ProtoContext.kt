@@ -1,17 +1,15 @@
-package net.protoqueue
-
-
-/**
- * proto上下文
- * Created by zhongyongsheng on 2018/4/21.
- */
-class ProtoContext<P, C>(internal val data: ByteArray?,
-                         internal val receiver: (P) -> Unit,
-                         internal val appId: Int,
-                         internal val context: C?,
-                         internal val receiveUri: Int,
-                         internal val topSid: Long,
-                         internal val subSid: Long,
-                         internal val parameter: QueueParameter<P, C>?) {
-    internal val protoDisposable: ProtoDisposable = ProtoDisposableImpl()
-}
+//package net.protoqueue
+//
+///**
+// * proto上下文
+// * Created by zhongyongsheng on 2018/4/21.
+// */
+//class ProtoContext<P, C>(
+//    val data: ByteArray?,
+//    val receiver: (P) -> Unit,
+//    val receiveUri: Int,
+//    val parameter: QueueParameter<P, C>?,
+//    val protoQueue: ProtoQueue<P, C>
+//) {
+//    val protoDisposable: ProtoDisposable = ProtoQueue.ProtoDisposableImpl()
+//}
