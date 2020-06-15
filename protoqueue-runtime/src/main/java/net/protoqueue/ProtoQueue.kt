@@ -92,8 +92,7 @@ abstract class ProtoQueue<P, C> {
 
         val protoRequest =
             ProtoRequest(data, receiver, getOwnAppId(), protoContext, receiveUri, topSid, subSid, parameter)
-        protoRequest.send()
-        return protoRequest.protoDisposable
+        return protoRequest.send()
     }
 
     /**
