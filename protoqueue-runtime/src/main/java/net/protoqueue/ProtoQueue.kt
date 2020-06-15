@@ -217,13 +217,13 @@ abstract class ProtoQueue<P, C> {
          * 取消回包的实现
          * Created by zhongyongsheng on 2018/9/24.
          */
-        @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
         inner class ProtoDisposableImpl : ProtoDisposable {
             var isDisposed = AtomicBoolean(false)
 
             override fun dispose() {
                 isDisposed.set(true)
                 mContextMap.remove(context)
+                mHandler.removeCallbacksAndMessages(context)
             }
 
             override fun isDisposed(): Boolean {
