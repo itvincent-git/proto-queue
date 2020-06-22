@@ -12,9 +12,6 @@ import javax.annotation.processing.ProcessingEnvironment
  */
 abstract class BaseWriter(private val className: ClassName) {
 
-    init {
-    }
-
     @Throws(IOException::class)
     fun write(processingEnvironment: ProcessingEnvironment) {
         val typeSpecBuilder = createTypeSpecBuilder()

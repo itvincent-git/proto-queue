@@ -148,9 +148,11 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
      *       override suspend fun request(req: DSLRequest, parameter: RequestParameter?): Response<DSLResponse?> {
      *           val proto = DSLProto()
      *           proto.req = req
-     *           val resProto = enqueueAwaitOrNull(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
-     *           val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
-     *           return Response(resProto?.res, resParameter)
+     *           return catchThrowable {
+     *              val resProto = enqueueAwait(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
+     *              val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
+     *              Response(resProto?.res, resParameter)
+     *           }
      *       }
      *
      *       override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
@@ -205,12 +207,14 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     }
                     addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
                     addStatement("proto.%L = req", rpcData.requestProperty)
+                    beginControlFlow("return %M {", catchThrowable)
                     addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: %T.DEFAULT_TIMEOUT)",
-                        enqueueAwaitOrNull, rpcData.responseUri, queueParameter)
+                        enqueueAwait, rpcData.responseUri, queueParameter)
                     addStatement(
                         "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
                         ResponseParameter::class.asTypeName(), "resProto")
-                    addStatement("return %T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
+                    addStatement("%T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
+                    endControlFlow()
                 }
                 .build()
         )
@@ -236,7 +240,8 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     }
 
     companion object {
-        val enqueueAwaitOrNull = MemberName("net.protoqueue", "enqueueAwaitOrNull")
+        val enqueueAwait = MemberName("net.protoqueue", "enqueueAwait")
+        val catchThrowable = MemberName("net.protoqueue.rpc", "catchThrowable")
         val queueParameter = ClassName("net.protoqueue", "QueueParameter")
         val rpcInterface = ClassName("net.protoqueue.rpc", "RPC")
         val responseRegisterDisposable = ClassName("net.protoqueue.rpc", "ResponseRegisterDisposable")

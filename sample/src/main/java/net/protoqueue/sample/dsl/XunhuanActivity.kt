@@ -49,7 +49,7 @@ class XunhuanActivity : AppCompatActivity() {
                 log.info("PLevelRequest request:$request")
                 val response = DslProtoQueue.instance.level().request(request)
                 log.info("PLevelRequest response code:${response.parameter.resultCode} msg:${response.parameter
-                    .resultMsg} body:${response.body} ")
+                    .resultMsg} body:${response.body} throwable:${response.throwable}")
             }
         }
 
