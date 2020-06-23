@@ -145,25 +145,10 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     /**
      * override fun rpcOne(): RPC<DSLRequest, DSLResponse> {
      *   return object : RPC<DSLRequest, DSLResponse> {
-     *       override suspend fun request(req: DSLRequest, parameter: RequestParameter?): Response<DSLResponse?> {
-     *           val proto = DSLProto()
-     *           proto.req = req
-     *           return catchThrowable {
-     *              val resProto = enqueueAwait(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
-     *              val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
-     *              Response(resProto?.res, resParameter)
-     *           }
-     *       }
-     *
-     *       override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
-     *           mResponseRegister.addRegister(DSLCommon.kResponseUri) {
-     *              val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
-     *              block(it.res, responseParameter)
-     *           }
-     *       }
      *   }
      * }
      */
+    //方法外部的实现
     private fun addRPCFunctions(builder: TypeSpec.Builder) {
         for (rpc in protoQueueClassData.rpcDatas) {
             val rpcClass = rpcInterface
@@ -171,6 +156,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
             val rpcObject = TypeSpec.anonymousClassBuilder().addSuperinterface(rpcClass)
                 .apply {
                     addRPCRequestFunction(this, rpc)
+                    addRPCRequestCallbackFunction(this, rpc)
                     addRpcResponseFunction(this, rpc)
                 }
                 .build()
@@ -180,6 +166,19 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         }
     }
 
+    //request方法的实现
+    /**
+     * override suspend fun request(req: DSLRequest, parameter: RequestParameter?): Response<DSLResponse?> {
+     *           val proto = DSLProto()
+     *           proto.req = req
+     *           proto.uri = TestProtos.kUserRequestUri
+     *           return catchThrowable {
+     *              val resProto = enqueueAwait(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
+     *              val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
+     *              Response(resProto?.res, resParameter)
+     *           }
+     *       }
+     */
     private fun addRPCRequestFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         builder.addFunction(
             FunSpec.builder("request")
@@ -207,6 +206,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     }
                     addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
                     addStatement("proto.%L = req", rpcData.requestProperty)
+                    addStatement("proto.%L = %L", protoQueueClassData.uriLiteral, rpcData.requestUri)
                     beginControlFlow("return %M {", catchThrowable)
                     addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: %T.DEFAULT_TIMEOUT)",
                         enqueueAwait, rpcData.responseUri, queueParameter)
@@ -220,6 +220,15 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         )
     }
 
+    //registerResponse的实现
+    /**
+     * override fun registerResponse(block: (DSLResponse?, ResponseParameter?) -> Unit) {
+     *           mResponseRegister.addRegister(DSLCommon.kResponseUri) {
+     *              val responseParameter = ResponseParameter(it.header?.resCode, it.header?.resMsg)
+     *              block(it.res, responseParameter)
+     *           }
+     *       }
+     */
     private fun addRpcResponseFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         val blockTypeName = LambdaTypeName.get(null,
             listOf(ParameterSpec.builder("", rpcData.responseProtoClassTypeName.toNullableType()).build(),
@@ -235,6 +244,68 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
                 .endControlFlow()
                 .addModifiers(KModifier.OVERRIDE)
+                .build()
+        )
+    }
+
+    /**
+     * override fun requestCallback(
+     *  req: TestProtos.PLevelRequest, parameter: RequestParameter?,
+     *  callback: (Response<TestProtos.PLevelResponse?>) -> Unit
+     *) {
+     *  val proto = TestProtos.DslProto()
+     *  proto.levelRequest = req
+     *  newQueueParameter(proto, 3) {
+     *      val resParameter = ResponseParameter(it?.header)
+     *      callback(Response(it?.levelResponse, resParameter))
+     *  }.error {
+     *      callback(Response(null, ResponseParameter(null), it))
+     *  }.enqueue()
+     * }
+     */
+    private fun addRPCRequestCallbackFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
+        val callbackTypeName = LambdaTypeName.get(null,
+            listOf(ParameterSpec.builder("", Response::class.asTypeName().parameterizedBy(
+                rpcData.responseProtoClassTypeName.toNullableType())).build()),
+            Unit::class.asTypeName())
+        builder.addFunction(
+            FunSpec.builder("requestCallback")
+                .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName)
+                    .build())
+                .addParameter(
+                    ParameterSpec.builder("parameter", RequestParameter::class.asTypeName()
+                        .toNullableType()).build())
+                .addParameter(ParameterSpec.builder("callback", callbackTypeName).build())
+                .addModifiers(KModifier.OVERRIDE)
+                .apply {
+                    if (rpcData.requestProtoClassTypeName.toString() == "net.protoqueue.rpc.NoRequest") {
+                        addStatement("throw IllegalAccessException(%S)",
+                            "Cannot invoke request when use [NoRequest] as request type")
+                        return@apply
+                    }
+                    if (rpcData.requestUri == Int.MIN_VALUE) {
+                        CompilerContext.log.error("ProtoQueueRPC.requestUri must set value")
+                        return@apply
+                    }
+                    if (rpcData.requestProperty.isEmpty()) {
+                        CompilerContext.log.error("ProtoQueueRPC.requestProperty must set value")
+                        return@apply
+                    }
+                    addStatement("val proto = %T()", protoQueueClassData.protoClassTypeName)
+                    addStatement("proto.%L = req", rpcData.requestProperty)
+                    addStatement("proto.%L = %L", protoQueueClassData.uriLiteral, rpcData.requestUri)
+                    beginControlFlow("newQueueParameter(proto, %L) {", rpcData.responseUri)
+                    addStatement(
+                        "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                        ResponseParameter::class.asTypeName(), "it")
+                    addStatement("callback(%T(it?.%L, resParameter))", Response::class, rpcData.responseProperty)
+                    endControlFlow()
+                    beginControlFlow(".error {")
+                    addStatement("callback(%T(null, %T(null), it))", Response::class,
+                        ResponseParameter::class)
+                    endControlFlow()
+                    addStatement(".enqueue()")
+                }
                 .build()
         )
     }

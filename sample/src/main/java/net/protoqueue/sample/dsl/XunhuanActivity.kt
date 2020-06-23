@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_xunhuan.global_broadcast
 import kotlinx.android.synthetic.main.activity_xunhuan.timeout_request
 import kotlinx.android.synthetic.main.activity_xunhuan.user_request
+import kotlinx.android.synthetic.main.activity_xunhuan.user_request_cb
 import kotlinx.android.synthetic.main.activity_xunhuan.vm_request
 import kotlinx.coroutines.launch
 import net.protoqueue.rpc.rpcRegister
@@ -69,6 +70,29 @@ class XunhuanActivity : AppCompatActivity() {
 
         vm_request.setOnClickListener {
             viewModel.sendRequest()
+        }
+
+        user_request_cb.setOnClickListener {
+            val request = TestProtos.PUserRequest().apply {
+                uid = 10001
+            }
+            log.info("user request callback:$request")
+            DslProtoQueue.instance.user().requestCallback(request) {
+                log.info("user callback response code:${it.parameter.resultCode} msg:${it.parameter
+                    .resultMsg} body:${it.body} throwable:${it.throwable}")
+                if (it.parameter.isSuccess) {
+                    log.info("user callback response success")
+                }
+            }
+
+            //超时的示例
+            val request2 = TestProtos.PLevelRequest().apply {
+                uid = 10001
+            }
+            log.info("PLevelRequest callback request:$request2")
+            DslProtoQueue.instance.level().requestCallback(request2) {
+                log.info("PLevelRequest callback response code:${it.parameter.resultCode} throwable:${it.throwable}")
+            }
         }
     }
 }

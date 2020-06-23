@@ -6,9 +6,14 @@ package net.protoqueue.rpc
  */
 interface RPC<REQ, RES> {
     /**
-     * 发送请求并接收回复
+     * 协程调用：发送请求并接收回复
      */
     suspend fun request(req: REQ, parameter: RequestParameter? = null): Response<RES?>
+
+    /**
+     * callback回调：发送请求并接收回复
+     */
+    fun requestCallback(req: REQ, parameter: RequestParameter? = null, callback: (Response<RES?>) -> Unit)
 
     /**
      * 注册监听广播或单播
