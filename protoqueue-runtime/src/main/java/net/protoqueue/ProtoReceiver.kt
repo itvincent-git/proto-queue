@@ -9,6 +9,10 @@ interface ProtoReceiver<T> {
 
     companion object {
         //兼容旧的写法
-        operator fun <T> invoke(block: (T) -> Unit) = block
+        operator fun <T> invoke(block: (T) -> Unit) = object : ProtoReceiver<T> {
+            override fun onProto(proto: T) {
+                block(proto)
+            }
+        }
     }
 }
