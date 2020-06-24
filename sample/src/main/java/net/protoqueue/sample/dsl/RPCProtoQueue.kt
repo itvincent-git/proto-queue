@@ -6,8 +6,10 @@ import com.google.protobuf.nano.MessageNano
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.protoqueue.ProtoReceiver
 import net.protoqueue.ProtoSender
 import net.protoqueue.annotation.ProtoQueueClass
+import net.protoqueue.protoQueueCreator
 import net.protoqueue.rpc.NoRequest
 import net.protoqueue.rpc.ProtoQueueRPC
 import net.protoqueue.rpc.RPC
@@ -18,7 +20,6 @@ import net.protoqueue.sample.proto.nano.TestProtos.kLevelResponseUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
 import net.protoqueue.sample.simple.BaseProtoQueue
-import net.protoqueue.protoQueueCreator
 import net.slog.SLoggerFactory
 import net.stripe.lib.appScope
 import java.util.Arrays
@@ -75,6 +76,21 @@ abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
             delay(2000)
             onReceiveData(10000, MessageNano.toByteArray(proto))
         }
+    }
+
+    /**
+     * 测试用api的方式来请求
+     */
+    fun apiResquest() {
+        val request = TestProtos.PUserRequest().apply {
+            uid = 20001
+        }
+        val proto = TestProtos.DslProto()
+        proto.userRequest = request
+        proto.uri = 0
+        enqueue(proto, 1, ProtoReceiver {
+            log.debug("apiResquest res: ${it.userResponse}")
+        })
     }
 
     companion object {

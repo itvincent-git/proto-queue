@@ -10,7 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".dsl.XunhuanActivity"></activity>
+        <activity android:name=".dsl.XunhuanActivity" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
@@ -20,6 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".simple.ApiActivity"></activity>
     </application>
 
 </manifest>
