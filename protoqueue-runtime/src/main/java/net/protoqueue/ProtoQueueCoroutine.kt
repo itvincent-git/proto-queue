@@ -26,7 +26,7 @@ suspend fun <P, C, T : ProtoQueue<P, C>> T.enqueueAwait(
             .timeout(timeout)
             .enqueue()
         continuation.invokeOnCancellation {
-            if (!disposable.isDisposed) disposable.dispose()
+            if (!disposable.isDisposed()) disposable.dispose()
         }
     }
 }

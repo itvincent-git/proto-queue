@@ -194,7 +194,7 @@ abstract class ProtoQueue<P, C> {
         private fun handleTimeout(valContext: C) {
             mContextMap.remove(valContext)
             mHandler.removeCallbacksAndMessages(valContext)
-            if (protoDisposable.isDisposed) return
+            if (protoDisposable.isDisposed()) return
             try {
                 parameter?.error?.invoke(ProtoTimeoutError("Wait for response timeout"))
             } catch (t: Throwable) {
@@ -206,7 +206,7 @@ abstract class ProtoQueue<P, C> {
             if (getReceiveUri(proto) == receiveUri) {
                 mContextMap.remove(receiveContext)
                 mHandler.removeCallbacksAndMessages(receiveContext)
-                if (!protoDisposable.isDisposed)
+                if (!protoDisposable.isDisposed())
                     receiver(proto)
                 return true
             }
