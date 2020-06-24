@@ -5,5 +5,5 @@ package net.protoqueue
  * Created by zhongyongsheng on 2018/4/20.
  */
 interface ProtoSender {
-    fun onSend(appId: Int, data: ByteArray?, topSid: Long, subSid: Long)
+    fun onSend(appId: Int, data: ByteArray, topSid: Long, subSid: Long)
 }
