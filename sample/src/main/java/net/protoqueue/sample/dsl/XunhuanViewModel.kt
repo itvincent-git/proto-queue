@@ -16,7 +16,7 @@ class XunhuanViewModel : ObservableViewModel() {
 
     init {
         rpcRegister {
-            DslProtoQueue.instance.globalBroadcast().onResponse { pGlobalBroadcast, responseParameter ->
+            RPCProtoQueue.instance.globalBroadcast().onResponse { pGlobalBroadcast, responseParameter ->
                 log.info("globalBroadcast response code:${responseParameter.resultCode} msg:${responseParameter
                     .resultMsg}")
                 log.info("globalBroadcast onResponse:$pGlobalBroadcast")
@@ -30,7 +30,7 @@ class XunhuanViewModel : ObservableViewModel() {
                 uid = 10001
             }
             log.info("user request:$request")
-            val response = DslProtoQueue.instance.user().request(request)
+            val response = RPCProtoQueue.instance.user().request(request)
             log.info("user response code:${response.parameter.resultCode} msg:${response.parameter
                 .resultMsg} body:${response.body} ")
             if (response.parameter.isSuccess) {

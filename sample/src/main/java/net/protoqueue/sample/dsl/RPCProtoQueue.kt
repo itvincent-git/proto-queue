@@ -6,7 +6,6 @@ import com.google.protobuf.nano.MessageNano
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.ProtoSender
 import net.protoqueue.annotation.ProtoQueueClass
 import net.protoqueue.rpc.NoRequest
@@ -19,6 +18,7 @@ import net.protoqueue.sample.proto.nano.TestProtos.kLevelResponseUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserRequestUri
 import net.protoqueue.sample.proto.nano.TestProtos.kUserResponseUri
 import net.protoqueue.sample.simple.BaseProtoQueue
+import net.protoqueue.protoQueueCreator
 import net.slog.SLoggerFactory
 import net.stripe.lib.appScope
 import java.util.Arrays
@@ -28,8 +28,9 @@ import java.util.Arrays
  * Created by zhongyongsheng on 2020/4/17.
  */
 private val log = SLoggerFactory.getLogger("DslProtoQueue")
+
 @ProtoQueueClass
-abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
+abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
 
     override fun getOwnAppId(): Int {
         return 10000
@@ -51,7 +52,6 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
     @ProtoQueueRPC(requestUri = kLevelRequestUri, responseUri = kLevelResponseUri,
         requestProperty = "levelRequest", responseProperty = "levelResponse")
     abstract fun level(): RPC<TestProtos.PLevelRequest, TestProtos.PLevelResponse>
-
 
     @ProtoQueueRPC(responseUri = kGlobalBroadcast, responseProperty = "broadcast")
     abstract fun globalBroadcast(): RPC<NoRequest, TestProtos.PGlobalBroadcast>
@@ -78,14 +78,7 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
     }
 
     companion object {
-        @JvmStatic
-        val instance: DslProtoQueue by lazy {
-            ProtoQueueBuilder.newBuilder(DslProtoQueue::class.java, dslTestSender).build()
-        }
-
-        private val handler = Handler(Looper.getMainLooper())
-
-        protected var dslTestSender = ProtoSender { appId, data, topSid, subSid ->
+        var testSender = ProtoSender { appId, data, topSid, subSid ->
             log.info("onSend: $appId, ${Arrays.toString(data)}, $topSid, $subSid")
 
             //模拟服务器收包并回复
@@ -111,5 +104,9 @@ abstract class DslProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
                 }
             }, 100)
         }
+
+        @JvmStatic
+        val instance: RPCProtoQueue by protoQueueCreator(testSender)
+        private val handler = Handler(Looper.getMainLooper())
     }
 }

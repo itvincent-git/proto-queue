@@ -33,7 +33,7 @@ class XunhuanActivity : AppCompatActivity() {
                     uid = 10001
                 }
                 log.info("user request:$request")
-                val response = DslProtoQueue.instance.user().request(request)
+                val response = RPCProtoQueue.instance.user().request(request)
                 log.info("user response code:${response.parameter.resultCode} msg:${response.parameter
                     .resultMsg} body:${response.body} ")
                 if (response.parameter.isSuccess) {
@@ -48,7 +48,7 @@ class XunhuanActivity : AppCompatActivity() {
                     uid = 10001
                 }
                 log.info("PLevelRequest request:$request")
-                val response = DslProtoQueue.instance.level().request(request)
+                val response = RPCProtoQueue.instance.level().request(request)
                 log.info("PLevelRequest response code:${response.parameter.resultCode} msg:${response.parameter
                     .resultMsg} body:${response.body} throwable:${response.throwable}")
             }
@@ -56,12 +56,12 @@ class XunhuanActivity : AppCompatActivity() {
 
         //发送测试广播
         global_broadcast.setOnClickListener {
-            DslProtoQueue.instance.testBroadcast()
+            RPCProtoQueue.instance.testBroadcast()
         }
 
         //注册监听广播
         rpcRegister {
-            DslProtoQueue.instance.globalBroadcast().onResponse { pGlobalBroadcast, responseParameter ->
+            RPCProtoQueue.instance.globalBroadcast().onResponse { pGlobalBroadcast, responseParameter ->
                 log.info("globalBroadcast response code:${responseParameter.resultCode} msg:${responseParameter
                     .resultMsg}")
                 log.info("globalBroadcast onResponse:$pGlobalBroadcast")
@@ -77,7 +77,7 @@ class XunhuanActivity : AppCompatActivity() {
                 uid = 10001
             }
             log.info("user request callback:$request")
-            DslProtoQueue.instance.user().requestCallback(request) {
+            RPCProtoQueue.instance.user().requestCallback(request) {
                 log.info("user callback response code:${it.parameter.resultCode} msg:${it.parameter
                     .resultMsg} body:${it.body} throwable:${it.throwable}")
                 if (it.parameter.isSuccess) {
@@ -90,7 +90,7 @@ class XunhuanActivity : AppCompatActivity() {
                 uid = 10001
             }
             log.info("PLevelRequest callback request:$request2")
-            DslProtoQueue.instance.level().requestCallback(request2) {
+            RPCProtoQueue.instance.level().requestCallback(request2) {
                 log.info("PLevelRequest callback response code:${it.parameter.resultCode} throwable:${it.throwable}")
             }
         }
