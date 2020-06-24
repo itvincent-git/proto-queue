@@ -65,5 +65,8 @@ class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender) 
     }
 }
 
+/**
+ * 更快捷的创建[ProtoQueue]的方法
+ */
 fun <T : ProtoQueue<*, *>> protoQueueCreator(sender: ProtoSender): ReadOnlyProperty<Any, T> =
     ProtoQueueSingletonCreator(sender)
