@@ -79,7 +79,7 @@ abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
 
     companion object {
         var testSender = object : ProtoSender {
-            override fun onSend(appId: Int, data: ByteArray?, topSid: Long, subSid: Long) {
+            override fun onSend(appId: Int, data: ByteArray, topSid: Long, subSid: Long) {
                 log.info("onSend: $appId, ${Arrays.toString(data)}, $topSid, $subSid")
 
                 //模拟服务器收包并回复
