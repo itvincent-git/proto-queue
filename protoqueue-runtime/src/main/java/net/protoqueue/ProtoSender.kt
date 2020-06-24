@@ -6,4 +6,13 @@ package net.protoqueue
  */
 interface ProtoSender {
     fun onSend(appId: Int, data: ByteArray, topSid: Long, subSid: Long)
+
+    companion object {
+        //兼容旧的写法
+        operator fun invoke(block: (Int, ByteArray, Long, Long) -> Unit) = object : ProtoSender {
+            override fun onSend(appId: Int, data: ByteArray, topSid: Long, subSid: Long) {
+                block(appId, data, topSid, subSid)
+            }
+        }
+    }
 }

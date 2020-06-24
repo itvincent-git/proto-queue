@@ -78,33 +78,31 @@ abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
     }
 
     companion object {
-        var testSender = object : ProtoSender {
-            override fun onSend(appId: Int, data: ByteArray, topSid: Long, subSid: Long) {
-                log.info("onSend: $appId, ${Arrays.toString(data)}, $topSid, $subSid")
+        var testSender = ProtoSender { appId, data, topSid, subSid ->
+            log.info("onSend: $appId, ${Arrays.toString(data)}, $topSid, $subSid")
 
-                //模拟服务器收包并回复
-                handler.postDelayed({
-                    val sendProto = TestProtos.DslProto.parseFrom(data)
-                    //测试回复数据
-                    if (sendProto.uri == kUserRequestUri) {
-                        val proto = TestProtos.DslProto().apply {
-                            userResponse = TestProtos.PUserResponse().apply {
-                                uid = sendProto.userRequest.uid
-                                name = "jack"
-                                uri = kUserResponseUri
-                                header = TestProtos.PHeader().apply {
-                                    seqid = sendProto.header.seqid
-                                    result = TestProtos.Result()
-                                    result.code = 0
-                                    result.resMsg = "success"
-                                }
+            //模拟服务器收包并回复
+            handler.postDelayed({
+                val sendProto = TestProtos.DslProto.parseFrom(data)
+                //测试回复数据
+                if (sendProto.uri == kUserRequestUri) {
+                    val proto = TestProtos.DslProto().apply {
+                        userResponse = TestProtos.PUserResponse().apply {
+                            uid = sendProto.userRequest.uid
+                            name = "jack"
+                            uri = kUserResponseUri
+                            header = TestProtos.PHeader().apply {
+                                seqid = sendProto.header.seqid
+                                result = TestProtos.Result()
+                                result.code = 0
+                                result.resMsg = "success"
                             }
                         }
-
-                        instance.onReceiveData(appId, MessageNano.toByteArray(proto))
                     }
-                }, 100)
-            }
+
+                    instance.onReceiveData(appId, MessageNano.toByteArray(proto))
+                }
+            }, 100)
         }
 
         @JvmStatic

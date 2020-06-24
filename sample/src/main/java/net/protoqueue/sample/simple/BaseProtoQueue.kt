@@ -27,12 +27,10 @@ abstract class BaseProtoQueue<P, C> : ProtoQueue<P, C>() {
 
     companion object {
         private const val TAG = "BaseProtoQueue"
-        protected var mSender = object : ProtoSender {
-            override fun onSend(appId: Int, data: ByteArray, topSid: Long, subSid: Long) {
-                SLog.info(TAG,
-                    String.format("onSend: %d, %s, %d, %d", appId, Arrays.toString(data),
-                        topSid, subSid))
-            }
+        protected var mSender = ProtoSender { appId, data, topSid, subSid ->
+            SLog.info(TAG,
+                String.format("onSend: %d, %s, %d, %d", appId, Arrays.toString(data),
+                    topSid, subSid))
         }
     }
 }
