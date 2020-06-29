@@ -2,7 +2,6 @@ package net.protoqueue
 
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.jvm.javaType
 
 /**
  * 代理方式生成[ProtoQueue]单例
@@ -26,17 +25,17 @@ class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender) 
             if (_v2 !== null) {
                 _v2
             } else {
-                val typedValue = init(property)
+                val typedValue = init(thisRef)
                 _value = typedValue
                 typedValue
             }
         }
     }
 
-    //使用反射返回值类型来创建对象
-    private fun init(property: KProperty<*>): T {
+    //使用反射外部类型来创建对象
+    private fun init(ref: Any): T {
         val implementation: T =
-            getGeneratedImplementation(property.returnType.javaType as Class<*>, IMPL_SUFFIX)
+            getGeneratedImplementation(ref.javaClass.declaringClass, IMPL_SUFFIX)
         implementation.init(sender)
         return implementation
     }

@@ -33,3 +33,8 @@
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
 }
+
+# 解决okio的混淆报错
+-dontwarn java.nio.file.*
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-dontwarn okio.**
