@@ -23,7 +23,7 @@ annotation class ProtoQueueRPC(
     val requestProperty: String = "",
 
     /**
-     * 响应类在外层Proto中访问属性名，例如userRequest，这里是生成的java文件中的驼峰式名称，不是.proto文件中带_的名称
+     * 响应类在外层Proto中访问属性名，例如userResponse，这里是生成的java文件中的驼峰式名称，不是.proto文件中带_的名称
      */
     val responseProperty: String
 )
