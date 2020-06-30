@@ -34,15 +34,17 @@ class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender) 
 
     //使用反射外部类型来创建对象
     private fun init(ref: Any): T {
+        val outerClass = ref.javaClass.declaringClass
+            ?: throw IllegalArgumentException("protoQueueCreator is not in ProtoQueue.Companion: ${ref.javaClass}")
         val implementation: T =
-            getGeneratedImplementation(ref.javaClass.declaringClass, IMPL_SUFFIX)
+            getGeneratedImplementation(outerClass, IMPL_SUFFIX)
         implementation.init(sender)
         return implementation
     }
 
     private fun <T> getGeneratedImplementation(cls: Class<*>, suffix: String): T {
-        val fullPackage = cls.getPackage().name
-        val name = cls.canonicalName
+        val fullPackage = cls.getPackage()?.name ?: throw RuntimeException("$cls package is null")
+        val name = cls.canonicalName ?: throw RuntimeException("$cls canonicalName is null")
         val postPackageName =
             if (fullPackage.isEmpty()) name else name.substring(fullPackage.length + 1)
         val implName = postPackageName.replace('.', '_') + suffix
