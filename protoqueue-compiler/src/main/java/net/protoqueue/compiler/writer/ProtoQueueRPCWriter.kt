@@ -174,7 +174,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
      *           proto.uri = TestProtos.kUserRequestUri
      *           return catchThrowable {
      *              val resProto = enqueueAwait(proto, DSLCommon.kResponseUri, parameter?.timeout ?: 10000)
-     *              val resParameter = ResponseParameter(resProto?.header?.resCode, resProto?.header?.resMsg)
+     *              val resParameter = ResponseParameter(resProto?.header)
      *              Response(resProto?.res, resParameter)
      *           }
      *       }
@@ -210,9 +210,15 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     beginControlFlow("return %M {", catchThrowable)
                     addStatement("val resProto = %M(proto, %L, parameter?.timeout ?: %T.DEFAULT_TIMEOUT)",
                         enqueueAwait, rpcData.responseUri, queueParameter)
-                    addStatement(
-                        "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                        ResponseParameter::class.asTypeName(), "resProto")
+                    if (protoQueueClassData.resHeaderLiteralHas2Param) {
+                        addStatement(
+                            "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                            ResponseParameter::class.asTypeName(), "resProto", rpcData.responseProperty)
+                    } else {
+                        addStatement(
+                            "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                            ResponseParameter::class.asTypeName(), "resProto")
+                    }
                     addStatement("%T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
                     endControlFlow()
                 }
@@ -237,12 +243,21 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
         builder.addFunction(
             FunSpec.builder("registerResponse")
                 .addParameter(ParameterSpec.builder("block", blockTypeName).build())
-                .returns(responseRegisterDisposable)
-                .beginControlFlow("return mResponseRegister.addRegister(%L) {", rpcData.responseUri)
-                .addStatement("val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                    ResponseParameter::class.asTypeName(), "it")
-                .addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
-                .endControlFlow()
+                .returns(responseRegisterDisposable).apply {
+                    beginControlFlow("return mResponseRegister.addRegister(%L) {", rpcData.responseUri)
+                    if (protoQueueClassData.resHeaderLiteralHas2Param) {
+                        addStatement(
+                            "val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                            ResponseParameter::class.asTypeName(), "it", rpcData.responseProperty)
+                    } else {
+                        addStatement(
+                            "val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                            ResponseParameter::class.asTypeName(), "it")
+                    }
+                    addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
+                    endControlFlow()
+                }
+
                 .addModifiers(KModifier.OVERRIDE)
                 .build()
         )
@@ -295,9 +310,15 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     addStatement("proto.%L = req", rpcData.requestProperty)
                     addStatement("proto.%L = %L", protoQueueClassData.uriLiteral, rpcData.requestUri)
                     beginControlFlow("newQueueParameter(proto, %L) {", rpcData.responseUri)
-                    addStatement(
-                        "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                        ResponseParameter::class.asTypeName(), "it")
+                    if (protoQueueClassData.resHeaderLiteralHas2Param) {
+                        addStatement(
+                            "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                            ResponseParameter::class.asTypeName(), "it", rpcData.responseProperty)
+                    } else {
+                        addStatement(
+                            "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
+                            ResponseParameter::class.asTypeName(), "it")
+                    }
                     addStatement("callback(%T(it?.%L, resParameter))", Response::class, rpcData.responseProperty)
                     endControlFlow()
                     beginControlFlow(".error {")

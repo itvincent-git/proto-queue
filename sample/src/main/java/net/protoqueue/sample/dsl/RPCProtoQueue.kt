@@ -30,6 +30,7 @@ import java.util.Arrays
  */
 private val log = SLoggerFactory.getLogger("DslProtoQueue")
 
+//@ProtoQueueClass(resHeaderLiteral = "%L?.%L.response")
 @ProtoQueueClass
 abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
 

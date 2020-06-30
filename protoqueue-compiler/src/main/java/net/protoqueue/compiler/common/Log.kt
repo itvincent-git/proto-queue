@@ -1,5 +1,8 @@
 package net.protoqueue.compiler.common
 
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.net.UnknownHostException
 import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.tools.Diagnostic
@@ -34,11 +37,39 @@ class Log(private val messager: Messager) {
         messager.printMessage(Diagnostic.Kind.ERROR, safeFormat(msg, *args))
     }
 
+    /**
+     * 输出日志，打印[throwable]堆栈
+     */
+    fun error(msg: String, throwable: Throwable) {
+        messager.printMessage(Diagnostic.Kind.ERROR, getStackTraceString(throwable))
+    }
+
     private fun safeFormat(msg: String, vararg args: Any): String {
         return try {
             String.format(msg, *args) + "\r\n" //加上日志才会能换行
         } catch (e: Exception) {
             msg
         }
+    }
+
+    private fun getStackTraceString(tr: Throwable?): String? {
+        if (tr == null) {
+            return ""
+        }
+
+        // This is to reduce the amount of log spew that apps do in the non-error
+        // condition of the network being unavailable.
+        var t = tr
+        while (t != null) {
+            if (t is UnknownHostException) {
+                return ""
+            }
+            t = t.cause
+        }
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        tr.printStackTrace(pw)
+        pw.flush()
+        return sw.toString()
     }
 }

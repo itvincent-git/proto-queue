@@ -32,8 +32,8 @@ annotation class ProtoQueueClass(
     val uriLiteral: String = "uri",
 
     /**
-     * rpc方法中使用到的resCode代码
+     * rpc方法中使用到的获取response header代码
      * %L是PROTO的实例
      */
-    val resHeaderLiteral: String = "%L?.header"
+    val resHeaderLiteral: String = "%L.header"
 )

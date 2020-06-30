@@ -41,7 +41,7 @@ class PortQueueProcessor : BasicAnnotationProcessor() {
                     try {
                         ProtoQueueRPCWriter(it).write(processingEnv)
                     } catch (e: Throwable) {
-                        CompilerContext.log.error("ProtoQueueClassWriter error %s", e.message ?: "")
+                        CompilerContext.log.error("ProtoQueueRPCWriter error %s", e)
                     }
                 }
 
