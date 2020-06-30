@@ -9,11 +9,14 @@ package net.protoqueue.annotation
 annotation class ProtoQueueClass(
     /**
      * seq上下文在proto里定义的名称
+     * %L传入的是proto
      * @return
      */
     val protoContextLiteral: String = "return %L.header?.seqid",
     /**
      * 生成buildProto的语句，默认例如FtsUserProto.parseFrom
+     * %T是PROTO类名
+     * %L是data
      * @return
      */
     val buildProtoLiteral: String = "return %T.parseFrom(%L)",
@@ -30,6 +33,7 @@ annotation class ProtoQueueClass(
 
     /**
      * rpc方法中使用到的resCode代码
+     * %L是PROTO的实例
      */
     val resHeaderLiteral: String = "%L?.header"
 )
