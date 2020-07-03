@@ -6,6 +6,7 @@ import android.arch.lifecycle.OnLifecycleEvent
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.Log
 import net.protoqueue.rpc.ResponseRegister
 import net.stripe.lib.ObservableViewModel
 import java.io.Closeable
@@ -175,11 +176,12 @@ abstract class ProtoQueue<P, C> {
         val subSid: Long,
         val parameter: QueueParameter<P, C>?
     ) {
-        val protoDisposable: ProtoDisposable = ProtoDisposableImpl()
+        private var protoDisposable: ProtoDisposable? = null
 
         fun send(): ProtoDisposable {
             val valContext = this.context
             if (data != null && valContext != null) {
+                Log.i("ProtoQueue", "send $valContext")
                 mContextMap[valContext] = this
                 try {
                     mProtoSender?.onSend(appId, data, topSid, subSid)
@@ -193,13 +195,16 @@ abstract class ProtoQueue<P, C> {
                     }, valContext, SystemClock.uptimeMillis() + parameter.timeout.toLong())
                 }
             }
-            return protoDisposable
+            protoDisposable = ProtoDisposableImpl(valContext)
+            return protoDisposable!!
         }
 
         private fun handleTimeout(valContext: C) {
-            mContextMap.remove(valContext)
-            mHandler.removeCallbacksAndMessages(valContext)
-            if (protoDisposable.isDisposed()) return
+            Log.i("ProtoQueue", "handleTImeout $valContext")
+//            mContextMap.remove(valContext)
+//            mHandler.removeCallbacksAndMessages(valContext)
+            protoDisposable?.finish()
+            if (protoDisposable?.isDisposed() == true) return
             try {
                 parameter?.error?.invoke(ProtoTimeoutError("Wait for response timeout"))
             } catch (t: Throwable) {
@@ -209,9 +214,10 @@ abstract class ProtoQueue<P, C> {
 
         fun onReceive(receiveContext: C, proto: P): Boolean {
             if (getReceiveUri(proto) == receiveUri) {
-                mContextMap.remove(receiveContext)
-                mHandler.removeCallbacksAndMessages(receiveContext)
-                if (!protoDisposable.isDisposed())
+//                mContextMap.remove(receiveContext)
+//                mHandler.removeCallbacksAndMessages(receiveContext)
+                protoDisposable?.finish()
+                if (protoDisposable?.isDisposed() == false)
                     receiver(proto)
                 return true
             }
@@ -222,17 +228,27 @@ abstract class ProtoQueue<P, C> {
          * 取消回包的实现
          * Created by zhongyongsheng on 2018/9/24.
          */
-        inner class ProtoDisposableImpl : ProtoDisposable {
+        inner class ProtoDisposableImpl(private val context: C?) : ProtoDisposable {
             var isDisposed = AtomicBoolean(false)
+            var onFinishListener: (() -> Unit)? = null
 
             override fun dispose() {
+                Log.i("ProtoQueue", "dispose $context")
                 isDisposed.set(true)
-                mContextMap.remove(context)
-                mHandler.removeCallbacksAndMessages(context)
+                context?.let {
+                    mContextMap.remove(it)
+                    mHandler.removeCallbacksAndMessages(it)
+                }
             }
 
             override fun isDisposed(): Boolean {
                 return isDisposed.get()
+            }
+
+            override fun finish() {
+                mContextMap.remove(context)
+                mHandler.removeCallbacksAndMessages(context)
+                onFinishListener?.invoke()
             }
 
             override fun registerLifecycle(lifecycle: Lifecycle) {
@@ -240,21 +256,39 @@ abstract class ProtoQueue<P, C> {
             }
 
             override fun registerObservableViewModel(viewModel: ObservableViewModel) {
-                viewModel.addCloseableIfAbsent(PROTO_DISPOSABLE_VM_KEY, DisposableObserver(this))
+                Log.i("ProtoQueue", "registerObservableViewModel $context")
+                context?.let {
+                    val observer = viewModel.getCloseable(PROTO_DISPOSABLE_VM_KEY) ?: kotlin.run {
+                        viewModel.addCloseableIfAbsent(PROTO_DISPOSABLE_VM_KEY, CloseableObserver<C>())
+                    }
+                    observer.contextMap[context] = this
+                    this.onFinishListener = {
+                        observer.contextMap.remove(context)
+                    }
+                }
             }
         }
 
         /**
          * 监听生命周期时，当onDestory/close时，停止任务执行
          */
-        inner class DisposableObserver(private val disposable: ProtoDisposable) : LifecycleObserver, Closeable {
+        inner class DisposableObserver(private val disposable: ProtoDisposable) : LifecycleObserver {
             @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
             fun onDestroy() {
                 disposable.dispose()
             }
+        }
+
+        /**
+         * 监听生命周期时，当onDestory/close时，停止任务执行
+         */
+        inner class CloseableObserver<C> : Closeable {
+            internal val contextMap = ConcurrentHashMap<C, ProtoDisposable>()
 
             override fun close() {
-                disposable.dispose()
+                contextMap.forEach {
+                    it.value.dispose()
+                }
             }
         }
     }

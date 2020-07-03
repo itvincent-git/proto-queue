@@ -20,6 +20,11 @@ interface ProtoDisposable {
     fun isDisposed(): Boolean
 
     /**
+     * 已经接收回包，或超时调用
+     */
+    fun finish()
+
+    /**
      * 注册到Lifecycle生命周期，在lifecycle.onDestory的时候dispose
      */
     fun registerLifecycle(lifecycle: Lifecycle)
