@@ -30,7 +30,7 @@ versions.gradle_download_task = '3.2.0'
 versions.javapoet = '1.10.0'
 versions.auto_common = '0.10'
 versions.kotlinpoet = '1.5.0'
-versions.stripe_coroutine = '0.7.0-newvm'
+versions.stripe_coroutine = '0.8.1-newvm'
 
 ext.versions = versions
 

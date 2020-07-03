@@ -1,9 +1,14 @@
 package net.protoqueue
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.OnLifecycleEvent
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import net.protoqueue.rpc.ResponseRegister
+import net.stripe.lib.ObservableViewModel
+import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -229,7 +234,33 @@ abstract class ProtoQueue<P, C> {
             override fun isDisposed(): Boolean {
                 return isDisposed.get()
             }
+
+            override fun registerLifecycle(lifecycle: Lifecycle) {
+                lifecycle.addObserver(DisposableObserver(this))
+            }
+
+            override fun registerObservableViewModel(viewModel: ObservableViewModel) {
+                viewModel.addCloseableIfAbsent(PROTO_DISPOSABLE_VM_KEY, DisposableObserver(this))
+            }
         }
+
+        /**
+         * 监听生命周期时，当onDestory/close时，停止任务执行
+         */
+        inner class DisposableObserver(private val disposable: ProtoDisposable) : LifecycleObserver, Closeable {
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() {
+                disposable.dispose()
+            }
+
+            override fun close() {
+                disposable.dispose()
+            }
+        }
+    }
+
+    companion object {
+        private val PROTO_DISPOSABLE_VM_KEY = "PROTO_DISPOSABLE_VIEWMODEL_ONCLEAR"
     }
 
     /**

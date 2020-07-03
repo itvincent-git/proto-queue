@@ -8,7 +8,9 @@ import kotlinx.android.synthetic.main.activity_xunhuan.timeout_request
 import kotlinx.android.synthetic.main.activity_xunhuan.user_request
 import kotlinx.android.synthetic.main.activity_xunhuan.user_request_cb
 import kotlinx.android.synthetic.main.activity_xunhuan.vm_request
+import kotlinx.android.synthetic.main.activity_xunhuan.vm_request_callback
 import kotlinx.coroutines.launch
+import net.protoqueue.rpc.RequestParameter
 import net.protoqueue.rpc.rpcRegister
 import net.protoqueue.sample.R
 import net.protoqueue.sample.proto.nano.TestProtos
@@ -68,31 +70,40 @@ class XunhuanActivity : AppCompatActivity() {
             }
         }
 
-        vm_request.setOnClickListener {
-            viewModel.sendRequest()
-        }
-
+        //测试callback
         user_request_cb.setOnClickListener {
             val request = TestProtos.PUserRequest().apply {
                 uid = 10001
             }
             log.info("user request callback:$request")
-            RPCProtoQueue.instance.user().requestCallback(request) {
-                log.info("user callback response code:${it.parameter.resultCode} msg:${it.parameter
-                    .resultMsg} body:${it.body} throwable:${it.throwable}")
-                if (it.parameter.isSuccess) {
-                    log.info("user callback response success")
+            RPCProtoQueue.instance.user()
+                .requestCallback(request, RequestParameter(lifecycleOwner = this@XunhuanActivity)) {
+                    log.info("user callback response code:${it.parameter.resultCode} msg:${it.parameter
+                        .resultMsg} body:${it.body} throwable:${it.throwable}")
+                    if (it.parameter.isSuccess) {
+                        log.info("user callback response success")
+                    }
                 }
-            }
 
             //超时的示例
             val request2 = TestProtos.PLevelRequest().apply {
                 uid = 10001
             }
             log.info("PLevelRequest callback request:$request2")
-            RPCProtoQueue.instance.level().requestCallback(request2) {
-                log.info("PLevelRequest callback response code:${it.parameter.resultCode} throwable:${it.throwable}")
-            }
+            RPCProtoQueue.instance.level()
+                .requestCallback(request2, RequestParameter(lifecycleOwner = this@XunhuanActivity)) {
+                    log.info(
+                        "PLevelRequest callback response code:${it.parameter.resultCode} throwable:${it.throwable}")
+                }
+        }
+
+        //测试viewmodel
+        vm_request.setOnClickListener {
+            viewModel.sendRequest()
+        }
+
+        vm_request_callback.setOnClickListener {
+            viewModel.setCallback()
         }
     }
 }

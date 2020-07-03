@@ -1,6 +1,7 @@
 package net.protoqueue.sample.dsl
 
 import kotlinx.coroutines.launch
+import net.protoqueue.rpc.RequestParameter
 import net.protoqueue.rpc.rpcRegister
 import net.protoqueue.sample.proto.nano.TestProtos
 import net.slog.SLoggerFactory
@@ -37,5 +38,31 @@ class XunhuanViewModel : ObservableViewModel() {
                 log.info("user response success")
             }
         }
+    }
+
+    fun setCallback() {
+//        val request = TestProtos.PUserRequest().apply {
+//            uid = 10001
+//        }
+//        log.info("user request callback:$request")
+//        RPCProtoQueue.instance.user()
+//            .requestCallback(request, RequestParameter(observableViewModel = this)) {
+//                log.info("user callback response code:${it.parameter.resultCode} msg:${it.parameter
+//                    .resultMsg} body:${it.body} throwable:${it.throwable}")
+//                if (it.parameter.isSuccess) {
+//                    log.info("user callback response success")
+//                }
+//            }
+
+        //超时的示例
+        val request2 = TestProtos.PLevelRequest().apply {
+            uid = 10001
+        }
+        log.info("PLevelRequest callback request:$request2")
+        RPCProtoQueue.instance.level()
+            .requestCallback(request2, RequestParameter(observableViewModel = this)) {
+                log.info(
+                    "PLevelRequest callback response code:${it.parameter.resultCode} throwable:${it.throwable}")
+            }
     }
 }

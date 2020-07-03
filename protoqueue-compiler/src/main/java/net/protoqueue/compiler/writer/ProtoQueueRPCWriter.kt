@@ -14,9 +14,6 @@ import com.squareup.kotlinpoet.asTypeName
 import net.protoqueue.compiler.common.CompilerContext
 import net.protoqueue.compiler.data.ProtoQueueClassData
 import net.protoqueue.compiler.data.ProtoQueueRPCData
-import net.protoqueue.rpc.RequestParameter
-import net.protoqueue.rpc.Response
-import net.protoqueue.rpc.ResponseParameter
 import net.protoqueue.util.TmpVar
 import net.protoqueue.util.toNullableType
 import java.util.concurrent.atomic.AtomicInteger
@@ -184,11 +181,10 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
             FunSpec.builder("request")
                 .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName)
                     .build())
-                .returns(Response::class.asTypeName().parameterizedBy(
+                .returns(response.parameterizedBy(
                     rpcData.responseProtoClassTypeName.toNullableType()))
                 .addParameter(
-                    ParameterSpec.builder("parameter", RequestParameter::class.asTypeName()
-                        .toNullableType()).build())
+                    ParameterSpec.builder("parameter", requestParameter.toNullableType()).build())
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
                 .apply {
                     if (rpcData.requestProtoClassTypeName.toString() == "net.protoqueue.rpc.NoRequest") {
@@ -213,13 +209,13 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     if (protoQueueClassData.resHeaderLiteralHas2Param) {
                         addStatement(
                             "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                            ResponseParameter::class.asTypeName(), "resProto", rpcData.responseProperty)
+                            responseParameter, "resProto", rpcData.responseProperty)
                     } else {
                         addStatement(
                             "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                            ResponseParameter::class.asTypeName(), "resProto")
+                            responseParameter, "resProto")
                     }
-                    addStatement("%T(resProto?.%L, resParameter)", Response::class, rpcData.responseProperty)
+                    addStatement("%T(resProto?.%L, resParameter)", response, rpcData.responseProperty)
                     endControlFlow()
                 }
                 .build()
@@ -238,7 +234,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     private fun addRpcResponseFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         val blockTypeName = LambdaTypeName.get(null,
             listOf(ParameterSpec.builder("", rpcData.responseProtoClassTypeName.toNullableType()).build(),
-                ParameterSpec.builder("", ResponseParameter::class.asTypeName()).build()),
+                ParameterSpec.builder("", responseParameter).build()),
             Unit::class.asTypeName())
         builder.addFunction(
             FunSpec.builder("registerResponse")
@@ -248,11 +244,11 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     if (protoQueueClassData.resHeaderLiteralHas2Param) {
                         addStatement(
                             "val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                            ResponseParameter::class.asTypeName(), "it", rpcData.responseProperty)
+                            responseParameter, "it", rpcData.responseProperty)
                     } else {
                         addStatement(
                             "val responseParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                            ResponseParameter::class.asTypeName(), "it")
+                            responseParameter, "it")
                     }
                     addStatement("block(it.%L, responseParameter)", rpcData.responseProperty)
                     endControlFlow()
@@ -280,7 +276,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
      */
     private fun addRPCRequestCallbackFunction(builder: TypeSpec.Builder, rpcData: ProtoQueueRPCData) {
         val callbackTypeName = LambdaTypeName.get(null,
-            listOf(ParameterSpec.builder("", Response::class.asTypeName().parameterizedBy(
+            listOf(ParameterSpec.builder("", response.parameterizedBy(
                 rpcData.responseProtoClassTypeName.toNullableType())).build()),
             Unit::class.asTypeName())
         builder.addFunction(
@@ -288,8 +284,7 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                 .addParameter(ParameterSpec.builder("req", rpcData.requestProtoClassTypeName)
                     .build())
                 .addParameter(
-                    ParameterSpec.builder("parameter", RequestParameter::class.asTypeName()
-                        .toNullableType()).build())
+                    ParameterSpec.builder("parameter", requestParameter.toNullableType()).build())
                 .addParameter(ParameterSpec.builder("callback", callbackTypeName).build())
                 .addModifiers(KModifier.OVERRIDE)
                 .apply {
@@ -313,19 +308,19 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
                     if (protoQueueClassData.resHeaderLiteralHas2Param) {
                         addStatement(
                             "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                            ResponseParameter::class.asTypeName(), "it", rpcData.responseProperty)
+                            responseParameter, "it", rpcData.responseProperty)
                     } else {
                         addStatement(
                             "val resParameter = %T(${protoQueueClassData.resHeaderLiteral})",
-                            ResponseParameter::class.asTypeName(), "it")
+                            responseParameter, "it")
                     }
-                    addStatement("callback(%T(it?.%L, resParameter))", Response::class, rpcData.responseProperty)
+                    addStatement("callback(%T(it?.%L, resParameter))", response, rpcData.responseProperty)
                     endControlFlow()
                     beginControlFlow(".error {")
-                    addStatement("callback(%T(null, %T(null), it))", Response::class,
-                        ResponseParameter::class)
+                    addStatement("callback(%T(null, %T(null), it))", response, responseParameter)
                     endControlFlow()
                     addStatement(".enqueue()")
+                    addStatement(".%M(parameter)", registerRequestParameter)
                 }
                 .build()
         )
@@ -334,8 +329,12 @@ class ProtoQueueRPCWriter(internal var protoQueueClassData: ProtoQueueClassData)
     companion object {
         val enqueueAwait = MemberName("net.protoqueue", "enqueueAwait")
         val catchThrowable = MemberName("net.protoqueue.rpc", "catchThrowable")
+        val registerRequestParameter = MemberName("net.protoqueue.rpc", "registerRequestParameter")
         val queueParameter = ClassName("net.protoqueue", "QueueParameter")
         val rpcInterface = ClassName("net.protoqueue.rpc", "RPC")
+        val requestParameter = ClassName("net.protoqueue.rpc", "RequestParameter")
+        val responseParameter = ClassName("net.protoqueue.rpc", "ResponseParameter")
+        val response = ClassName("net.protoqueue.rpc", "Response")
         val responseRegisterDisposable = ClassName("net.protoqueue.rpc", "ResponseRegisterDisposable")
     }
 }
