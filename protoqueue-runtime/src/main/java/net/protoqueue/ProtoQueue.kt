@@ -6,7 +6,6 @@ import android.arch.lifecycle.OnLifecycleEvent
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.util.Log
 import net.protoqueue.rpc.ResponseRegister
 import net.stripe.lib.ObservableViewModel
 import java.io.Closeable
@@ -140,7 +139,7 @@ abstract class ProtoQueue<P, C> {
             //只有找到正常的回包，被正确处理，才返回；否则交由广播逻辑处理
             receiveContext?.let {
                 try {
-                    if (mContextMap[it]?.onReceive(it, proto) == true)
+                    if (mContextMap[it]?.onReceive(proto) == true)
                         return
                 } catch (t: Throwable) {
                     onProtoException(t)
@@ -181,7 +180,6 @@ abstract class ProtoQueue<P, C> {
         fun send(): ProtoDisposable {
             val valContext = this.context
             if (data != null && valContext != null) {
-                Log.i("ProtoQueue", "send $valContext")
                 mContextMap[valContext] = this
                 try {
                     mProtoSender?.onSend(appId, data, topSid, subSid)
@@ -191,7 +189,7 @@ abstract class ProtoQueue<P, C> {
 
                 if (parameter != null && parameter.timeout > 0) {
                     mHandler.postAtTime({
-                        handleTimeout(valContext)
+                        handleTimeout()
                     }, valContext, SystemClock.uptimeMillis() + parameter.timeout.toLong())
                 }
             }
@@ -199,10 +197,7 @@ abstract class ProtoQueue<P, C> {
             return protoDisposable!!
         }
 
-        private fun handleTimeout(valContext: C) {
-            Log.i("ProtoQueue", "handleTImeout $valContext")
-//            mContextMap.remove(valContext)
-//            mHandler.removeCallbacksAndMessages(valContext)
+        private fun handleTimeout() {
             protoDisposable?.finish()
             if (protoDisposable?.isDisposed() == true) return
             try {
@@ -212,10 +207,8 @@ abstract class ProtoQueue<P, C> {
             }
         }
 
-        fun onReceive(receiveContext: C, proto: P): Boolean {
+        fun onReceive(proto: P): Boolean {
             if (getReceiveUri(proto) == receiveUri) {
-//                mContextMap.remove(receiveContext)
-//                mHandler.removeCallbacksAndMessages(receiveContext)
                 protoDisposable?.finish()
                 if (protoDisposable?.isDisposed() == false)
                     receiver(proto)
@@ -233,7 +226,6 @@ abstract class ProtoQueue<P, C> {
             var onFinishListener: (() -> Unit)? = null
 
             override fun dispose() {
-                Log.i("ProtoQueue", "dispose $context")
                 isDisposed.set(true)
                 context?.let {
                     mContextMap.remove(it)
@@ -256,7 +248,6 @@ abstract class ProtoQueue<P, C> {
             }
 
             override fun registerObservableViewModel(viewModel: ObservableViewModel) {
-                Log.i("ProtoQueue", "registerObservableViewModel $context")
                 context?.let {
                     val observer = viewModel.getCloseable(PROTO_DISPOSABLE_VM_KEY) ?: kotlin.run {
                         viewModel.addCloseableIfAbsent(PROTO_DISPOSABLE_VM_KEY, CloseableObserver<C>())
