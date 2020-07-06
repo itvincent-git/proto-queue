@@ -1,7 +1,7 @@
 package net.protoqueue
 
 import android.arch.lifecycle.Lifecycle
-import net.stripe.lib.ObservableViewModel
+import net.stripe.lib.ICloseableObserver
 
 /**
  * 可取消协议回包
@@ -30,7 +30,7 @@ interface ProtoDisposable {
     fun registerLifecycle(lifecycle: Lifecycle)
 
     /**
-     * 注册到[ObservableViewModel]，在[ObservableViewModel.onCleared]的时候dispose
+     * 注册到[ICloseableObserver]，在生命周期结束的时候dispose
      */
-    fun registerObservableViewModel(viewModel: ObservableViewModel)
+    fun registerCloseableObserver(observer: ICloseableObserver)
 }

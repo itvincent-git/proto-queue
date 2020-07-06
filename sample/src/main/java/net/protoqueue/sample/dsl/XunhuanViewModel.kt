@@ -60,7 +60,7 @@ class XunhuanViewModel : ObservableViewModel() {
         }
         log.info("PLevelRequest callback request:$request2")
         RPCProtoQueue.instance.level()
-            .requestCallback(request2, RequestParameter(observableViewModel = this)) {
+            .requestCallback(request2, RequestParameter(closeableObserver = this)) {
                 log.info(
                     "PLevelRequest callback response code:${it.parameter.resultCode} throwable:${it.throwable}")
             }

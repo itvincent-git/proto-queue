@@ -3,7 +3,7 @@ package net.protoqueue.rpc
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import net.protoqueue.ProtoDisposable
-import net.stripe.lib.ObservableViewModel
+import net.stripe.lib.ICloseableObserver
 
 /**
  * RPC参数
@@ -17,7 +17,7 @@ class RequestParameter(
     val timeout: Int = 10000,
     val lifecycleOwner: LifecycleOwner? = null,
     val lifecycle: Lifecycle? = null,
-    val observableViewModel: ObservableViewModel? = null
+    val closeableObserver: ICloseableObserver? = null
 )
 
 /**
@@ -31,8 +31,8 @@ fun ProtoDisposable.registerRequestParameter(requestParameter: RequestParameter?
         requestParameter.lifecycle?.let {
             registerLifecycle(it)
         }
-        requestParameter.observableViewModel?.let {
-            registerObservableViewModel(it)
+        requestParameter.closeableObserver?.let {
+            registerCloseableObserver(it)
         }
     }
 }

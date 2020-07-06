@@ -7,7 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import net.protoqueue.rpc.ResponseRegister
-import net.stripe.lib.ObservableViewModel
+import net.stripe.lib.ICloseableObserver
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -247,10 +247,10 @@ abstract class ProtoQueue<P, C> {
                 lifecycle.addObserver(DisposableObserver(this))
             }
 
-            override fun registerObservableViewModel(viewModel: ObservableViewModel) {
+            override fun registerCloseableObserver(observer: ICloseableObserver) {
                 context?.let {
-                    val observer = viewModel.getCloseable(PROTO_DISPOSABLE_VM_KEY) ?: kotlin.run {
-                        viewModel.addCloseableIfAbsent(PROTO_DISPOSABLE_VM_KEY, CloseableObserver<C>())
+                    val observer = observer.getCloseable(PROTO_DISPOSABLE_VM_KEY) ?: kotlin.run {
+                        observer.addCloseableIfAbsent(PROTO_DISPOSABLE_VM_KEY, CloseableObserver<C>())
                     }
                     observer.contextMap[context] = this
                     this.onFinishListener = {
