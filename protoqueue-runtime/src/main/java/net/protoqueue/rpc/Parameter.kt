@@ -13,11 +13,11 @@ import net.stripe.lib.ICloseableObserver
 /**
  * 请求参数
  */
-class RequestParameter(
-    val timeout: Int = 10000,
-    val lifecycleOwner: LifecycleOwner? = null,
-    val lifecycle: Lifecycle? = null,
-    val closeableObserver: ICloseableObserver? = null
+class RequestParameter @JvmOverloads constructor(
+    var timeout: Int = 10000,
+    var lifecycleOwner: LifecycleOwner? = null,
+    var lifecycle: Lifecycle? = null,
+    var closeableObserver: ICloseableObserver? = null
 )
 
 /**
