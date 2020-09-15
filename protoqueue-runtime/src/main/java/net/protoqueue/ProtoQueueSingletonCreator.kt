@@ -7,7 +7,8 @@ import kotlin.reflect.KProperty
  * 代理方式生成[ProtoQueue]单例
  * Created by zhongyongsheng on 2020/6/23.
  */
-class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender) : ReadOnlyProperty<Any, T> {
+class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender, val intercepter: ProtoIntercepter?) :
+    ReadOnlyProperty<Any, T> {
     @Volatile
     private var _value: T? = null
 
@@ -38,7 +39,7 @@ class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender) 
             ?: throw IllegalArgumentException("protoQueueCreator is not in ProtoQueue.Companion: ${ref.javaClass}")
         val implementation: T =
             getGeneratedImplementation(outerClass, IMPL_SUFFIX)
-        implementation.init(sender)
+        implementation.init(sender, intercepter)
         return implementation
     }
 
@@ -69,5 +70,6 @@ class ProtoQueueSingletonCreator<T : ProtoQueue<*, *>>(val sender: ProtoSender) 
 /**
  * 更快捷的创建[ProtoQueue]的方法
  */
-fun <T : ProtoQueue<*, *>> protoQueueCreator(sender: ProtoSender): ReadOnlyProperty<Any, T> =
-    ProtoQueueSingletonCreator(sender)
+fun <T : ProtoQueue<*, *>> protoQueueCreator(sender: ProtoSender, intercepter: ProtoIntercepter? = null):
+    ReadOnlyProperty<Any, T> =
+    ProtoQueueSingletonCreator(sender, intercepter)

@@ -6,6 +6,7 @@ import com.google.protobuf.nano.MessageNano
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.protoqueue.ProtoIntercepter
 import net.protoqueue.ProtoReceiver
 import net.protoqueue.ProtoSender
 import net.protoqueue.annotation.ProtoQueueClass
@@ -122,8 +123,12 @@ abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
             }, 100)
         }
 
+        val intercepter: ProtoIntercepter = {
+            log.debug("onIntercept ${it.javaClass}")
+        }
+
         @JvmStatic
-        val instance: RPCProtoQueue by protoQueueCreator(testSender)
+        val instance: RPCProtoQueue by protoQueueCreator(testSender, intercepter)
         private val handler = Handler(Looper.getMainLooper())
     }
 }

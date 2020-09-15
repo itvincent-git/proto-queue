@@ -21,9 +21,11 @@ abstract class ProtoQueue<P, C> {
     protected var mContextMap: MutableMap<C, ProtoRequest> = ConcurrentHashMap()
     protected var mHandler: Handler = Handler(Looper.getMainLooper())
     protected val mResponseRegister = ResponseRegister<P>()
+    protected var mProtoIntercepter: ProtoIntercepter? = null
 
-    fun init(protoSender: ProtoSender) {
+    fun init(protoSender: ProtoSender, protoIntercepter: ProtoIntercepter?) {
         mProtoSender = protoSender
+        mProtoIntercepter = protoIntercepter
     }
 
     /**
@@ -74,6 +76,9 @@ abstract class ProtoQueue<P, C> {
         receiver: (P) -> Unit,
         parameter: QueueParameter<P, C>?
     ): ProtoDisposable {
+
+        //拦截器
+        mProtoIntercepter?.invoke(proto as Any)
 
         var data: ByteArray? = null
         var protoContext: C? = null
@@ -380,3 +385,8 @@ abstract class ProtoQueue<P, C> {
      */
     protected abstract fun onProtoPreProcess(proto: P)
 }
+
+/**
+ * 拦截器，发送协议时拦截
+ */
+typealias ProtoIntercepter = (Any) -> Unit
