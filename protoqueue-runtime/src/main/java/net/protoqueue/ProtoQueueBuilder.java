@@ -3,7 +3,7 @@ package net.protoqueue;
 import android.support.annotation.NonNull;
 
 import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 
 /**
  * 提供返回PortTransformer实现类的方法
@@ -13,10 +13,11 @@ public class ProtoQueueBuilder<T extends ProtoQueue> {
     private static final String IMPL_SUFFIX = "_Impl";
     private final Class<T> mTransformerClass;
     private final ProtoSender mSender;
-    private Function1<Object, Unit> mIntercepter;
+    private Function2<Object, ? super ProtoQueue<?, ?>, Unit> mIntercepter;
 
-    private void setIntercepter(Function1<Object, Unit> intercepter) {
+    public ProtoQueueBuilder<T> setIntercepter(Function2<Object, ? super ProtoQueue<?, ?>, Unit> intercepter) {
         mIntercepter = intercepter;
+        return this;
     }
 
     public ProtoQueueBuilder(Class<T> cls, ProtoSender sender) {

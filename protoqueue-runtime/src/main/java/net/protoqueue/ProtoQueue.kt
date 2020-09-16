@@ -78,7 +78,7 @@ abstract class ProtoQueue<P, C> {
     ): ProtoDisposable {
 
         //拦截器
-        mProtoIntercepter?.invoke(proto as Any)
+        mProtoIntercepter?.invoke(proto as Any, this)
 
         var data: ByteArray? = null
         var protoContext: C? = null
@@ -354,7 +354,7 @@ abstract class ProtoQueue<P, C> {
      * 本协议的appid
      * @return
      */
-    protected abstract fun getOwnAppId(): Int
+    abstract fun getOwnAppId(): Int
 
     /**
      * 顶级频道号
@@ -389,4 +389,4 @@ abstract class ProtoQueue<P, C> {
 /**
  * 拦截器，发送协议时拦截
  */
-typealias ProtoIntercepter = (Any) -> Unit
+typealias ProtoIntercepter = (Any, ProtoQueue<*, *>) -> Unit

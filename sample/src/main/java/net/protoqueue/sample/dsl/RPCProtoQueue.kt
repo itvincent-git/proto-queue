@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.protoqueue.ProtoIntercepter
+import net.protoqueue.ProtoQueueBuilder
 import net.protoqueue.ProtoReceiver
 import net.protoqueue.ProtoSender
 import net.protoqueue.annotation.ProtoQueueClass
@@ -123,12 +124,18 @@ abstract class RPCProtoQueue : BaseProtoQueue<TestProtos.DslProto, Long>() {
             }, 100)
         }
 
-        val intercepter: ProtoIntercepter = {
-            log.debug("onIntercept ${it.javaClass}")
+        val intercepter: ProtoIntercepter = { proto, protoQueue ->
+            log.debug("onIntercept ${proto.javaClass} ${protoQueue.getOwnAppId()}")
         }
 
         @JvmStatic
         val instance: RPCProtoQueue by protoQueueCreator(testSender, intercepter)
+
+        @JvmStatic
+        val builderInstance: RPCProtoQueue by lazy {
+            ProtoQueueBuilder.newBuilder(RPCProtoQueue::class.java, testSender).setIntercepter(intercepter).build()
+        }
+
         private val handler = Handler(Looper.getMainLooper())
     }
 }
